@@ -46,6 +46,9 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   const profile = await analyzeCodebase(targetDir);
   if (options.name) {
     profile.projectName = options.name;
+    projectName = options.name;
+  } else if (profile.projectName) {
+    projectName = profile.projectName;
   }
 
   console.log(`  \x1b[90m• Languages:\x1b[0m      ${profile.languages.join(', ') || 'JavaScript'}`);

@@ -557,6 +557,27 @@ async function initApp() {
   setupEventListeners();
   initOfficeCanvas();
   startOfficeAnimationLoop();
+
+  // Instant initial fetch before SSE stream connects
+  try {
+    const [cfgRes, stRes] = await Promise.all([
+      fetch('/api/config').then(r => r.ok ? r.json() : null),
+      fetch('/api/state').then(r => r.ok ? r.json() : null)
+    ]);
+    if (cfgRes) {
+      appState.config = cfgRes;
+      renderProjectInfo();
+      renderAgentGrid();
+      renderSkillsList();
+    }
+    if (stRes) {
+      appState.state = stRes;
+      renderState();
+    }
+  } catch (e) {
+    // Handled by SSE
+  }
+
   connectSSE();
 }
 
@@ -709,10 +730,38 @@ function connectSSE() {
   };
 }
 
-// Render Project Information in Header
+// Render Project Information across the Dashboard dynamically
 function renderProjectInfo() {
   if (!appState.config) return;
-  document.getElementById('projectName').textContent = appState.config.project || 'pixel-agents';
+  const project = appState.config.project || 'my-app';
+  const projectUpper = project.toUpperCase();
+
+  // 1. Project badge in top header
+  const projectBadgeEl = document.getElementById('projectName');
+  if (projectBadgeEl) {
+    projectBadgeEl.textContent = project;
+  }
+
+  // 2. Browser Tab Title
+  document.title = `${projectUpper} // PixelCrew HQ — Autonomous Swarm Workspace`;
+
+  // 3. Header Logo Subtitle
+  const subTitleEl = document.getElementById('logoSubtitle') || document.querySelector('.logo-subtitle');
+  if (subTitleEl) {
+    subTitleEl.textContent = `FLOOR 42 // ${projectUpper} SPRINT HQ`;
+  }
+
+  // 4. Floor Plan Panel Title
+  const floorTitleEl = document.getElementById('officeFloorTitle');
+  if (floorTitleEl) {
+    floorTitleEl.textContent = `${projectUpper} OPEN-PLAN ENGINEERING FLOOR`;
+  }
+
+  // 5. Dynamic Task Input Placeholder
+  const taskInput = document.getElementById('taskInput');
+  if (taskInput && (!taskInput.value || taskInput.value.length === 0)) {
+    taskInput.placeholder = `Assign sprint objective (e.g. 'Optimize ${project} queries & build responsive UI')...`;
+  }
 }
 
 // Render Agent Cards Grid
