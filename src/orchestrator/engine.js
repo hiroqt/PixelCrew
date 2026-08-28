@@ -156,7 +156,7 @@ export class OrchestratorEngine extends EventEmitter {
       if (this.state.orchestrator) {
         this.state.orchestrator.currentTask = fullEvent.message;
       }
-      await this.saveState();
+      await this.persistState();
       this.emit('state_change', { state: this.state });
     }
 
@@ -231,6 +231,10 @@ export class OrchestratorEngine extends EventEmitter {
     } catch {
       // ignore
     }
+  }
+
+  async saveState() {
+    return this.persistState();
   }
 
   async resetSwarm() {
