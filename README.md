@@ -1,268 +1,330 @@
-# PixelCrew
+# PixelCrew (`@hiroqt/pixelcrew`)
 
 <p align="center">
-  <strong>Local Multi-Agent Orchestration Framework & Retro Pixel-Art Visual Dashboard</strong><br>
-  <em>Turn any project into an observable, orchestrated AI engineering workspace with a single command.</em>
+  <strong>Local Multi-Agent Orchestration Engine & Retro Pixel-Art Tech Startup Office</strong><br>
+  <em>Transform any codebase into an observable, autonomous, and choreographed AI engineering workspace with a single command.</em>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="Apache 2.0 License"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen.svg" alt="Node.js 18+"></a>
-  <a href="package.json"><img src="https://img.shields.io/badge/Dependencies-Zero-orange.svg" alt="Zero Runtime Dependencies"></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/Runtime_Dependencies-Zero-orange.svg" alt="Zero Runtime Dependencies"></a>
+  <a href="https://github.com/hiroqt/PixelCrew"><img src="https://img.shields.io/badge/Release-v0.1.0-blueviolet.svg" alt="Release v0.1.0"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="PRs Welcome"></a>
-  <a href="https://github.com/hiroqt/PixelCrew"><img src="https://img.shields.io/badge/Status-Active_v0.1.0-blueviolet.svg" alt="Release v0.1.0"></a>
 </p>
 
 ```text
-┌──────────────────────────────────────────────────────────────┐
-│  PIXELCREW HQ                                    ● RUNNING   │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│                  ┌─────────────────┐                         │
-│                  │   ORCHESTRATOR  │                         │
-│                  │      ◉_◉        │                         │
-│                  │   coordinating  │                         │
-│                  └────────┬────────┘                         │
-│                           │                                  │
-│             ┌─────────────┼─────────────┐                    │
-│             │             │             │                    │
-│             ▼             ▼             ▼                    │
-│        ┌─────────┐   ┌─────────┐   ┌─────────┐              │
-│        │ FRONTEND│   │ BACKEND │   │DATABASE │              │
-│        │  ▓▓▓▓   │   │  ▓▓▓▓   │   │  ▓▓▓▓   │              │
-│        │ working │   │ working │   │ waiting │              │
-│        └─────────┘   └─────────┘   └─────────┘              │
-│                                                              │
-│  ACTIVITY                                                    │
-│  ──────────────────────────────────────────────────────────  │
-│  03:15  orchestrator  → spawned frontend & backend           │
-│  03:15  frontend      → auditing component client boundaries │
-│  03:16  backend       → profiling API routes & latency       │
-│  03:16  database      → analyzing Prisma queries & indexes   │
-│  03:17  qa            → preparing automated regression suite │
-│                                                              │
-│  SKILLS                                                      │
-│  ──────────────────────────────────────────────────────────  │
-│  ✓ Codebase Intelligence                                     │
-│  ✓ Next.js App Router                                        │
-│  ✓ PostgreSQL Optimization                                   │
-│  ✓ Prisma ORM                                                │
-│  ◉ API Architecture                                          │
-│  ◌ Playwright E2E                                            │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│  PIXELCREW HQ  ::  FLOOR 42                              ● SWARM LIVE  │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│                    ┌──────────────────────┐                            │
+│                    │   LEAD ORCHESTRATOR  │                            │
+│                    │        [ ◉ _ ◉ ]     │                            │
+│                    │      DAG Dispatch    │                            │
+│                    └──────────┬───────────┘                            │
+│                               │                                        │
+│          ┌────────────────────┼────────────────────┐                   │
+│          │                    │                    │                   │
+│          ▼                    ▼                    ▼                   │
+│    ┌───────────┐        ┌───────────┐        ┌───────────┐             │
+│    │ FRONTEND  │        │  BACKEND  │        │ DATABASE  │             │
+│    │  [ ◉ ▂ ◉ ]│        │  [ ◉ ▂ ◉ ]│        │  [ ◉ ⊙ ]  │             │
+│    │  working  │        │  working  │        │ analyzing │             │
+│    └───────────┘        └───────────┘        └───────────┘             │
+│          │                    │                    │                   │
+│          ▼                    ▼                    ▼                   │
+│    ┌───────────┐        ┌───────────┐        ┌───────────┐             │
+│    │ SECURITY  │        │PERFORMANCE│        │    QA     │             │
+│    │  [ ░ ░ ]  │        │  [ ░ ░ ]  │        │  [ ░ ░ ]  │             │
+│    │  waiting  │        │  waiting  │        │  waiting  │             │
+│    └───────────┘        └───────────┘        └───────────┘             │
+│                                                                        │
+│  LIVE TELEMETRY STREAM                                                 │
+│  ────────────────────────────────────────────────────────────────────  │
+│  03:41:02  orchestrator  → decomposed objective into 4 parallel tasks  │
+│  03:41:03  frontend      → auditing component client boundaries (Next) │
+│  03:41:04  backend       → profiling REST endpoints & idempotency keys │
+│  03:41:05  database      → inspecting missing B-Tree & composite index │
+│                                                                        │
+│  ACTIVE SKILL ENGINES                                                  │
+│  ────────────────────────────────────────────────────────────────────  │
+│  ✓ Codebase Intelligence   ✓ Next.js 15 App Router   ✓ PostgreSQL / RLS│
+│  ◉ REST / OpenAPI 3.1      ◌ Web Vitals Profiling    ◌ Playwright E2E  │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Table of Contents
+## ⚡ 10-Second Ignition
 
-- [Quick Start](#quick-start)
-- [Architecture Overview](#architecture-overview)
-- [Key Features](#key-features)
-- [Codebase Context Adaptation](#codebase-context-adaptation)
-- [Skills Matrix & Capabilities](#skills-matrix--capabilities)
-- [Installation Guide](#installation-guide)
-  - [Workspace Installation](#1-workspace-installation)
-  - [Global Antigravity Plugin](#2-global-antigravity-plugin)
-- [CLI Command Reference](#cli-command-reference)
-- [Configuration Reference](#configuration-reference)
-- [Real-Time Event Streaming API](#real-time-event-streaming-api)
-- [Antigravity & IDE Integration](#antigravity--ide-integration)
-- [Dashboard Controls & Shortcuts](#dashboard-controls--shortcuts)
-- [Development & Testing](#development--testing)
-- [Documentation Index](#documentation-index)
-- [Contributing & Community](#contributing--community)
-- [License](#license)
-- [Created By](#created-by)
-
----
-
-## Quick Start
-
-Run inside any project directory to initialize and launch:
+No global installations or complex configuration required. Run directly in your repository:
 
 ```bash
-# 1. Initialize PixelCrew in your repository (adapts automatically to your tech stack)
+# 1. Initialize and adapt PixelCrew to your project stack
 npx github:hiroqt/PixelCrew init
 
-# 2. Start the orchestrator daemon & live visual dashboard
+# 2. Launch the orchestrator daemon and real-time visual office
 npx github:hiroqt/PixelCrew start
 
-# 3. (Optional) Run an interactive multi-agent demo sprint immediately
+# 3. (Optional) Run an instant multi-agent simulated sprint demo
 npx github:hiroqt/PixelCrew demo
 ```
 
-*(If published to npm, you can also use `npx pixelcrew init` & `npx pixelcrew start`)*
-
-The visual dashboard will automatically open in your browser at:  
-**`http://localhost:4747`** *(or the next available port if 4747 is in use)*
+The interactive dashboard opens automatically at:  
+👉 **`http://localhost:4747`** *(auto-recovers to `4748`+ if port 4747 is occupied)*
 
 ---
 
-## Architecture Overview
+## 💡 The Paradigm: Why PixelCrew?
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│                       DEVELOPER / IDE                        │
-│         npx github:hiroqt/PixelCrew init / start / task      │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                    ORCHESTRATION DAEMON                      │
-│                                                              │
-│  1. Codebase Analyzer     ──> Scans frameworks, ORMs, tests  │
-│  2. Context Engine        ──> Grounds agents in codebase     │
-│  3. DAG Task Planner      ──> Resolves agent dependencies    │
-│  4. Concurrency Limiter   ──> Manages parallel execution     │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-             ┌─────────────────┴─────────────────┐
-             │                                   │
-             ▼                                   ▼
-┌─────────────────────────┐         ┌─────────────────────────┐
-│     EVENT PIPELINE      │         │   AGENT SWARM ROSTER    │
-│  • events.jsonl         │         │  • Orchestrator (Lead)  │
-│  • SSE Broadcast Server │ <────── │  • Frontend Engineer    │
-│  • REST API (/api/emit) │         │  • Backend Engineer     │
-└────────────┬────────────┘         │  • Database Architect   │
-             │                      │  • Security Sentinel    │
-             ▼                      │  • Performance SRE      │
-┌─────────────────────────┐         │  • QA Automation Lead   │
-│  PIXEL STARTUP OFFICE   │         └─────────────────────────┘
-│  • Floor 42 2D Canvas   │
-│  • Workstation Drawers  │
-│  • Slack Stream Feed    │
-│  • Web Audio SFX Synth  │
-└─────────────────────────┘
+Traditional AI agent tooling runs inside black-box terminal loops: you type a prompt, wait minutes in silence, and hope the agent doesn't hallucinate or clobber your codebase.
+
+**PixelCrew turns the invisible execution loop into an observable, choreographed engineering office.**
+
+```mermaid
+flowchart TD
+    UserPrompt["Developer Prompt / Objective"] --> Analyzer["Codebase Static Analyzer\n(Scans Frameworks, ORMs, Testing)"]
+    Analyzer --> ContextCache[".pixel-agents/context.json\n(Project DNA & Architecture Profile)"]
+    ContextCache --> Orchestrator["Orchestrator Engine (DAG Task Planner)"]
+    
+    subgraph Swarm ["Autonomous Agent Swarm"]
+        Orchestrator --> FE["Frontend Engineer (React 19 / Next.js)"]
+        Orchestrator --> BE["Backend Architect (REST / gRPC / Auth)"]
+        Orchestrator --> DB["Database DBA (Postgres / Prisma / Drizzle)"]
+        Orchestrator --> SEC["Security Sentinel (OWASP / RLS)"]
+        Orchestrator --> PERF["Performance SRE (CWV / Profiling)"]
+        Orchestrator --> QA["QA Automation (Vitest / Playwright)"]
+    end
+
+    Swarm --> Telemetry["Event Pipeline (SSE & Append-only JSONL)"]
+    Telemetry --> Canvas["Floor 42 2D Canvas Dashboard\n(Procedural Sprites, CRT Shader, Web Audio SFX)"]
+    Telemetry --> IDESync["IDE Telemetry Feedback (Antigravity, Cursor, Claude)"]
+```
+
+### Core Innovations
+- **Zero Runtime Dependencies**: Pure Node.js ESM orchestrator with lightweight HTML5/CSS/Canvas. No bloated node_modules. Instant launch.
+- **Codebase Context Adaptation**: Auto-discovers frameworks (Next.js, Vite, React, Vue), ORMs (Prisma, Drizzle), and test runners (Vitest, Playwright) to tailor agent permissions and skill injection.
+- **Bi-Directional Telemetry**: Accepts event streams over CLI flags, HTTP REST endpoints (`/api/emit`), and append-only `.pixel-agents/events.jsonl` files.
+- **Floor 42 Office Engine**: Procedural 2D canvas with CRT scanline simulation, daytime/night-mode cyberpunk lighting, and retro 8-bit Web Audio chimes.
+
+---
+
+## 👥 The Swarm Roster & State Machine
+
+PixelCrew organizes work across 6 specialized personas, each bound to specific filesystem boundaries and skills:
+
+| Persona | Role & Focus | Primary Skills | Default Boundaries |
+| :--- | :--- | :--- | :--- |
+| **Lead Orchestrator** | Task decomposition, DAG dependency resolution, status sync | `codebase-intelligence` | Read: `**/*` / Write: `.pixel-agents/*` |
+| **Frontend Engineer** | App Router, component trees, state boundaries, Tailwind | `frontend-engineering` | Read/Write: `src/components/**`, `src/app/**`, `src/styles/**` |
+| **Backend Architect** | API contracts, OpenAPI 3.1, rate limiting, OAuth 2.1 | `backend-engineering` | Read/Write: `src/api/**`, `src/server/**`, `src/routes/**` |
+| **Database DBA** | Index tuning, EXPLAIN ANALYZE, RLS policies, migrations | `database-engineering` | Read/Write: `prisma/**`, `drizzle/**`, `db/**`, `migrations/**` |
+| **Security Sentinel** | OWASP Top 10 mitigation, auth guards, secret scrubbing | `backend-engineering` | Read: `**/*` / Write: `src/middleware/**`, `src/auth/**` |
+| **Performance SRE** | Core Web Vitals (LCP, INP, CLS), heap profiling, caching | `performance-engineering` | Read/Write: `src/**`, `next.config.*` |
+| **QA Automation** | Unit assertions, end-to-end user journeys, regression runs | `codebase-intelligence` | Read: `**/*` / Write: `tests/**`, `e2e/**` |
+
+### Agent Lifecycle States
+
+```
+[ IDLE ]       ●_●    Agent standing by for task allocation
+   │
+   ▼
+[ SPAWNING ]   ░_░    Injecting tailored markdown skills & file permissions
+   │
+   ▼
+[ ANALYZING ]  ◉_⊙    Reading repository AST, context profile, and references
+   │
+   ▼
+[ WORKING ]    ◉▂◉    Executing edits, refactoring, or generating code
+   │
+   ▼
+[ VERIFYING ]  🔍_🔍  Executing test suites, lint checks, and type validations
+   │
+   ├─► [ COMPLETED ]  ^_^   Task verified, tests green, event emitted
+   ├─► [ BLOCKED ]    ?_?   Waiting on upstream dependency or developer input
+   └─► [ ERROR ]      x_x   Diagnostic failure captured, recovery initiated
 ```
 
 ---
 
-## Key Features
+## 🧠 The 6 Engineering Skill Pillars
 
-- **Automatic Codebase Context Adaptation**: Scans `package.json`, frameworks, database/ORMs (Prisma, Drizzle, PostgreSQL, MongoDB), API architecture, and test runners to automatically tailor agent roles, skills, and filesystem permissions.
-- **Zero-Dependency Core & Dashboard**: Pure Node.js ESM orchestrator with lightweight vanilla HTML5, Canvas, and CSS. No heavy external runtime dependencies, instant startup.
-- **Pixel-Art Aesthetic & CRT Shader**: 8-bit retro arcade styling, procedural canvas sprite animations, live scanlines toggle, and retro 8-bit synth sound effects (Web Audio API).
-- **Multi-Agent State Machine**: Visual state tracking for every agent:
-  - `IDLE` (`●_●`) -> `SPAWNING` (`░_░`) -> `ANALYZING` (`◉_⊙`) -> `WORKING` (`◉▂◉`) -> `VERIFYING` (`🔍_🔍`) -> `COMPLETED` (`^_^`) / `BLOCKED` (`?_?`) / `ERROR` (`x_x`)
-- **Real-Time Event Streaming**: Low-latency Server-Sent Events (SSE) pipe `AgentEvent` payloads from CLI, local scripts, or external AI agents directly into the dashboard.
-- **Skills Matrix & Capabilities**: Decoupled skill definitions (`.pixel-agents/skills/*.md`) mapped to agent roles with real-time status indicators (`✓`, `◉`, `◌`).
-- **Dependency Graph & Task Decomposition**: Resolves directed acyclic graph (DAG) tasks (e.g. Database schema & Backend APIs before Frontend integration, followed by QA test suites).
-- **Graceful Port Collision Handling**: Automatically catches `EADDRINUSE` conflicts and binds to the next available port (`4748`, `4749`...) without crashing.
+PixelCrew equips agents with production-grade engineering skill modules located under `.pixel-agents/skills/`:
+
+### 1. `codebase-intelligence`
+Static analysis and project adaptation. Automatically inspects repository dependencies, directory structures, ORMs, API routes, and testing runners to ground every subagent in current architectural patterns.
+
+### 2. `frontend-engineering`
+Modern frontend architecture across React 19, Next.js App Router, Vue 3, Svelte 5, and vanilla CSS. Enforces strict anti-slop design rules, fluid `clamp()` typography, semantic HTML, and WCAG AA accessibility compliance.
+
+### 3. `backend-engineering`
+Enterprise backend standards: Clean Architecture, Hexagonal / Ports & Adapters, OpenAPI 3.1, RFC 7807 error envelopes, sliding-window rate limiting, idempotency key middleware, and OAuth 2.1 / PASETO security.
+
+### 4. `database-engineering`
+Advanced query tuning and indexing: B-Tree, GIN, GiST, BRIN, composite indexing column order, EXPLAIN ANALYZE interpretation, UUIDv7 vs ULID primary keys, Row-Level Security (RLS) isolation, and connection pooling.
+
+### 5. `performance-engineering`
+Full-stack profiling: Core Web Vitals (LCP, INP, CLS), main-thread yielding, streaming SSR, multi-tier caching (L1 in-memory, L2 Redis, L3 CDN), database connection pool sizing, and automated k6 stress testing.
+
+### 6. `pixel-agents`
+Autonomous multi-agent orchestration instructions, event emission protocols, task decomposition strategies, and live telemetry streaming to the Floor 42 dashboard.
 
 ---
 
-## Codebase Context Adaptation
+## 🛠️ Cross-Harness Installation & IDE Setup
 
-When initialized in an existing codebase, PixelCrew runs a static analysis sweep and extracts a comprehensive architecture profile:
+PixelCrew integrates seamlessly with all leading AI coding assistants and agent environments:
+
+### Google Antigravity IDE (Recommended)
+Register PixelCrew globally so Antigravity agents automatically stream to your visual office:
 
 ```bash
-npx github:hiroqt/PixelCrew analyze
-```
-
-### Example Profile Output:
-```text
-🔍 Analyzing Codebase Architecture & Context...
-
-PROJECT:            kaffa-tea
-LANGUAGES:          TypeScript, JavaScript
-FRAMEWORKS:         Next.js (App Router), React, Tailwind CSS
-BACKEND / API:      Node.js Route Handlers
-DATABASE / ORM:     PostgreSQL, Prisma ORM
-TESTING SUITE:      Vitest, Playwright
-AUTH / SECURITY:    NextAuth / Auth.js
-RECOMMENDED SKILLS: codebase-intelligence, nextjs, react, tailwind, prisma, postgresql, vitest, playwright-e2e, security-audit
-```
-
-This profile is cached in `.pixel-agents/context.json` so all subagents share grounded awareness of project conventions, directory paths, and dependencies.
-
----
-
-## Skills Matrix & Capabilities
-
-In PixelCrew, **agents are capability executors powered by modular skills**. Skills are structured as markdown instruction guides located in `.pixel-agents/skills/`:
-
-| Skill | Target Agent(s) | Focus & Directives |
-| :--- | :--- | :--- |
-| **`codebase-intelligence`** | All Agents | Inspects `.pixel-agents/context.json`, extracts repository architecture, and grounds code generation in existing patterns. |
-| **`nextjs`** | Frontend | App Router vs Pages Router patterns, Server Components, Route Handlers, metadata generation, and caching. |
-| **`react`** | Frontend | Modern React 19 hooks, component modularization, state boundaries, and concurrent rendering optimizations. |
-| **`tailwind`** | Frontend | Design tokens, responsive utility composition, dark mode, and anti-AI-slop layout rules. |
-| **`api-architecture`** | Backend | RESTful OpenAPI 3.1 standards, error envelopes, rate limiting, and idempotency key middleware. |
-| **`prisma`** | Database | Relational schema modeling, batched queries, migration lifecycle, and index optimization. |
-| **`postgresql`** | Database | EXPLAIN ANALYZE interpretation, B-Tree & GIN indexing, connection pooling (PgBouncer), and transaction isolation. |
-| **`drizzle`** | Database | Type-safe SQL schema design, relational queries, and zero-overhead migrations. |
-| **`security-audit`** | Security | OWASP Top 10 mitigation, SQL injection prevention, XSS sanitization, and JWT/RBAC authorization audits. |
-| **`performance-profiling`** | Performance | Core Web Vitals (LCP, INP, CLS), heap memory profiling, bundle reduction, and caching hierarchies. |
-| **`vitest` / `jest`** | QA | Unit test suites, mock boundaries, snapshot assertions, and coverage thresholds. |
-| **`playwright-e2e`** | QA | Resilient user journey tests, trace recording, and visual regression testing. |
-
----
-
-## Installation Guide
-
-### 1. Workspace Installation
-
-Run in the root of any existing project:
-
-```bash
-# Initialize PixelCrew in current repository
-npx github:hiroqt/PixelCrew init
-
-# Start the dashboard and orchestrator
-npx github:hiroqt/PixelCrew start
-```
-
-This scaffolds:
-- `.pixel-agents/config.json`: Swarm concurrency, agent permissions, and dashboard settings.
-- `.pixel-agents/context.json`: Detected tech stack and directory architecture.
-- `.pixel-agents/state.json`: Active agent states and sprint progress.
-- `.pixel-agents/events.jsonl`: Append-only event history log.
-- `.pixel-agents/agents/`: Agent persona definitions.
-- `.pixel-agents/skills/`: Tailored skill instruction files.
-- `.pixel-dashboard/`: Standalone HTML5 canvas office dashboard.
-
-### 2. Global Antigravity Plugin
-
-To register PixelCrew across all projects in the Antigravity IDE:
-
-```bash
-# Create global plugin folder
+# Register global plugin
 mkdir -p ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents
+cp plugins/plugin.json ~/.gemini/config/plugins/pixel-agents/
+cp .agents/skills/pixel-agents/SKILL.md ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents/
+```
 
-# Copy plugin manifest and skill instructions
-cp /path/to/PixelCrew/plugins/plugin.json ~/.gemini/config/plugins/pixel-agents/plugin.json
-cp /path/to/PixelCrew/.agents/skills/pixel-agents/SKILL.md ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents/SKILL.md
+Whenever you prompt inside Antigravity:
+> *"Analyze the database queries in this repo using PixelCrew"*
+
+The agent automatically loads the skill, executes the task, and streams live sprite animations and status logs to your browser.
+
+---
+
+### Claude Code
+Install project-locally or link globally:
+
+```bash
+# Project-local install
+mkdir -p .claude/skills/pixel-agents
+cp .agents/skills/pixel-agents/SKILL.md .claude/skills/pixel-agents/
 ```
 
 ---
 
-## CLI Command Reference
+### Cursor IDE
+Add to your project's agent rules or skills:
 
-| Command | Description | Example |
-| :--- | :--- | :--- |
-| `npx github:hiroqt/PixelCrew init` | Scaffolds & adapts `.pixel-agents/` to current codebase | `npx github:hiroqt/PixelCrew init --yes` |
-| `npx github:hiroqt/PixelCrew analyze` | Scans repository and prints detected architecture profile | `npx github:hiroqt/PixelCrew analyze` |
-| `npx github:hiroqt/PixelCrew start` | Launches orchestrator daemon, SSE stream & dashboard | `npx github:hiroqt/PixelCrew start --port 4747` |
-| `npx github:hiroqt/PixelCrew dashboard` | Opens or serves the web dashboard UI | `npx github:hiroqt/PixelCrew dashboard` |
-| `npx github:hiroqt/PixelCrew demo` | Boots swarm and dispatches a full simulated multi-agent mission | `npx github:hiroqt/PixelCrew demo` |
-| `npx github:hiroqt/PixelCrew task "<msg>"` | Dispatches a new task to the running swarm or runs locally | `npx github:hiroqt/PixelCrew task "Fix slow queries"` |
-| `npx github:hiroqt/PixelCrew emit` | Emits an event to the live dashboard stream | `npx github:hiroqt/PixelCrew emit --agent db --message "Done"` |
-| `npx github:hiroqt/PixelCrew status` | Prints ASCII summary of current swarm state | `npx github:hiroqt/PixelCrew status` |
-| `npx github:hiroqt/PixelCrew help` | Displays full CLI manual and available flags | `npx github:hiroqt/PixelCrew help` |
+```bash
+mkdir -p .cursor/skills/pixel-agents
+cp .agents/skills/pixel-agents/SKILL.md .cursor/skills/pixel-agents/
+```
+
+*Ensure Agent Skills are enabled under Cursor Settings → Beta.*
 
 ---
 
-## Configuration Reference
+### OpenAI Codex CLI
+Install project-locally with native hook support:
 
-Customize agent roles, permissions, concurrency, and theme in `.pixel-agents/config.json`:
+```bash
+mkdir -p .agents/skills
+cp -r .agents/skills/* .agents/skills/
+```
 
+---
+
+### GitHub Copilot / Grok Build / Gemini CLI / Trae / OpenCode
+Copy the `.agents/skills/` directory into your tool's native skills folder:
+- **GitHub Copilot**: `.github/skills/pixel-agents/`
+- **Gemini CLI**: `~/.gemini/config/skills/pixel-agents/`
+- **Grok Build**: `.grok/skills/pixel-agents/`
+- **Trae**: `~/.trae/skills/` or `~/.trae-cn/skills/`
+
+---
+
+## 💻 CLI Terminal Reference
+
+| Command | Action | Example |
+| :--- | :--- | :--- |
+| `npx github:hiroqt/PixelCrew init` | Scaffolds `.pixel-agents/` and adapts to repository | `npx github:hiroqt/PixelCrew init --yes` |
+| `npx github:hiroqt/PixelCrew start` | Launches orchestrator, SSE stream, and web dashboard | `npx github:hiroqt/PixelCrew start --port 4747` |
+| `npx github:hiroqt/PixelCrew analyze` | Prints detected frameworks, database, ORM, and test stack | `npx github:hiroqt/PixelCrew analyze` |
+| `npx github:hiroqt/PixelCrew demo` | Launches an interactive 6-agent simulated sprint | `npx github:hiroqt/PixelCrew demo` |
+| `npx github:hiroqt/PixelCrew task "<text>"` | Dispatches a direct objective to the running agent swarm | `npx github:hiroqt/PixelCrew task "Optimize SQL queries"` |
+| `npx github:hiroqt/PixelCrew emit [flags]` | Emits a custom telemetry event into the stream | `npx github:hiroqt/PixelCrew emit --agent db --message "Done"` |
+| `npx github:hiroqt/PixelCrew dashboard` | Opens or serves the standalone Floor 42 dashboard UI | `npx github:hiroqt/PixelCrew dashboard` |
+| `npx github:hiroqt/PixelCrew status` | Prints ASCII summary of swarm states and active sprints | `npx github:hiroqt/PixelCrew status` |
+| `npx github:hiroqt/PixelCrew help` | Displays full CLI manual and flag details | `npx github:hiroqt/PixelCrew help` |
+
+### CLI Options & Flags:
+- `--port <number>`: Dashboard port (default: `4747`)
+- `--no-open`: Prevents auto-launching browser on startup
+- `--yes`, `-y`: Bypasses interactive prompts during initialization
+- `--agent <name>`: Target agent for event emission (`frontend`, `backend`, `database`, `security`, `performance`, `qa`)
+- `--type <type>`: Event category (`spawn`, `thinking`, `tool`, `skill`, `complete`, `error`)
+- `--message <text>`: Description payload for the event log
+- `--skill <name>`: Skill tag associated with the action
+
+---
+
+## 📡 Live Telemetry & Event Streaming API
+
+PixelCrew provides multiple interfaces to emit events into the live visual canvas from shell scripts, Git hooks, CI/CD runners, or external agent tools:
+
+### Option 1: Via CLI Emit Command
+```bash
+npx github:hiroqt/PixelCrew emit \
+  --agent database \
+  --type tool \
+  --skill database-engineering \
+  --message "Adding composite index on orders(user_id, created_at)"
+```
+
+### Option 2: Via HTTP REST Endpoint
+```bash
+curl -X POST http://localhost:4747/api/emit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent": "frontend",
+    "type": "skill",
+    "skill": "frontend-engineering",
+    "message": "Refactored checkout button to use fluid clamp spacing"
+  }'
+```
+
+### Option 3: Event Payload Schema
+```typescript
+interface AgentEvent {
+  id?: string;
+  timestamp: number;
+  agent: "orchestrator" | "frontend" | "backend" | "database" | "security" | "performance" | "qa";
+  type: "spawn" | "thinking" | "tool" | "skill" | "progress" | "complete" | "error";
+  message: string;
+  skill?: string;
+  metadata?: Record<string, unknown>;
+}
+```
+
+---
+
+## 📂 Workspace Manifest & Architecture
+
+Initializing PixelCrew creates a self-contained `.pixel-agents/` control directory in your repository:
+
+```
+your-project/
+├── .pixel-agents/
+│   ├── config.json              # Swarm concurrency, agent permissions, and dashboard settings
+│   ├── context.json             # Cached static analysis of frameworks, ORMs, and paths
+│   ├── state.json               # Real-time state of every agent persona
+│   ├── events.jsonl             # Append-only persistent telemetry event log
+│   ├── agents/                  # Specialized agent persona definitions
+│   └── skills/                  # Grounded engineering skill markdown manuals
+├── .pixel-dashboard/            # Zero-dependency HTML5 canvas visual office bundle
+├── DESIGN.md                    # Visual tokens, canvas coordinate engine & audio specs
+├── PRODUCT.md                   # Product vision, technical roadmap, and architectural goals
+└── README.md
+```
+
+### `config.json` Specimen:
 ```json
 {
   "version": "0.1.0",
-  "project": "my-saas-app",
+  "project": "my-app",
   "orchestrator": {
     "enabled": true,
     "maxConcurrentAgents": 4,
@@ -272,48 +334,27 @@ Customize agent roles, permissions, concurrency, and theme in `.pixel-agents/con
   "agents": {
     "frontend": {
       "name": "Frontend Agent",
-      "role": "UI/UX & Component Engineering",
       "sprite": "frontend",
       "color": "#00f0ff",
-      "enabled": true,
-      "maxTasks": 2,
-      "skills": ["react", "nextjs", "tailwind", "codebase-intelligence"],
+      "skills": ["frontend-engineering", "codebase-intelligence"],
       "permissions": {
-        "read": ["src/components/**", "src/pages/**", "src/styles/**"],
-        "write": ["src/components/**", "src/styles/**"]
+        "read": ["src/components/**", "src/app/**"],
+        "write": ["src/components/**"]
       }
     },
     "database": {
       "name": "Database Agent",
-      "role": "Data Modeling & Query Optimization",
       "sprite": "database",
       "color": "#ffd700",
-      "enabled": true,
-      "maxTasks": 1,
-      "skills": ["postgresql", "prisma", "query-optimization", "indexing"],
+      "skills": ["database-engineering"],
       "permissions": {
-        "read": ["prisma/**", "db/**"],
+        "read": ["prisma/**", "src/db/**"],
         "write": ["prisma/**"]
-      }
-    },
-    "qa": {
-      "name": "QA Agent",
-      "role": "End-to-End & Integration Testing",
-      "sprite": "qa",
-      "color": "#b026ff",
-      "enabled": true,
-      "dependsOn": ["frontend", "backend", "database"],
-      "skills": ["testing", "vitest", "playwright-e2e"],
-      "permissions": {
-        "read": ["**/*"],
-        "write": ["tests/**"]
       }
     }
   },
   "dashboard": {
-    "enabled": true,
     "port": 4747,
-    "theme": "pixel",
     "crtEffect": true,
     "soundEffects": true
   }
@@ -322,141 +363,60 @@ Customize agent roles, permissions, concurrency, and theme in `.pixel-agents/con
 
 ---
 
-## Real-Time Event Streaming API
+## 🎮 Dashboard Controls & Keybindings
 
-The dashboard listens to structured `AgentEvent` payloads over Server-Sent Events (SSE). You can stream events from **shell scripts**, **Git hooks**, or **Antigravity / Gemini subagents**:
-
-### Via CLI:
-```bash
-npx github:hiroqt/PixelCrew emit \
-  --agent database \
-  --type tool \
-  --skill prisma \
-  --message "Inspecting schema for missing indexes"
-```
-
-### Via HTTP REST API:
-```bash
-curl -X POST http://localhost:4747/api/emit \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent": "backend",
-    "type": "skill",
-    "skill": "api-architecture",
-    "message": "Optimized /api/customers with cursor pagination"
-  }'
-```
-
-### Event Payload Schema:
-```typescript
-type AgentEvent = {
-  id?: string;
-  timestamp: number;
-  agent: "orchestrator" | "frontend" | "backend" | "database" | "security" | "performance" | "qa";
-  type: "spawn" | "thinking" | "tool" | "skill" | "progress" | "complete" | "error";
-  message: string;
-  skill?: string;
-  metadata?: Record<string, any>;
-};
-```
+| Key / Control | Function | Description |
+| :--- | :--- | :--- |
+| `[SPACE]` | **Launch Demo** | Boots the swarm and runs a simulated multi-agent sprint |
+| `[1] - [6]` | **Agent Inspector** | Opens the dedicated status drawer and permissions for agents 1 through 6 |
+| `[ESC]` | **Close Modals** | Closes any active agent inspector or overlay drawer |
+| `CRT Button` | **Scanline Shader** | Toggles retro arcade phosphor scanlines and vignette effect |
+| `NIGHT Button` | **Cyberpunk Shift** | Switches between warm day office and neon cyberpunk night lighting |
+| `SFX Button` | **Web Audio Synth** | Toggles procedural 8-bit chip-tune feedback sounds |
 
 ---
 
-## Antigravity & IDE Integration
+## 🧪 Development & Testing
 
-Whenever you prompt inside Antigravity IDE:
-> *"Analyze the frontend of this project using Pixel Agents"*
-
-The AI agent activates the `pixel-agents` skill and streams telemetry live to your dashboard:
-
-```text
-  You (in Antigravity IDE): "Analyze frontend using pixel agents"
-                             │
-                             ▼
-  1. Agent emits: emit --agent frontend --type thinking --message "Analyzing Next.js routes"
-  2. Agent emits: emit --agent frontend --type tool --skill nextjs --message "Inspecting page.tsx"
-  3. Agent emits: emit --agent frontend --type complete --message "Identified 3 UI optimizations"
-                             │
-                             ▼
- ┌────────────────────────────────────────────────────────────────────────┐
- │                      PIXELCREW LIVE DASHBOARD                          │
- │                                                                        │
- │  1. Frontend Sprite Animates: Starts typing fast with glowing screens  │
- │  2. Slack Live Feed: Logs [#FRONTEND → Inspecting page.tsx]            │
- │  3. 8-Bit Audio: Plays retro chime on skill completion                 │
- │  4. Skills Matrix: Next.js skill icon turns green (✓)                  │
- └────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Dashboard Controls & Shortcuts
-
-| Shortcut | Action |
-| :--- | :--- |
-| `[SPACE]` | Launch live multi-agent swarm demo |
-| `[1]` | Inspect **Frontend Agent** details & permissions |
-| `[2]` | Inspect **Backend Agent** details & permissions |
-| `[3]` | Inspect **Database Agent** details & permissions |
-| `[4]` | Inspect **Security Agent** details & permissions |
-| `[5]` | Inspect **Performance Agent** details & permissions |
-| `[6]` | Inspect **QA Agent** details & permissions |
-| `[ESC]` | Close inspector modal |
-| `CRT Toggle` | Toggle retro scanline shader effect |
-| `NIGHT Toggle` | Toggle night shift / cyberpunk neon lighting |
-| `SFX Toggle` | Toggle 8-bit Web Audio synth sounds |
-
----
-
-## Development & Testing
-
-Clone the repository and run the test suite:
+Run unit tests across the orchestrator engine, scaffolders, and server endpoints:
 
 ```bash
-# Clone repository
+# Clone the repository
 git clone https://github.com/hiroqt/PixelCrew.git
 cd PixelCrew
 
-# Run automated tests
+# Run the zero-dependency test suite
 npm test
 ```
 
 ---
 
-## Documentation Index
+## 📚 Documentation & Specifications
 
-- [Design Specifications](DESIGN.md) — Visual tokens, canvas coordinate engine, typography, and audio synthesis.
-- [Product Vision & Roadmap](PRODUCT.md) — Problem statement, user personas, architecture, and roadmap (v0.1 to v0.5).
-- [Contribution Guidelines & PR Standards](CONTRIBUTING.md) — Branch naming, conventional commits, and review checklist.
-- [Apache 2.0 License](LICENSE) — Full legal terms and third-party font notices.
-
----
-
-## Contributing & Community
-
-We warmly welcome contributions from the open-source community!
-
-- **Contribute Skills**: Add new domain markdown guides to `.pixel-agents/skills/` (e.g. GraphQL, Supabase, Redis, Rust).
-- **Add Agent Personas**: Create new specialized agent profiles for the startup office (e.g. Data Scientist, Cloud Architect).
-- **Enhance the Dashboard**: Improve procedural canvas animations, sound synthesizers, or add custom office packs.
-- **Report Issues**: Open an issue at [github.com/hiroqt/PixelCrew/issues](https://github.com/hiroqt/PixelCrew/issues).
-
-Please review [CONTRIBUTING.md](CONTRIBUTING.md) for full branch naming and commit guidelines.
+- [📐 DESIGN.md](DESIGN.md) — 2D Canvas coordinate matrix, sprite frame animations, color tokens, and Web Audio oscillator formulas.
+- [🎯 PRODUCT.md](PRODUCT.md) — Product vision, target personas, problem analysis, and development roadmap (v0.1 to v0.5).
+- [🤝 CONTRIBUTING.md](CONTRIBUTING.md) — How to author new skills, add custom agent sprites, and submit pull requests.
+- [⚖️ LICENSE](LICENSE) — Apache 2.0 open-source license.
 
 ---
 
-## License
+## 🌟 Community & Contributing
 
-Licensed under the **Apache License, Version 2.0** (the "License"). You may obtain a copy of the License at:
+Contributions of all types are warmly welcomed!
 
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the [LICENSE](LICENSE) for details.
+- **Create New Skills**: Add new technology guides to `.pixel-agents/skills/` (e.g. GraphQL, Supabase, Redis, Rust, Astro).
+- **Design Office Packs**: Add custom pixel-art furniture, workstations, and seasonal office themes.
+- **Improve Orchestration**: Enhance DAG task scheduling, automated error recovery, and concurrency management.
+- **Report Bugs**: Submit issues and feature proposals at [github.com/hiroqt/PixelCrew/issues](https://github.com/hiroqt/PixelCrew/issues).
 
 ---
 
-## Created by
+## 📄 License
 
-Created with care by:
-- **Arnel** ([GitHub @hiroqt](https://github.com/hiroqt))
-- In collaboration with the **Antigravity Swarm** community.
+PixelCrew is open-source software licensed under the **[Apache License, Version 2.0](LICENSE)**.
+
+---
+
+<p align="center">
+  Crafted with precision by <strong>Arnel</strong> (<a href="https://github.com/hiroqt">@hiroqt</a>) & the <strong>Antigravity Swarm</strong>.
+</p>
