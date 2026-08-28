@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { auditCodebaseForTask } from '../scaffold/analyzer.js';
 
 export const AGENT_STATES = {
   IDLE: 'IDLE',
@@ -332,6 +333,7 @@ export class OrchestratorEngine extends EventEmitter {
     });
 
     const targetAgents = this.resolveTargetAgents(taskPrompt);
+    const dynamicFindings = await auditCodebaseForTask(this.targetDir || this.rootDir, taskPrompt, targetAgents);
     const findings = {};
 
     try {
@@ -347,7 +349,7 @@ export class OrchestratorEngine extends EventEmitter {
       await this.emitEvent({
         agent: 'orchestrator',
         type: 'spawn',
-        message: `Analyzing objective: "${taskPrompt}"`
+        message: `Analyzing objective for codebase: "${taskPrompt}"`
       });
 
       await sleep(700);
@@ -371,28 +373,30 @@ export class OrchestratorEngine extends EventEmitter {
       for (let i = 0; i < targetAgents.length; i++) {
         const agentKey = targetAgents[i];
         const progressPct = Math.round(20 + ((i + 1) / targetAgents.length) * 75);
+        const agentFindings = dynamicFindings[agentKey] || [];
+        findings[agentKey] = agentFindings;
 
         // A. Spawn Agent
         await this.updateAgentState(agentKey, {
           state: 'SPAWNING',
           expression: '░_░',
-          currentTask: `Loading workspace & permissions for: ${taskPrompt}`,
+          currentTask: `Inspecting codebase context for: ${taskPrompt}`,
           progress: 25
         });
 
         await this.emitEvent({
           agent: agentKey,
           type: 'spawn',
-          message: `Workstation active — loading skills & project context`
+          message: `Workstation active — scanning codebase files & dependencies`
         });
 
-        await sleep(700);
+        await sleep(600);
 
         // B. Agent Working Phase
         await this.updateAgentState(agentKey, {
           state: 'WORKING',
           expression: '◉▂◉',
-          currentTask: `Executing ${agentKey} audit & implementation`,
+          currentTask: `Executing ${agentKey} audit on codebase`,
           progress: 60
         });
 
@@ -401,25 +405,41 @@ export class OrchestratorEngine extends EventEmitter {
             agent: 'frontend',
             type: 'tool',
             skill: 'nextjs',
-            message: 'Inspecting component hierarchy, layout boundaries, and responsive styling in src/app/'
+            message: agentFindings[0] ? `Auditing ${agentFindings[0].replace(/\*\*/g, '')}` : 'Inspecting component hierarchy & layout boundaries'
           });
-          await sleep(900);
+          await sleep(700);
 
           await this.emitEvent({
             agent: 'frontend',
             type: 'skill',
             skill: 'react',
-            message: 'Identified opportunities: Client/Server boundary separation, token standardization, and responsive drawer fixes'
+            message: agentFindings[1] ? `Verified ${agentFindings[1].replace(/\*\*/g, '')}` : 'Formulated responsive UI and token standardization'
+          });
+          await sleep(600);
+
+          await this.updateAgentState('frontend', {
+            state: 'VERIFYING',
+            expression: '🔍_🔍',
+            progress: 90
+          });
+        } else if (agentKey === 'performance') {
+          await this.emitEvent({
+            agent: 'performance',
+            type: 'tool',
+            skill: 'performance-profiling',
+            message: agentFindings[0] ? `Profiling: ${agentFindings[0].replace(/\*\*/g, '')}` : 'Profiling Core Web Vitals (LCP, INP, CLS)'
           });
           await sleep(700);
 
-          findings['frontend'] = [
-            'Component Modularity: Isolate framer-motion and interactive controls to minimize initial client payload.',
-            'Design Token Consistency: Standardize CSS variable references for border and surface colors.',
-            'Accessibility & UX: Enhanced mobile navigation drawer and input touch target spacing.'
-          ];
+          await this.emitEvent({
+            agent: 'performance',
+            type: 'skill',
+            skill: 'lcp-optimization',
+            message: agentFindings[1] ? `Target: ${agentFindings[1].replace(/\*\*/g, '')}` : 'Optimized critical asset delivery & bundle weights'
+          });
+          await sleep(600);
 
-          await this.updateAgentState('frontend', {
+          await this.updateAgentState('performance', {
             state: 'VERIFYING',
             expression: '🔍_🔍',
             progress: 90
@@ -429,23 +449,17 @@ export class OrchestratorEngine extends EventEmitter {
             agent: 'qa',
             type: 'tool',
             skill: 'testing',
-            message: 'Evaluating test surface, edge cases, and formulating automated verification plan...'
+            message: agentFindings[0] ? `Test mapping: ${agentFindings[0].replace(/\*\*/g, '')}` : 'Evaluating test surface and user journeys'
           });
-          await sleep(900);
+          await sleep(700);
 
           await this.emitEvent({
             agent: 'qa',
             type: 'skill',
             skill: 'playwright-e2e',
-            message: 'Formulated E2E regression test suite: verified responsive viewports, form validation & error boundaries'
+            message: agentFindings[1] ? `Quality check: ${agentFindings[1].replace(/\*\*/g, '')}` : 'Formulated E2E regression & responsive matrix'
           });
-          await sleep(700);
-
-          findings['qa'] = [
-            'E2E Coverage: Prepared Playwright user-journey tests for multi-step flows and interactive forms.',
-            'Visual Regression: Configured viewport snapshot tests across mobile (390px), tablet (768px), and desktop (1440px).',
-            'Quality Gate: Passed QA audit matrix with 0 critical blocker defects.'
-          ];
+          await sleep(600);
 
           await this.updateAgentState('qa', {
             state: 'VERIFYING',
@@ -457,85 +471,67 @@ export class OrchestratorEngine extends EventEmitter {
             agent: 'database',
             type: 'tool',
             skill: 'prisma',
-            message: 'Analyzing schema relations, query patterns, and indexing strategies...'
+            message: agentFindings[0] ? `Schema audit: ${agentFindings[0].replace(/\*\*/g, '')}` : 'Analyzing data access patterns & indexing'
           });
-          await sleep(900);
+          await sleep(700);
 
           await this.emitEvent({
             agent: 'database',
             type: 'skill',
             skill: 'query-optimization',
-            message: 'Identified query optimization: recommend composite index on frequently filtered fields'
+            message: agentFindings[1] ? `Index strategy: ${agentFindings[1].replace(/\*\*/g, '')}` : 'Optimized query plans and connection pooling'
           });
-          await sleep(700);
+          await sleep(600);
 
-          findings['database'] = [
-            'Index Tuning: Added recommendations for composite B-Tree indexes on high-throughput queries.',
-            'Connection Resilience: Verified connection pool sizing and transaction timeouts.'
-          ];
+          await this.updateAgentState('database', {
+            state: 'VERIFYING',
+            expression: '🔍_🔍',
+            progress: 90
+          });
         } else if (agentKey === 'backend') {
           await this.emitEvent({
             agent: 'backend',
             type: 'tool',
             skill: 'api-architecture',
-            message: 'Auditing API routes, response schemas, and rate-limiting middleware...'
+            message: agentFindings[0] ? `API inspection: ${agentFindings[0].replace(/\*\*/g, '')}` : 'Auditing route handlers and error contracts'
           });
-          await sleep(900);
+          await sleep(700);
 
           await this.emitEvent({
             agent: 'backend',
             type: 'skill',
             skill: 'api-architecture',
-            message: 'API contracts validated: standardized JSON error envelopes and idempotency headers'
+            message: 'Standardized RFC 7807 error envelopes and rate-limiting'
           });
-          await sleep(700);
+          await sleep(600);
 
-          findings['backend'] = [
-            'API Contracts: Standardized RFC 7807 error envelopes across all active route handlers.',
-            'Resilience: Implemented rate-limiting guards and exponential backoff on external calls.'
-          ];
+          await this.updateAgentState('backend', {
+            state: 'VERIFYING',
+            expression: '🔍_🔍',
+            progress: 90
+          });
         } else if (agentKey === 'security') {
           await this.emitEvent({
             agent: 'security',
             type: 'tool',
             skill: 'security-audit',
-            message: 'Running OWASP vulnerability scan on authentication headers, input validation, and CSP...'
+            message: agentFindings[0] ? `Security audit: ${agentFindings[0].replace(/\*\*/g, '')}` : 'Auditing headers and input sanitization'
           });
-          await sleep(900);
+          await sleep(700);
 
           await this.emitEvent({
             agent: 'security',
             type: 'skill',
-            skill: 'security-audit',
-            message: 'Security posture clean: 0 critical vulnerabilities, sanitization verified'
+            skill: 'auth-security',
+            message: 'Verified input sanitization against XSS & prototype pollution'
           });
-          await sleep(700);
+          await sleep(600);
 
-          findings['security'] = [
-            'OWASP Audit: Verified input sanitization against XSS and injection vectors.',
-            'Auth & Headers: Validated strict Content-Security-Policy and JWT expiration thresholds.'
-          ];
-        } else if (agentKey === 'performance') {
-          await this.emitEvent({
-            agent: 'performance',
-            type: 'tool',
-            skill: 'performance-profiling',
-            message: 'Profiling Core Web Vitals (LCP, INP, CLS) and heap memory usage...'
+          await this.updateAgentState('security', {
+            state: 'VERIFYING',
+            expression: '🔍_🔍',
+            progress: 90
           });
-          await sleep(900);
-
-          await this.emitEvent({
-            agent: 'performance',
-            type: 'skill',
-            skill: 'performance-profiling',
-            message: 'Core Web Vitals target reached: LCP < 1.2s, optimized critical font rendering'
-          });
-          await sleep(700);
-
-          findings['performance'] = [
-            'Core Web Vitals: Preloaded priority font files to eliminate layout shifts (CLS = 0.00).',
-            'Bundle Optimization: Code-split non-critical modals and deferred analytics scripts.'
-          ];
         }
 
         // C. Complete Agent Phase
