@@ -1,5 +1,6 @@
 import http from 'node:http';
 import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -32,6 +33,38 @@ export function createServer(engine, options = {}) {
       }
     }
   });
+
+  // Watch events.jsonl for direct external CLI writes (e.g. from Antigravity IDE)
+  let lastKnownEventCount = 0;
+  if (engine.eventsPath) {
+    try {
+      const initialContent = fsSync.readFileSync(engine.eventsPath, 'utf-8');
+      lastKnownEventCount = initialContent.trim().split('\n').filter(Boolean).length;
+    } catch {
+      lastKnownEventCount = 0;
+    }
+
+    fsSync.watchFile(engine.eventsPath, { interval: 300 }, async () => {
+      try {
+        const content = await fs.readFile(engine.eventsPath, 'utf-8');
+        const lines = content.trim().split('\n').filter(Boolean);
+        if (lines.length > lastKnownEventCount) {
+          const newLines = lines.slice(lastKnownEventCount);
+          lastKnownEventCount = lines.length;
+          for (const line of newLines) {
+            try {
+              const event = JSON.parse(line);
+              // Broadcast over SSE
+              const payload = `event: agent_event\ndata: ${JSON.stringify(event)}\n\n`;
+              for (const client of sseClients) {
+                try { client.write(payload); } catch {}
+              }
+            } catch {}
+          }
+        }
+      } catch {}
+    });
+  }
 
   const server = http.createServer(async (req, res) => {
     // Enable CORS

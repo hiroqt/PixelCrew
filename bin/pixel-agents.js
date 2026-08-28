@@ -2,6 +2,7 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
 import { spawn } from 'node:child_process';
 import { initializeProject } from '../src/scaffold/init.js';
 import { OrchestratorEngine } from '../src/orchestrator/engine.js';
@@ -60,6 +61,31 @@ function openBrowser(url) {
   } catch (err) {
     // Ignore browser open errors
   }
+}
+
+async function resolveDaemonUrl(rootDir) {
+  // 1. Check .pixel-agents/daemon.json
+  const daemonPath = path.join(rootDir, '.pixel-agents', 'daemon.json');
+  try {
+    const raw = await fs.readFile(daemonPath, 'utf-8');
+    const info = JSON.parse(raw);
+    if (info?.url) {
+      const res = await fetch(`${info.url}/api/state`, { signal: AbortSignal.timeout(600) });
+      if (res.ok) return info.url;
+    }
+  } catch {}
+
+  // 2. Scan fallback ports 4747..4755
+  for (let port = 4747; port <= 4755; port++) {
+    try {
+      const res = await fetch(`http://localhost:${port}/api/state`, { signal: AbortSignal.timeout(300) });
+      if (res.ok) {
+        return `http://localhost:${port}`;
+      }
+    } catch {}
+  }
+
+  return null;
 }
 
 function startServerWithPortFallback(server, initialPort, maxTries = 20) {
@@ -165,6 +191,25 @@ async function main() {
       try {
         const boundPort = await startServerWithPortFallback(server, requestedPort);
         const url = `http://localhost:${boundPort}`;
+
+        // Persist daemon discovery file
+        const daemonPath = path.join(rootDir, '.pixel-agents', 'daemon.json');
+        try {
+          await fs.writeFile(daemonPath, JSON.stringify({
+            port: boundPort,
+            pid: process.pid,
+            url,
+            startedAt: new Date().toISOString()
+          }, null, 2), 'utf-8');
+        } catch {}
+
+        const cleanupDaemon = () => {
+          try { fsSync.unlinkSync(daemonPath); } catch {}
+        };
+        process.on('exit', cleanupDaemon);
+        process.on('SIGINT', () => { cleanupDaemon(); process.exit(0); });
+        process.on('SIGTERM', () => { cleanupDaemon(); process.exit(0); });
+
         console.log(BANNER);
         console.log(`\n\x1b[32m\x1b[1m● PixelCrew Swarm Server Active\x1b[0m`);
         console.log(`  Visual Dashboard:  \x1b[36m\x1b[4m${url}\x1b[0m`);
@@ -215,20 +260,21 @@ async function main() {
         process.exit(1);
       }
 
-      // Check if daemon server is running on port 4747
-      try {
-        const res = await fetch('http://localhost:4747/api/task', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: taskPrompt })
-        });
-        if (res.ok) {
-          console.log(`\x1b[32m✓ Task dispatched to running swarm daemon:\x1b[0m "${taskPrompt}"`);
-          console.log('Check live status at http://localhost:4747');
-          return;
-        }
-      } catch {
-        // No server running, run locally in CLI mode
+      // Check if daemon server is running
+      const daemonUrl = await resolveDaemonUrl(rootDir);
+      if (daemonUrl) {
+        try {
+          const res = await fetch(`${daemonUrl}/api/task`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: taskPrompt })
+          });
+          if (res.ok) {
+            console.log(`\x1b[32m✓ Task dispatched to running swarm daemon (${daemonUrl}):\x1b[0m "${taskPrompt}"`);
+            console.log(`Check live status at ${daemonUrl}`);
+            return;
+          }
+        } catch {}
       }
 
       console.log(BANNER);
@@ -258,23 +304,26 @@ async function main() {
         skill: options.skill
       };
 
-      try {
-        const res = await fetch('http://localhost:4747/api/emit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData)
-        });
-        if (res.ok) {
-          console.log(`\x1b[32m✓ Event emitted to live dashboard:\x1b[0m ${eventData.agent} → ${eventData.message}`);
-          return;
-        }
-      } catch {
-        // Local append
-        const engine = new OrchestratorEngine(rootDir);
-        await engine.initialize();
-        await engine.emitEvent(eventData);
-        console.log(`\x1b[32m✓ Event recorded to .pixel-agents/events.jsonl:\x1b[0m ${eventData.agent} → ${eventData.message}`);
+      const daemonUrl = await resolveDaemonUrl(rootDir);
+      if (daemonUrl) {
+        try {
+          const res = await fetch(`${daemonUrl}/api/emit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(eventData)
+          });
+          if (res.ok) {
+            console.log(`\x1b[32m✓ Event emitted to live dashboard (${daemonUrl}):\x1b[0m ${eventData.agent} → ${eventData.message}`);
+            return;
+          }
+        } catch {}
       }
+
+      // Local append & persist
+      const engine = new OrchestratorEngine(rootDir);
+      await engine.initialize();
+      await engine.emitEvent(eventData);
+      console.log(`\x1b[32m✓ Event recorded to .pixel-agents/events.jsonl:\x1b[0m ${eventData.agent} → ${eventData.message}`);
       break;
     }
 
