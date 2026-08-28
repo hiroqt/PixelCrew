@@ -1,0 +1,45 @@
+{
+  "name": "pixel-agents",
+  "version": "0.1.0",
+  "description": "Local multi-agent orchestration framework with an interactive pixel-art tech startup office visual dashboard",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "pixel-agents": "./bin/pixel-agents.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node bin/pixel-agents.js start",
+    "init": "node bin/pixel-agents.js init",
+    "dashboard": "node bin/pixel-agents.js dashboard",
+    "demo": "node bin/pixel-agents.js demo",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "agents",
+    "multi-agent",
+    "orchestrator",
+    "pixel-art",
+    "dashboard",
+    "llm",
+    "ai",
+    "workflow",
+    "terminal",
+    "startup-office",
+    "npx"
+  ],
+  "author": "Arnel & Antigravity Swarm",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hiroqt/PixelCrew.git"
+  }
+}

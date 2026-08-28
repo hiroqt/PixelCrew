@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIXEL CORPS — Autonomous AI Startup Office HQ</title>
+  <meta name="description" content="Local multi-agent orchestration framework with an interactive pixel-art corporate tech startup office dashboard.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="crt-active">
+  <!-- CRT Screen Scanline Overlay -->
+  <div class="crt-scanlines" id="crtOverlay"></div>
+  <div class="crt-vignette"></div>
+
+  <div class="pixel-app">
+    <!-- STARTUP OFFICE HEADER -->
+    <header class="arcade-header">
+      <div class="header-left">
+        <div class="logo-box">
+          <span class="pixel-icon">🏢</span>
+          <div>
+            <h1 class="logo-title">PIXEL CORPS HQ</h1>
+            <span class="logo-subtitle">FLOOR 42 // AUTONOMOUS TECH STARTUP</span>
+          </div>
+        </div>
+        <div class="project-badge" id="projectBadge">
+          <span class="badge-label">PRODUCT:</span>
+          <span class="badge-value" id="projectName">my-orchestrated-app</span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="office-meters">
+          <div class="meter-item">
+            <span class="meter-label">☕ COFFEE:</span>
+            <div class="pixel-meter"><div class="pixel-meter-fill" id="coffeeFill" style="width: 88%;"></div></div>
+          </div>
+          <div class="meter-item">
+            <span class="meter-label">⚡ VELOCITY:</span>
+            <div class="pixel-meter"><div class="pixel-meter-fill velocity" id="velocityFill" style="width: 95%;"></div></div>
+          </div>
+        </div>
+        <div class="status-indicator" id="swarmStatusBadge">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="swarmStatusText">STANDBY</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="pixel-btn btn-sm" id="btnAudioToggle" title="Toggle 8-bit Audio SFX">
+          <span id="audioIcon">🔊</span> SFX
+        </button>
+        <button class="pixel-btn btn-sm" id="btnCrtToggle" title="Toggle CRT Scanline Effect">
+          <span>📺</span> CRT
+        </button>
+        <button class="pixel-btn btn-sm" id="btnNightToggle" title="Toggle Night Shift / Cyberpunk Neon">
+          <span id="nightIcon">🌙</span> NIGHT
+        </button>
+        <button class="pixel-btn btn-sm btn-warn" id="btnReset" title="Call All-Hands Reset">
+          <span>🔄</span> RESET
+        </button>
+        <button class="pixel-btn btn-sm btn-primary" id="btnDemo" title="Launch Startup Sprint Demo">
+          <span>🚀</span> SPRINT DEMO
+        </button>
+      </div>
+    </header>
+
+    <!-- SPRINT OBJECTIVE & TASK BAR -->
+    <section class="task-dispatch-section">
+      <form class="task-form" id="taskForm">
+        <div class="prompt-input-wrapper">
+          <span class="prompt-prefix">SPRINT GOAL &gt;</span>
+          <input 
+            type="text" 
+            class="pixel-input" 
+            id="taskInput" 
+            placeholder="Assign product milestone to the engineering team (e.g. 'Optimize Prisma queries & deploy CRM search bar')..." 
+            autocomplete="off"
+          />
+          <button type="submit" class="pixel-btn btn-primary" id="btnSubmitTask">
+            <span>💻</span> ASSIGN SPRINT
+          </button>
+        </div>
+      </form>
+      <div class="quick-prompts">
+        <span class="quick-title">QUICK TICKETS:</span>
+        <button class="quick-tag" data-prompt="Find slow Prisma queries and create optimized database index">☕ DB: Optimize Indexes</button>
+        <button class="quick-tag" data-prompt="Build customer CRM dashboard with React and API endpoints">🎨 FE/BE: Build CRM Module</button>
+        <button class="quick-tag" data-prompt="Audit security authentication and profile Core Web Vitals">🛡️ SEC/PERF: Audit & Speed</button>
+        <button class="quick-tag" data-prompt="Run full end-to-end regression and Playwright integration suite">🧪 QA: Green Test Suite</button>
+      </div>
+    </section>
+
+    <!-- MAIN OFFICE FLOOR PLAN & WORKSTATIONS -->
+    <main class="orchestration-layout">
+      
+      <!-- PIXEL ART STARTUP OFFICE FLOOR PLAN (CANVAS) -->
+      <section class="office-floor-section pixel-panel">
+        <div class="panel-header">
+          <div class="office-tab-title">
+            <span class="office-status-pill">● LIVE WORKSPACE</span>
+            <span class="panel-title">PIXEL CORPS OPEN-PLAN OFFICE FLOOR</span>
+          </div>
+          <div class="office-legend">
+            <span class="legend-item"><span class="legend-dot fe"></span> FE</span>
+            <span class="legend-item"><span class="legend-dot be"></span> BE</span>
+            <span class="legend-item"><span class="legend-dot db"></span> DB</span>
+            <span class="legend-item"><span class="legend-dot sec"></span> SEC</span>
+            <span class="legend-item"><span class="legend-dot perf"></span> PERF</span>
+            <span class="legend-item"><span class="legend-dot qa"></span> QA</span>
+            <span class="legend-item"><span class="legend-dot lead"></span> LEAD</span>
+          </div>
+        </div>
+
+        <div class="office-canvas-container">
+          <canvas id="officeCanvas" width="960" height="420" class="office-canvas"></canvas>
+          
+          <!-- Hover Workstation Tooltip -->
+          <div class="desk-tooltip" id="deskTooltip" style="display: none;">
+            <div class="tooltip-name" id="tooltipName">Frontend Desk</div>
+            <div class="tooltip-status" id="tooltipStatus">WORKING</div>
+            <div class="tooltip-task" id="tooltipTask">Building React components...</div>
+          </div>
+        </div>
+
+        <div class="office-footer-bar">
+          <div class="office-metrics">
+            <span>TEAM MEMBERS: <strong id="activeAgentCount">0/6 WORKING</strong></span>
+            <span>SPRINT PROGRESS: <strong id="orchProgressText">0%</strong></span>
+            <span>SPRINT TIME: <strong id="missionElapsed">00:00</strong></span>
+          </div>
+          <div class="office-hints">
+            <span>🖱️ CLICK ANY EMPLOYEE DESK TO INSPECT TICKETS & PERMISSIONS</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- EMPLOYEE WORKSTATIONS CARDS GRID -->
+      <section class="agents-roster-section">
+        <div class="section-title-bar">
+          <span class="section-title">ENGINEERING SQUADS & WORKSTATIONS</span>
+          <span class="section-subtitle">CLICK CARD TO OPEN EMPLOYEE DRAWER</span>
+        </div>
+
+        <div class="agents-grid" id="agentsGrid">
+          <!-- Populated dynamically by app.js -->
+        </div>
+      </section>
+
+      <!-- BOTTOM SPLIT: SLACK / TERMINAL & JIRA SKILLS -->
+      <div class="bottom-split-section">
+        <!-- STARTUP SLACK CHAT & LIVE TERMINAL -->
+        <section class="activity-panel pixel-panel">
+          <div class="panel-header">
+            <div class="terminal-controls">
+              <span class="term-btn term-red"></span>
+              <span class="term-btn term-yellow"></span>
+              <span class="term-btn term-green"></span>
+              <span class="panel-title">#engineering-feed // SLACK STREAM</span>
+            </div>
+            <div class="activity-actions">
+              <div class="filter-group" id="agentFilters">
+                <button class="filter-chip active" data-filter="all">#ALL</button>
+                <button class="filter-chip" data-filter="orchestrator">#LEAD</button>
+                <button class="filter-chip" data-filter="frontend">#FE</button>
+                <button class="filter-chip" data-filter="backend">#BE</button>
+                <button class="filter-chip" data-filter="database">#DB</button>
+                <button class="filter-chip" data-filter="security">#SEC</button>
+                <button class="filter-chip" data-filter="performance">#PERF</button>
+                <button class="filter-chip" data-filter="qa">#QA</button>
+              </div>
+              <button class="pixel-btn btn-xs" id="btnClearLogs">CLEAR</button>
+            </div>
+          </div>
+          <div class="terminal-logs" id="terminalLogs">
+            <div class="log-entry log-system">
+              <span class="log-time">[09:00:00]</span>
+              <span class="log-agent log-agent-orchestrator">SLACKBOT</span>
+              <span class="log-msg">🏢 Team logged in to Pixel Corps HQ. All workstations ready for sprint tasks.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- SPRINT SKILLS & JIRA CAPABILITY MATRIX -->
+        <section class="skills-panel pixel-panel">
+          <div class="panel-header">
+            <span class="panel-title">SPRINT SKILL MATRIX</span>
+            <span class="skill-stats-badge" id="skillStatsBadge">0/18 READY</span>
+          </div>
+          <div class="skills-list" id="skillsList">
+            <!-- Populated dynamically -->
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- EMPLOYEE INSPECTION MODAL / DRAWER -->
+    <div class="pixel-modal-backdrop" id="agentModal">
+      <div class="pixel-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-agent-icon" id="modalAgentIcon">💼</span>
+            <h2 class="modal-agent-name" id="modalAgentName">Employee Workstation</h2>
+          </div>
+          <button class="pixel-btn btn-sm btn-warn" id="btnCloseModal">✕</button>
+        </div>
+        <div class="modal-body" id="modalAgentBody">
+          <!-- Dynamic Content -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ARCADE / OFFICE FOOTER -->
+    <footer class="arcade-footer">
+      <div class="footer-left">
+        <span>PRESS [1..6] TO OPEN EMPLOYEE PROFILE</span>
+        <span>•</span>
+        <span>[SPACE] SPRINT DEMO</span>
+      </div>
+      <div class="footer-right">
+        <span class="heartbeat-indicator">● OFFICE WIFI CONNECTED</span>
+        <span>PIXEL CORPS TECH DAEMON</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
