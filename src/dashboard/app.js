@@ -712,6 +712,53 @@ function connectSSE() {
     appState.events.push(event);
     appendLog(event);
 
+    // Real-time visual state & sprite animation update
+    if (appState.state && event.agent) {
+      if (event.agent !== 'orchestrator') {
+        if (!appState.state.agents[event.agent]) {
+          appState.state.agents[event.agent] = {
+            state: 'IDLE',
+            expression: '●_●',
+            currentTask: 'Idle',
+            skillsStatus: {}
+          };
+        }
+        const aState = appState.state.agents[event.agent];
+        if (event.type === 'spawn' || event.type === 'thinking') {
+          aState.state = 'ANALYZING';
+          aState.expression = '◉_⊙';
+        } else if (event.type === 'complete') {
+          aState.state = 'COMPLETED';
+          aState.expression = '^‿^';
+        } else if (event.type === 'error') {
+          aState.state = 'ERROR';
+          aState.expression = 'x_x';
+        } else if (event.type === 'idle') {
+          aState.state = 'IDLE';
+          aState.expression = '●_●';
+        } else {
+          aState.state = 'WORKING';
+          aState.expression = '◉▂◉';
+        }
+        aState.currentTask = event.message || aState.currentTask;
+
+        if (event.skill) {
+          aState.skillsStatus = aState.skillsStatus || {};
+          aState.skillsStatus[event.skill] = event.type === 'complete' ? 'completed' : 'active';
+        }
+      } else {
+        if (event.type === 'complete') {
+          appState.state.status = 'COMPLETED';
+        } else {
+          appState.state.status = 'RUNNING';
+        }
+        if (appState.state.orchestrator) {
+          appState.state.orchestrator.currentTask = event.message || appState.state.orchestrator.currentTask;
+        }
+      }
+      renderState();
+    }
+
     // Audio cues
     if (event.type === 'spawn') synth.playSpawn();
     else if (event.type === 'skill') synth.playSkill();

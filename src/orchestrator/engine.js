@@ -126,6 +126,40 @@ export class OrchestratorEngine extends EventEmitter {
       this.eventHistory.shift();
     }
 
+    // Auto update internal agent state on event
+    if (fullEvent.agent && fullEvent.agent !== 'orchestrator') {
+      let newState = 'WORKING';
+      if (fullEvent.type === 'spawn' || fullEvent.type === 'thinking') newState = 'ANALYZING';
+      else if (fullEvent.type === 'complete') newState = 'COMPLETED';
+      else if (fullEvent.type === 'error') newState = 'ERROR';
+      else if (fullEvent.type === 'idle') newState = 'IDLE';
+
+      const updates = {
+        state: newState,
+        currentTask: fullEvent.message
+      };
+
+      if (fullEvent.skill) {
+        updates.skillsStatus = {
+          ...(this.state.agents[fullEvent.agent]?.skillsStatus || {}),
+          [fullEvent.skill]: fullEvent.type === 'complete' ? 'completed' : 'active'
+        };
+      }
+
+      await this.updateAgentState(fullEvent.agent, updates);
+    } else if (fullEvent.agent === 'orchestrator') {
+      if (fullEvent.type === 'complete') {
+        this.state.status = 'COMPLETED';
+      } else {
+        this.state.status = 'RUNNING';
+      }
+      if (this.state.orchestrator) {
+        this.state.orchestrator.currentTask = fullEvent.message;
+      }
+      await this.saveState();
+      this.emit('state_change', { state: this.state });
+    }
+
     // Persist to events.jsonl
     try {
       await fs.appendFile(this.eventsPath, JSON.stringify(fullEvent) + '\n', 'utf-8');
