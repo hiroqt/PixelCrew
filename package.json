@@ -1,6 +1,6 @@
 {
   "name": "pixelcrew",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Local multi-agent orchestration framework with an interactive pixel-art tech startup office visual dashboard",
   "type": "module",
   "main": "src/index.js",

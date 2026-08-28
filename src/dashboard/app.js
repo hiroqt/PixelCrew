@@ -830,6 +830,78 @@ function renderReportsList() {
   });
 }
 
+function formatMarkdownText(text) {
+  if (!text) return '';
+  let html = escapeHtml(text);
+
+  // Bold: **text** or __text__
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="report-bold">$1</strong>');
+  html = html.replace(/__(.*?)__/g, '<strong class="report-bold">$1</strong>');
+
+  // Inline Code: `code`
+  html = html.replace(/`([^`]+)`/g, '<code class="report-inline-code">$1</code>');
+
+  // Italic: *text* or _text_
+  html = html.replace(/\*([^*]+)\*/g, '<em class="report-italic">$1</em>');
+  html = html.replace(/_([^_]+)_/g, '<em class="report-italic">$1</em>');
+
+  return html;
+}
+
+function parseFindingItem(finding) {
+  let rawCategory = (finding.category || '').trim();
+  let rawDesc = (finding.description || '').trim();
+
+  let combined = rawDesc;
+  if (!rawDesc || rawDesc === rawCategory) {
+    combined = rawCategory;
+  } else if (rawCategory && rawDesc) {
+    combined = `${rawCategory}: ${rawDesc}`;
+  }
+
+  let badge = 'Finding';
+  let path = null;
+  let description = combined;
+
+  // 1. Extract markdown bold badge if present: **Title (`path`)** or **Title**
+  const boldPrefixMatch = combined.match(/^(\*\*|__)?([^*_`:]+?)(?:\s*\(`?([^`)]+?)`?\))?(\*\*|__)?(?::\s*|\s*-\s*|\s*—\s*)(.*)$/s);
+  if (boldPrefixMatch) {
+    badge = boldPrefixMatch[2].replace(/\*\*/g, '').trim();
+    path = boldPrefixMatch[3] ? boldPrefixMatch[3].trim() : null;
+    description = boldPrefixMatch[5] ? boldPrefixMatch[5].trim() : '';
+  } else {
+    // 2. Check if category itself contains title and path
+    const catMatch = rawCategory.match(/^(\*\*|__)?([^*_`:]+?)(?:\s*\(`?([^`)]+?)`?\))?(\*\*|__)?$/);
+    if (catMatch) {
+      badge = catMatch[2].replace(/\*\*/g, '').trim();
+      path = catMatch[3] ? catMatch[3].trim() : null;
+      description = rawDesc;
+    } else {
+      const colonIndex = combined.indexOf(':');
+      if (colonIndex > 0 && colonIndex < 45) {
+        let rawTitle = combined.substring(0, colonIndex).replace(/\*\*/g, '').replace(/__/g, '').trim();
+        const pathMatch = rawTitle.match(/^(.*?)(?:\s*\(`?([^`)]+?)`?\))$/);
+        if (pathMatch) {
+          badge = pathMatch[1].trim();
+          path = pathMatch[2].trim();
+        } else {
+          badge = rawTitle;
+        }
+        description = combined.substring(colonIndex + 1).trim();
+      }
+    }
+  }
+
+  badge = badge.replace(/\*\*/g, '').replace(/`/g, '').trim();
+  if (!badge) badge = 'Observation';
+
+  return {
+    badge,
+    path,
+    descriptionHtml: formatMarkdownText(description || combined)
+  };
+}
+
 function renderActiveReport() {
   const viewer = document.getElementById('reportsViewer');
   if (!viewer) return;
@@ -840,7 +912,7 @@ function renderActiveReport() {
       <div class="report-empty-state">
         <span style="font-size: 32px;">📋</span>
         <span>SELECT A SPRINT REPORT FROM THE LEFT SIDEBAR</span>
-        <span style="color: var(--text-dim); font-size: 10px;">Audit reports are generated automatically after every completed swarm run.</span>
+        <span style="color: var(--text-dim); font-size: 11px;">Audit reports are generated automatically after every completed swarm run.</span>
       </div>
     `;
     return;
@@ -854,8 +926,8 @@ function renderActiveReport() {
           <div>
             <h3 class="report-hero-title">RAW MARKDOWN SPECIFICATION</h3>
             <div class="report-hero-meta">
-              <span>PROJECT: <strong>${report.project || 'Project'}</strong></span>
-              <span>DATE: <strong>${report.dateFormatted || 'N/A'}</strong></span>
+              <span>PROJECT: <strong>${escapeHtml(report.project || 'Project')}</strong></span>
+              <span>DATE: <strong>${escapeHtml(report.dateFormatted || 'N/A')}</strong></span>
             </div>
           </div>
         </div>
@@ -878,7 +950,7 @@ function renderActiveReport() {
             <span>SQUADS: <strong>${(report.targetAgents || []).map(a => a.toUpperCase()).join(', ')}</strong></span>
           </div>
         </div>
-        <span class="report-item-status" style="font-size: 10px; padding: 4px 8px;">100% COMPLETE</span>
+        <span class="report-item-status">COMPLETED</span>
       </div>
       <div class="report-summary-box">
         <strong>Executive Summary:</strong> The autonomous engineering swarm executed an architectural and quality audit, resolving dependencies and formulating <strong>${report.totalFindings || 0} actionable improvements</strong>.
@@ -907,22 +979,39 @@ function renderActiveReport() {
 
     <!-- SQUAD FINDINGS ACCORDION / CARDS -->
     <div class="report-sections-grid">
-      ${(report.sections || []).map(section => `
-        <div class="report-squad-card" style="border-left: 4px solid ${section.color || '#00f0ff'};">
-          <div class="report-squad-header" style="color: ${section.color || '#00f0ff'};">
-            <span>${section.icon || '💼'}</span>
-            <span>${escapeHtml(section.name || section.agent.toUpperCase())}</span>
+      ${(report.sections || []).map(section => {
+        const squadColor = section.color || '#00f0ff';
+        const findings = section.findings || [];
+        return `
+        <div class="report-squad-card" style="border-left: 4px solid ${squadColor};">
+          <div class="report-squad-header">
+            <div class="report-squad-header-left" style="color: ${squadColor};">
+              <span>${section.icon || '💼'}</span>
+              <span>${escapeHtml(section.name || section.agent.toUpperCase())}</span>
+            </div>
+            <span class="report-squad-count">${findings.length} ${findings.length === 1 ? 'Point' : 'Points'}</span>
           </div>
           <div class="report-findings-list">
-            ${(section.findings || []).map(f => `
-              <div class="report-finding-item">
-                <span class="finding-pill" style="border-color: ${section.color || '#00f0ff'}; color: ${section.color || '#00f0ff'};">${escapeHtml(f.category || 'Finding')}</span>
-                <span class="finding-desc">${escapeHtml(f.description || '')}</span>
+            ${findings.map(f => {
+              const parsed = parseFindingItem(f);
+              return `
+              <div class="report-finding-card">
+                <div class="finding-card-header">
+                  <span class="finding-badge" style="background: rgba(0, 240, 255, 0.08); border-color: ${squadColor}40; color: ${squadColor};">
+                    ${escapeHtml(parsed.badge)}
+                  </span>
+                  ${parsed.path ? `<span class="finding-path-pill"><code>${escapeHtml(parsed.path)}</code></span>` : ''}
+                </div>
+                <div class="finding-body-text">
+                  ${parsed.descriptionHtml}
+                </div>
               </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         </div>
-      `).join('')}
+        `;
+      }).join('')}
     </div>
 
     <!-- ACTION ITEMS CHECKLIST -->
@@ -932,7 +1021,7 @@ function renderActiveReport() {
         ${(report.actionItems || []).map(item => `
           <label class="report-check-item">
             <input type="checkbox" />
-            <span>${escapeHtml(item)}</span>
+            <span>${formatMarkdownText(item)}</span>
           </label>
         `).join('')}
       </div>
