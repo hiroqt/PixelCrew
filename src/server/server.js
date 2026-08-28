@@ -215,12 +215,12 @@ export function createServer(engine, options = {}) {
     else if (filename.endsWith('.svg')) contentType = 'image/svg+xml';
     else if (filename.endsWith('.ico')) contentType = 'image/x-icon';
 
-    // Check project .pixel-dashboard first, then fallback to built-in
-    let filePath = path.join(dashboardDir, filename);
+    // Serve latest dashboard assets from package with fallback to project directory
+    let filePath = path.join(fallbackDashboardDir, filename);
     try {
       await fs.access(filePath);
     } catch {
-      filePath = path.join(fallbackDashboardDir, filename);
+      filePath = path.join(dashboardDir, filename);
       try {
         await fs.access(filePath);
       } catch {

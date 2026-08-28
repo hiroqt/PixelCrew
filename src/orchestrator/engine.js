@@ -725,32 +725,121 @@ export class OrchestratorEngine extends EventEmitter {
   }
 
   /**
-   * Reads and lists all audit reports stored in .pixel-agents/reports/
+   * Reads and lists all audit reports stored in .pixel-agents/reports/ or reports/
    */
   async getReports() {
-    const reportsDir = path.join(this.pixelAgentsDir, 'reports');
-    try {
-      await fs.mkdir(reportsDir, { recursive: true });
-      const files = await fs.readdir(reportsDir);
-      const jsonFiles = files.filter(f => f.endsWith('.json'));
+    const directories = [
+      path.join(this.pixelAgentsDir, 'reports'),
+      path.join(this.targetDir || this.rootDir, 'reports')
+    ];
 
-      const reports = [];
-      for (const file of jsonFiles) {
-        try {
-          const raw = await fs.readFile(path.join(reportsDir, file), 'utf-8');
-          const data = JSON.parse(raw);
-          reports.push(data);
-        } catch {
-          // ignore corrupted files
+    const reportsMap = new Map();
+
+    for (const dir of directories) {
+      try {
+        await fs.mkdir(dir, { recursive: true });
+        const files = await fs.readdir(dir);
+
+        // 1. Process JSON reports first
+        const jsonFiles = files.filter(f => f.endsWith('.json'));
+        for (const file of jsonFiles) {
+          try {
+            const raw = await fs.readFile(path.join(dir, file), 'utf-8');
+            const data = JSON.parse(raw);
+            const id = data.id || file.replace(/\.json$/, '');
+            reportsMap.set(id, { ...data, id });
+          } catch {}
         }
+
+        // 2. Process Markdown reports (including standalone .md files)
+        const mdFiles = files.filter(f => f.endsWith('.md'));
+        for (const file of mdFiles) {
+          const id = file.replace(/\.md$/, '');
+          if (!reportsMap.has(id)) {
+            try {
+              const fullPath = path.join(dir, file);
+              const raw = await fs.readFile(fullPath, 'utf-8');
+              const stats = await fs.stat(fullPath);
+              const parsed = this.parseMarkdownReport(id, raw, stats.mtime);
+              reportsMap.set(id, parsed);
+            } catch {}
+          }
+        }
+      } catch {}
+    }
+
+    const reports = Array.from(reportsMap.values());
+    reports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    return reports;
+  }
+
+  /**
+   * Helper to parse standalone markdown files into structured report objects
+   */
+  parseMarkdownReport(id, markdown, mtime) {
+    const lines = markdown.split('\n');
+    let title = id.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const findings = [];
+    const actionItems = [];
+    const detectedAgents = new Set();
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('# ') && (title === id || title.toLowerCase() === id.replace(/[-_]/g, ' '))) {
+        title = trimmed.replace(/^#\s+/, '');
+      } else if (trimmed.startsWith('- [ ]') || trimmed.startsWith('- [x]')) {
+        actionItems.push(trimmed.replace(/^-\s+\[.\]\s*/, ''));
+      } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || /^\d+\.\s+/.test(trimmed)) {
+        findings.push(trimmed.replace(/^[-*]\s+|\d+\.\s+/, ''));
       }
 
-      // Sort newest first
-      reports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-      return reports;
-    } catch {
-      return [];
+      // Check agent mentions
+      const lower = line.toLowerCase();
+      if (lower.includes('frontend') || lower.includes('ui') || lower.includes('react')) detectedAgents.add('frontend');
+      if (lower.includes('backend') || lower.includes('api')) detectedAgents.add('backend');
+      if (lower.includes('database') || lower.includes('postgres') || lower.includes('prisma') || lower.includes('sql')) detectedAgents.add('database');
+      if (lower.includes('security') || lower.includes('auth')) detectedAgents.add('security');
+      if (lower.includes('performance') || lower.includes('vital') || lower.includes('speed')) detectedAgents.add('performance');
+      if (lower.includes('qa') || lower.includes('test') || lower.includes('playwright')) detectedAgents.add('qa');
     }
+
+    const targetAgents = detectedAgents.size > 0 ? Array.from(detectedAgents) : ['frontend', 'qa'];
+    const timestamp = mtime ? new Date(mtime).getTime() : Date.now();
+    const dateObj = new Date(timestamp);
+    const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+
+    // Group findings into clean sections
+    const sections = [
+      {
+        agent: targetAgents[0] || 'frontend',
+        name: `${(targetAgents[0] || 'Team').toUpperCase()} Findings`,
+        icon: '📋',
+        color: '#00f0ff',
+        findings: (findings.length > 0 ? findings : ['Report recorded in markdown']).slice(0, 10).map((f, i) => {
+          const parts = f.split(':');
+          return {
+            id: `item-${i + 1}`,
+            category: parts.length > 1 ? parts[0].trim() : 'Observation',
+            description: parts.length > 1 ? parts.slice(1).join(':').trim() : f
+          };
+        })
+      }
+    ];
+
+    return {
+      id,
+      timestamp,
+      dateFormatted: `${dateStr}, ${timeStr}`,
+      project: this.config?.project || path.basename(this.targetDir || this.rootDir),
+      objective: title,
+      status: 'COMPLETED',
+      targetAgents,
+      totalFindings: findings.length || 1,
+      sections,
+      actionItems: actionItems.length > 0 ? actionItems : (findings.length > 0 ? findings.slice(0, 5) : ['Review report findings']),
+      markdown
+    };
   }
 
   /**
