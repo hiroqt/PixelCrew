@@ -22,27 +22,29 @@ npx pixelcrew init --yes
 
 ### Step 2: Stream Activity as You Work
 
-As you analyze files, run tools, or write code, emit events corresponding to the specialized role (`frontend`, `backend`, `database`, `security`, `performance`, `qa`):
+As you analyze files, run tools, or write code, emit events corresponding to the specialized role (`frontend`, `backend`, `database`, `security`, `performance`, `qa`). Use `pixelcrew emit` (or `npx --prefer-offline pixelcrew emit`):
 
 #### 1. When Starting / Thinking:
 ```bash
-npx pixelcrew emit --agent frontend --type thinking --message "Analyzing React components and routing structure"
+pixelcrew emit --agent frontend --type thinking --message "Analyzing React components and routing structure"
 ```
 
 #### 2. When Reading / Modifying Files or Using Tools:
 ```bash
-npx pixelcrew emit --agent frontend --type tool --skill nextjs --message "Inspecting src/app/page.tsx for rendering bottlenecks"
+pixelcrew emit --agent frontend --type tool --skill nextjs --message "Inspecting src/app/page.tsx for rendering bottlenecks"
 ```
 
 #### 3. When Applying a Skill:
 ```bash
-npx pixelcrew emit --agent frontend --type skill --skill tailwind --message "Refactoring CSS grid and responsive layout"
+pixelcrew emit --agent frontend --type skill --skill tailwind --message "Refactoring CSS grid and responsive layout"
 ```
 
 #### 4. When Completing the Task:
 ```bash
-npx pixelcrew emit --agent frontend --type complete --message "Frontend analysis complete: identified 3 component optimizations"
+pixelcrew emit --agent frontend --type complete --message "Frontend analysis complete: identified 3 component optimizations"
 ```
+
+> **💡 Real-Time Sync Note:** You can also append event JSON directly to `.pixel-agents/events.jsonl`. The dashboard's live file watcher automatically detects new lines and broadcasts them over SSE in real-time.
 
 ---
 
