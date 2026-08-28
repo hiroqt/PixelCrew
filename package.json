@@ -5,9 +5,9 @@
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "pixelcrew": "./bin/pixel-agents.js",
-    "pixel-crew": "./bin/pixel-agents.js",
-    "pixel-agents": "./bin/pixel-agents.js"
+    "pixelcrew": "bin/pixel-agents.js",
+    "pixel-crew": "bin/pixel-agents.js",
+    "pixel-agents": "bin/pixel-agents.js"
   },
   "files": [
     "bin/",
@@ -42,6 +42,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hiroqt/PixelCrew.git"
+    "url": "git+https://github.com/hiroqt/PixelCrew.git"
   }
 }
