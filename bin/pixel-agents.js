@@ -242,8 +242,11 @@ async function main() {
         console.log(`\x1b[90m${time}\x1b[0m  \x1b[36m${agentPadded}\x1b[0m → ${event.message}`);
       });
 
-      await engine.submitTask(taskPrompt);
-      console.log('\n\x1b[32m✓ Task completed by agent swarm.\x1b[0m\n');
+      const report = await engine.submitTask(taskPrompt);
+      if (report) {
+        console.log('\n\x1b[36m' + report + '\x1b[0m\n');
+      }
+      console.log('\x1b[32m✓ Sprint audit completed successfully.\x1b[0m\n');
       break;
     }
 
