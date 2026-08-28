@@ -261,46 +261,6 @@ Copy the `.agents/skills/` directory into your tool's native skills folder:
 
 ---
 
-## 📡 Live Telemetry & Event Streaming API
-
-PixelCrew provides multiple interfaces to emit events into the live visual canvas from shell scripts, Git hooks, CI/CD runners, or external agent tools:
-
-### Option 1: Via CLI Emit Command
-```bash
-npx github:hiroqt/PixelCrew emit \
-  --agent database \
-  --type tool \
-  --skill database-engineering \
-  --message "Adding composite index on orders(user_id, created_at)"
-```
-
-### Option 2: Via HTTP REST Endpoint
-```bash
-curl -X POST http://localhost:4747/api/emit \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent": "frontend",
-    "type": "skill",
-    "skill": "frontend-engineering",
-    "message": "Refactored checkout button to use fluid clamp spacing"
-  }'
-```
-
-### Option 3: Event Payload Schema
-```typescript
-interface AgentEvent {
-  id?: string;
-  timestamp: number;
-  agent: "orchestrator" | "frontend" | "backend" | "database" | "security" | "performance" | "qa";
-  type: "spawn" | "thinking" | "tool" | "skill" | "progress" | "complete" | "error";
-  message: string;
-  skill?: string;
-  metadata?: Record<string, unknown>;
-}
-```
-
----
-
 ## 📂 Workspace Manifest & Architecture
 
 Initializing PixelCrew creates a self-contained `.pixel-agents/` control directory in your repository:
@@ -318,47 +278,6 @@ your-project/
 ├── DESIGN.md                    # Visual tokens, canvas coordinate engine & audio specs
 ├── PRODUCT.md                   # Product vision, technical roadmap, and architectural goals
 └── README.md
-```
-
-### `config.json` Specimen:
-```json
-{
-  "version": "0.1.0",
-  "project": "my-app",
-  "orchestrator": {
-    "enabled": true,
-    "maxConcurrentAgents": 4,
-    "autoDecompose": true,
-    "logEvents": true
-  },
-  "agents": {
-    "frontend": {
-      "name": "Frontend Agent",
-      "sprite": "frontend",
-      "color": "#00f0ff",
-      "skills": ["frontend-engineering", "codebase-intelligence"],
-      "permissions": {
-        "read": ["src/components/**", "src/app/**"],
-        "write": ["src/components/**"]
-      }
-    },
-    "database": {
-      "name": "Database Agent",
-      "sprite": "database",
-      "color": "#ffd700",
-      "skills": ["database-engineering"],
-      "permissions": {
-        "read": ["prisma/**", "src/db/**"],
-        "write": ["prisma/**"]
-      }
-    }
-  },
-  "dashboard": {
-    "port": 4747,
-    "crtEffect": true,
-    "soundEffects": true
-  }
-}
 ```
 
 ---
@@ -418,5 +337,5 @@ PixelCrew is open-source software licensed under the **[Apache License, Version 
 ---
 
 <p align="center">
-  Crafted with precision by <strong>Arnel</strong> (<a href="https://github.com/hiroqt">@hiroqt</a>) & the <strong>Antigravity Swarm</strong>.
+  Crafted with precision by <strong>Arnel</strong> (<a href="https://github.com/hiroqt">@hiroqt</a>).
 </p>

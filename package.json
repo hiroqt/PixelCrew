@@ -35,7 +35,7 @@
     "startup-office",
     "npx"
   ],
-  "author": "Arnel & Antigravity Swarm",
+  "author": "Arnel (@hiroqt)",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18.0.0"

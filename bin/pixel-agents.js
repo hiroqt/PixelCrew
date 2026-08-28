@@ -70,17 +70,25 @@ async function resolveDaemonUrl(rootDir) {
     const raw = await fs.readFile(daemonPath, 'utf-8');
     const info = JSON.parse(raw);
     if (info?.url) {
-      const res = await fetch(`${info.url}/api/state`, { signal: AbortSignal.timeout(600) });
-      if (res.ok) return info.url;
+      const res = await fetch(`${info.url}/api/info`, { signal: AbortSignal.timeout(600) });
+      if (res.ok) {
+        const serverInfo = await res.json();
+        if (!serverInfo.rootDir || serverInfo.rootDir === rootDir) {
+          return info.url;
+        }
+      }
     }
   } catch {}
 
-  // 2. Scan fallback ports 4747..4755
+  // 2. Scan fallback ports 4747..4755 and verify rootDir
   for (let port = 4747; port <= 4755; port++) {
     try {
-      const res = await fetch(`http://localhost:${port}/api/state`, { signal: AbortSignal.timeout(300) });
+      const res = await fetch(`http://localhost:${port}/api/info`, { signal: AbortSignal.timeout(300) });
       if (res.ok) {
-        return `http://localhost:${port}`;
+        const serverInfo = await res.json();
+        if (serverInfo.rootDir && serverInfo.rootDir === rootDir) {
+          return `http://localhost:${port}`;
+        }
       }
     } catch {}
   }

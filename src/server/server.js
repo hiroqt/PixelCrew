@@ -110,6 +110,14 @@ export function createServer(engine, options = {}) {
     };
 
     // API Routes
+    if (pathname === '/api/info' && req.method === 'GET') {
+      return sendJson(200, {
+        rootDir: engine.rootDir,
+        project: engine.getConfig()?.project || path.basename(engine.rootDir),
+        version: '0.1.0'
+      });
+    }
+
     if (pathname === '/api/state' && req.method === 'GET') {
       return sendJson(200, engine.getState());
     }
