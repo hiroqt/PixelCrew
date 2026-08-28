@@ -62,6 +62,41 @@ function openBrowser(url) {
   }
 }
 
+function startServerWithPortFallback(server, initialPort, maxTries = 20) {
+  return new Promise((resolve, reject) => {
+    let currentPort = initialPort;
+    let attempts = 0;
+
+    function tryListen() {
+      server.removeAllListeners('error');
+      server.removeAllListeners('listening');
+
+      server.once('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          attempts++;
+          if (attempts >= maxTries) {
+            reject(new Error(`Could not find an available port after ${maxTries} attempts (starting at port ${initialPort}).`));
+            return;
+          }
+          currentPort++;
+          console.log(`\x1b[33mPort ${currentPort - 1} is already in use. Trying next port ${currentPort}...\x1b[0m`);
+          tryListen();
+        } else {
+          reject(err);
+        }
+      });
+
+      server.once('listening', () => {
+        resolve(currentPort);
+      });
+
+      server.listen(currentPort);
+    }
+
+    tryListen();
+  });
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const command = args[0] || 'help';
@@ -124,13 +159,14 @@ async function main() {
       const engine = new OrchestratorEngine(rootDir);
       await engine.initialize();
 
-      const port = options.port || engine.getConfig()?.dashboard?.port || 4747;
+      const requestedPort = options.port || engine.getConfig()?.dashboard?.port || 4747;
       const server = createServer(engine, options);
 
-      server.listen(port, () => {
-        const url = `http://localhost:${port}`;
+      try {
+        const boundPort = await startServerWithPortFallback(server, requestedPort);
+        const url = `http://localhost:${boundPort}`;
         console.log(BANNER);
-        console.log(`\n\x1b[32m\x1b[1m● Pixel Agents Swarm Server Active\x1b[0m`);
+        console.log(`\n\x1b[32m\x1b[1m● PixelCrew Swarm Server Active\x1b[0m`);
         console.log(`  Visual Dashboard:  \x1b[36m\x1b[4m${url}\x1b[0m`);
         console.log(`  Event Stream:      \x1b[36m${url}/api/events\x1b[0m\n`);
         console.log('\x1b[90mPress Ctrl+C to stop.\x1b[0m\n');
@@ -142,12 +178,15 @@ async function main() {
         // Auto trigger demo if command was 'demo'
         if (command === 'demo') {
           setTimeout(() => {
-            const prompt = 'Analyze CRM customer search bottlenecks & optimize Postgres Prisma queries with responsive UI';
+            const prompt = `Optimize ${engine.getConfig()?.project || 'app'} APIs, database queries & deploy responsive dashboard`;
             console.log(`\x1b[33m[DEMO]\x1b[0m Dispatching swarm mission: "${prompt}"\n`);
             engine.submitTask(prompt).catch(console.error);
           }, 1200);
         }
-      });
+      } catch (err) {
+        console.error(`\x1b[31mFailed to start server:\x1b[0m`, err.message);
+        process.exit(1);
+      }
 
       // Stream terminal events as they happen
       engine.on('agent_event', (event) => {

@@ -140,7 +140,7 @@ test('Server handles routes and event broadcasting', async () => {
       on() {}
     });
     assert.equal(resHtml.statusCode, 200);
-    assert.ok(resHtml.body.toString().includes('PIXEL CORPS'));
+    assert.ok(resHtml.body.toString().includes('PIXELCREW'));
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
