@@ -190,6 +190,14 @@ test('analyzeCodebase detects tech stack and adapts permissions', async () => {
     assert.ok(config.agents.frontend.skills.includes('tailwind'));
     assert.ok(config.agents.database.skills.includes('prisma'));
     assert.ok(config.agents.database.skills.includes('postgresql'));
+
+    // Test generic template name fallback (e.g. next_temp -> folder name)
+    await fs.writeFile(
+      path.join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'next_temp' }, null, 2)
+    );
+    const profileGeneric = await analyzeCodebase(tmpDir);
+    assert.equal(profileGeneric.projectName, path.basename(tmpDir));
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }

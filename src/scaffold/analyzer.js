@@ -66,9 +66,21 @@ export async function analyzeCodebase(targetDir = process.cwd()) {
   }
 
   // 2. Node.js & JavaScript/TypeScript Ecosystem Detection
+  const dirName = path.basename(targetDir);
+  const GENERIC_NAMES = new Set([
+    'next_temp', 'next-temp', 'nextjs-temp', 'my-app', 'next-app', 'react-app',
+    'app', 'template', 'starter', 'boilerplate', 'untitled', 'temp', 'tmp', 'project',
+    'create-next-app', 'vite-project', 'frontend', 'backend', 'demo', 'sample'
+  ]);
+
   const pkg = await readJson('package.json');
+  if (pkg && pkg.name && !GENERIC_NAMES.has(pkg.name.toLowerCase())) {
+    profile.projectName = pkg.name;
+  } else {
+    profile.projectName = dirName;
+  }
+
   if (pkg) {
-    profile.projectName = pkg.name || profile.projectName;
     const allDeps = {
       ...(pkg.dependencies || {}),
       ...(pkg.devDependencies || {})
