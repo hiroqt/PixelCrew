@@ -1,10 +1,12 @@
 {
-  "name": "pixel-agents",
+  "name": "pixelcrew",
   "version": "0.1.0",
   "description": "Local multi-agent orchestration framework with an interactive pixel-art tech startup office visual dashboard",
   "type": "module",
   "main": "src/index.js",
   "bin": {
+    "pixelcrew": "./bin/pixel-agents.js",
+    "pixel-crew": "./bin/pixel-agents.js",
     "pixel-agents": "./bin/pixel-agents.js"
   },
   "files": [

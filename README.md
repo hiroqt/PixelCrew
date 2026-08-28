@@ -1,11 +1,11 @@
-# Pixel Agents
+# PixelCrew
 
 > **Local Multi-Agent Orchestration Framework & Retro Pixel-Art Visual Dashboard**  
 > Turn any project into an orchestrated AI workspace with a single `npx` command.
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│  PIXEL AGENTS                                    ● RUNNING   │
+│  PIXELCREW HQ                                    ● RUNNING   │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │                  ┌─────────────────┐                         │
@@ -48,15 +48,17 @@
 Run inside any project directory to initialize and launch:
 
 ```bash
-# 1. Initialize Pixel Agents in your repository (adapts automatically to your stack)
-npx pixel-agents init
+# 1. Initialize PixelCrew in your repository (adapts automatically to your stack)
+npx github:hiroqt/PixelCrew init
 
 # 2. Start the orchestrator & visual dashboard
-npx pixel-agents start
+npx github:hiroqt/PixelCrew start
 
 # 3. (Optional) Run an interactive multi-agent demo immediately
-npx pixel-agents demo
+npx github:hiroqt/PixelCrew demo
 ```
+
+*(If installed via npm, you can also use the shorthand: `npx pixelcrew init` & `npx pixelcrew start`)*
 
 The visual dashboard will automatically open at:  
 **`http://localhost:4747`**
@@ -65,7 +67,7 @@ The visual dashboard will automatically open at:
 
 ## Key Features
 
-- **Automatic Codebase Context Adaptation**: When initialized in an existing repository, Pixel Agents scans your `package.json`, frameworks, database/ORMs (Prisma, Drizzle, PostgreSQL, MongoDB), API architecture, and test runners to automatically tailor agent roles, skills, and filesystem permissions.
+- **Automatic Codebase Context Adaptation**: When initialized in an existing repository, PixelCrew scans your `package.json`, frameworks, database/ORMs (Prisma, Drizzle, PostgreSQL, MongoDB), API architecture, and test runners to automatically tailor agent roles, skills, and filesystem permissions.
 - **Zero-Dependency Core & Dashboard**: Pure Node.js ESM orchestrator with lightweight vanilla HTML5, Canvas, and CSS. No heavy external runtime dependencies, instant startup.
 - **Pixel-Art Aesthetic & CRT Shader**: 8-bit retro arcade styling, procedural canvas sprite animations, live scanlines toggle, and retro 8-bit synth sound effects (Web Audio API).
 - **Multi-Agent State Machine**: Visual state tracking for every agent:
@@ -79,7 +81,7 @@ The visual dashboard will automatically open at:
 
 ## About the Skills System
 
-In Pixel Agents, **Agents are not hardcoded personas—they are capability executors powered by modular skills**.
+In PixelCrew, **Agents are not hardcoded personas—they are capability executors powered by modular skills**.
 
 Instead of coupling logic directly inside agent prompts, capabilities are structured as standalone markdown instruction files located in `.pixel-agents/skills/` (and `.agents/skills/`). Each skill teaches an agent specific engineering patterns, verification checklists, and tool constraints.
 
@@ -113,7 +115,7 @@ To equip any repository with the skills engine:
 cd /path/to/my-project
 
 # 2. Run the initialization command (automatically detects stack & generates tailored skills)
-npx pixel-agents init
+npx github:hiroqt/PixelCrew init
 
 # 3. Add custom skills anytime by placing new markdown files in .pixel-agents/skills/
 # Example: .pixel-agents/skills/stripe-payments.md
@@ -121,25 +123,25 @@ npx pixel-agents init
 
 ### Method 2: Global Antigravity / Gemini Plugin Installation
 
-To install Pixel Agents as a **global skill** available across every repository in your Antigravity IDE:
+To install PixelCrew as a **global skill** available across every repository in your Antigravity IDE:
 
 ```bash
 # 1. Create the global plugin directory
 mkdir -p ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents
 
 # 2. Copy the plugin manifest and skill instructions
-cp /path/to/pixel-agents/plugins/plugin.json ~/.gemini/config/plugins/pixel-agents/plugin.json
-cp /path/to/pixel-agents/.agents/skills/pixel-agents/SKILL.md ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents/SKILL.md
+cp /path/to/PixelCrew/plugins/plugin.json ~/.gemini/config/plugins/pixel-agents/plugin.json
+cp /path/to/PixelCrew/.agents/skills/pixel-agents/SKILL.md ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents/SKILL.md
 ```
 
-Once installed globally, you can invoke Pixel Agents in any project simply by prompting:
+Once installed globally, you can invoke PixelCrew in any project simply by prompting:
 > *"Use pixel-agents to scan this codebase and orchestrate the feature sprint."*
 
 ---
 
 ## Project Structure Scaffolding
 
-Running `npx pixel-agents init` creates the following directory structure in your repository:
+Running `npx github:hiroqt/PixelCrew init` creates the following directory structure in your repository:
 
 ```text
 my-project/
@@ -185,15 +187,15 @@ my-project/
 
 | Command | Description | Example |
 | :--- | :--- | :--- |
-| `npx pixel-agents init` | Scaffolds & adapts `.pixel-agents/` to current codebase | `npx pixel-agents init --yes` |
-| `npx pixel-agents analyze` | Scans repository and prints detected architecture profile | `npx pixel-agents analyze` |
-| `npx pixel-agents start` | Launches orchestrator daemon, SSE stream & dashboard | `npx pixel-agents start --port 4747` |
-| `npx pixel-agents dashboard` | Opens or serves the web dashboard UI | `npx pixel-agents dashboard` |
-| `npx pixel-agents demo` | Boots swarm and dispatches a full simulated multi-agent mission | `npx pixel-agents demo` |
-| `npx pixel-agents task "<msg>"` | Dispatches a new task to the running swarm or runs locally | `npx pixel-agents task "Fix slow queries"` |
-| `npx pixel-agents emit` | Emits an event to the live dashboard stream | `npx pixel-agents emit --agent db --message "Done"` |
-| `npx pixel-agents status` | Prints ASCII summary of current swarm state | `npx pixel-agents status` |
-| `npx pixel-agents help` | Displays full CLI manual and available flags | `npx pixel-agents help` |
+| `npx github:hiroqt/PixelCrew init` | Scaffolds & adapts `.pixel-agents/` to current codebase | `npx github:hiroqt/PixelCrew init --yes` |
+| `npx github:hiroqt/PixelCrew analyze` | Scans repository and prints detected architecture profile | `npx github:hiroqt/PixelCrew analyze` |
+| `npx github:hiroqt/PixelCrew start` | Launches orchestrator daemon, SSE stream & dashboard | `npx github:hiroqt/PixelCrew start --port 4747` |
+| `npx github:hiroqt/PixelCrew dashboard` | Opens or serves the web dashboard UI | `npx github:hiroqt/PixelCrew dashboard` |
+| `npx github:hiroqt/PixelCrew demo` | Boots swarm and dispatches a full simulated multi-agent mission | `npx github:hiroqt/PixelCrew demo` |
+| `npx github:hiroqt/PixelCrew task "<msg>"` | Dispatches a new task to the running swarm or runs locally | `npx github:hiroqt/PixelCrew task "Fix slow queries"` |
+| `npx github:hiroqt/PixelCrew emit` | Emits an event to the live dashboard stream | `npx github:hiroqt/PixelCrew emit --agent db --message "Done"` |
+| `npx github:hiroqt/PixelCrew status` | Prints ASCII summary of current swarm state | `npx github:hiroqt/PixelCrew status` |
+| `npx github:hiroqt/PixelCrew help` | Displays full CLI manual and available flags | `npx github:hiroqt/PixelCrew help` |
 
 ---
 
@@ -270,7 +272,7 @@ The dashboard listens to structured `AgentEvent` payloads. You can stream events
 
 ### Via CLI:
 ```bash
-npx pixel-agents emit \
+npx github:hiroqt/PixelCrew emit \
   --agent database \
   --type tool \
   --skill prisma \
@@ -340,7 +342,7 @@ We warmly welcome contributions from the open-source community!
 - **Contribute New Skills**: Add new domain-specific markdown guides to `.pixel-agents/skills/` (e.g. GraphQL, Supabase, Redis, Rust).
 - **Add Agent Personas**: Create new specialized agent profiles for the startup office (e.g. Data Scientist, Technical Writer, Cloud Architect).
 - **Enhance the Dashboard**: Improve procedural canvas animations, sound synthesizers, or add custom office customization packs.
-- **Report Bugs & Suggest Features**: Open an issue on GitHub with reproduction steps and logs.
+- **Report Bugs & Suggest Features**: Open an issue on GitHub at [github.com/hiroqt/PixelCrew/issues](https://github.com/hiroqt/PixelCrew/issues).
 
 For detailed branch naming rules, conventional commit formats, and PR review standards, please read [CONTRIBUTING.md](CONTRIBUTING.md).
 
