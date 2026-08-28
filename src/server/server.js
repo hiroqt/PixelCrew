@@ -34,7 +34,7 @@ export function createServer(engine, options = {}) {
     }
   });
 
-  // Watch events.jsonl for direct external CLI writes (e.g. from Antigravity IDE)
+  // Watch events.jsonl for direct external CLI / IDE writes
   let lastKnownEventCount = 0;
   if (engine.eventsPath) {
     try {
@@ -44,7 +44,7 @@ export function createServer(engine, options = {}) {
       lastKnownEventCount = 0;
     }
 
-    fsSync.watchFile(engine.eventsPath, { interval: 300 }, async () => {
+    fsSync.watchFile(engine.eventsPath, { interval: 150 }, async () => {
       try {
         const content = await fs.readFile(engine.eventsPath, 'utf-8');
         const lines = content.trim().split('\n').filter(Boolean);
@@ -54,13 +54,32 @@ export function createServer(engine, options = {}) {
           for (const line of newLines) {
             try {
               const event = JSON.parse(line);
-              // Broadcast over SSE
+              // Update in-memory event history
+              engine.eventHistory.push(event);
+              if (engine.eventHistory.length > 200) engine.eventHistory.shift();
+
+              // Broadcast over SSE immediately
               const payload = `event: agent_event\ndata: ${JSON.stringify(event)}\n\n`;
               for (const client of sseClients) {
                 try { client.write(payload); } catch {}
               }
             } catch {}
           }
+        }
+      } catch {}
+    });
+  }
+
+  // Watch state.json for direct external updates
+  if (engine.statePath) {
+    fsSync.watchFile(engine.statePath, { interval: 150 }, async () => {
+      try {
+        const content = await fs.readFile(engine.statePath, 'utf-8');
+        const state = JSON.parse(content);
+        engine.state = state;
+        const payload = `event: state_change\ndata: ${JSON.stringify({ state })}\n\n`;
+        for (const client of sseClients) {
+          try { client.write(payload); } catch {}
         }
       } catch {}
     });
