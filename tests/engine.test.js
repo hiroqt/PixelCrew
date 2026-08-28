@@ -202,3 +202,70 @@ test('analyzeCodebase detects tech stack and adapts permissions', async () => {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('OrchestratorEngine compiles, persists, and serves audit reports', async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pixel-agents-reports-'));
+  try {
+    await initializeProject(tmpDir, { name: 'report-test-app', yes: true });
+
+    const engine = new OrchestratorEngine(tmpDir);
+    await engine.initialize();
+
+    // 1. Test compileAuditReport & saveAuditReport
+    const reportData = engine.compileAuditReport(
+      'Optimize database queries & refine checkout UI',
+      ['frontend', 'database'],
+      {
+        frontend: ['Performance: Reduced bundle size with dynamic imports'],
+        database: ['Index: Added B-Tree composite index on users(email, created_at)']
+      }
+    );
+
+    assert.ok(reportData.id);
+    assert.equal(reportData.project, 'report-test-app');
+    assert.equal(reportData.totalFindings, 2);
+    assert.equal(reportData.sections.length, 2);
+    assert.ok(reportData.markdown.includes('PixelCrew Swarm Audit Report'));
+
+    await engine.saveAuditReport(reportData);
+
+    // 2. Test getReports and getReportById
+    const allReports = await engine.getReports();
+    assert.equal(allReports.length, 1);
+    assert.equal(allReports[0].id, reportData.id);
+
+    const fetchedReport = await engine.getReportById(reportData.id);
+    assert.ok(fetchedReport);
+    assert.equal(fetchedReport.objective, 'Optimize database queries & refine checkout UI');
+
+    // 3. Test Server /api/reports endpoint
+    const server = createServer(engine);
+    const dispatch = (req) => new Promise((resolve) => {
+      const res = {
+        statusCode: 200,
+        headers: {},
+        body: '',
+        setHeader(k, v) { this.headers[k] = v; },
+        writeHead(code, headers) { this.statusCode = code; if (headers) Object.assign(this.headers, headers); },
+        end(chunk) {
+          if (chunk) this.body = chunk;
+          resolve(this);
+        }
+      };
+      server.emit('request', req, res);
+    });
+
+    const resReports = await dispatch({
+      method: 'GET',
+      url: '/api/reports',
+      headers: { host: 'localhost' },
+      on() {}
+    });
+    assert.equal(resReports.statusCode, 200);
+    const parsedReports = JSON.parse(resReports.body);
+    assert.equal(parsedReports.reports.length, 1);
+    assert.equal(parsedReports.reports[0].id, reportData.id);
+  } finally {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  }
+});

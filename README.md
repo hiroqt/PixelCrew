@@ -63,13 +63,13 @@ No global installations or complex configuration required. Run directly in your 
 
 ```bash
 # 1. Initialize and adapt PixelCrew to your project stack
-npx github:hiroqt/PixelCrew init
+npx pixelcrew init
 
 # 2. Launch the orchestrator daemon and real-time visual office
-npx github:hiroqt/PixelCrew start
+npx pixelcrew start
 
 # 3. (Optional) Run an instant multi-agent simulated sprint demo
-npx github:hiroqt/PixelCrew demo
+npx pixelcrew demo
 ```
 
 The interactive dashboard opens automatically at:  
@@ -240,15 +240,15 @@ Copy the `.agents/skills/` directory into your tool's native skills folder:
 
 | Command | Action | Example |
 | :--- | :--- | :--- |
-| `npx github:hiroqt/PixelCrew init` | Scaffolds `.pixel-agents/` and adapts to repository | `npx github:hiroqt/PixelCrew init --yes` |
-| `npx github:hiroqt/PixelCrew start` | Launches orchestrator, SSE stream, and web dashboard | `npx github:hiroqt/PixelCrew start --port 4747` |
-| `npx github:hiroqt/PixelCrew analyze` | Prints detected frameworks, database, ORM, and test stack | `npx github:hiroqt/PixelCrew analyze` |
-| `npx github:hiroqt/PixelCrew demo` | Launches an interactive 6-agent simulated sprint | `npx github:hiroqt/PixelCrew demo` |
-| `npx github:hiroqt/PixelCrew task "<text>"` | Dispatches a direct objective to the running agent swarm | `npx github:hiroqt/PixelCrew task "Optimize SQL queries"` |
-| `npx github:hiroqt/PixelCrew emit [flags]` | Emits a custom telemetry event into the stream | `npx github:hiroqt/PixelCrew emit --agent db --message "Done"` |
-| `npx github:hiroqt/PixelCrew dashboard` | Opens or serves the standalone Floor 42 dashboard UI | `npx github:hiroqt/PixelCrew dashboard` |
-| `npx github:hiroqt/PixelCrew status` | Prints ASCII summary of swarm states and active sprints | `npx github:hiroqt/PixelCrew status` |
-| `npx github:hiroqt/PixelCrew help` | Displays full CLI manual and flag details | `npx github:hiroqt/PixelCrew help` |
+| `npx pixelcrew init` | Scaffolds `.pixel-agents/` and adapts to repository | `npx pixelcrew init --yes` |
+| `npx pixelcrew start` | Launches orchestrator, SSE stream, and web dashboard | `npx pixelcrew start --port 4747` |
+| `npx pixelcrew analyze` | Prints detected frameworks, database, ORM, and test stack | `npx pixelcrew analyze` |
+| `npx pixelcrew demo` | Launches an interactive 6-agent simulated sprint | `npx pixelcrew demo` |
+| `npx pixelcrew task "<text>"` | Dispatches a direct objective to the running agent swarm | `npx pixelcrew task "Optimize SQL queries"` |
+| `npx pixelcrew emit [flags]` | Emits a custom telemetry event into the stream | `npx pixelcrew emit --agent db --message "Done"` |
+| `npx pixelcrew dashboard` | Opens or serves the standalone Floor 42 dashboard UI | `npx pixelcrew dashboard` |
+| `npx pixelcrew status` | Prints ASCII summary of swarm states and active sprints | `npx pixelcrew status` |
+| `npx pixelcrew help` | Displays full CLI manual and flag details | `npx pixelcrew help` |
 
 ### CLI Options & Flags:
 - `--port <number>`: Dashboard port (default: `4747`)

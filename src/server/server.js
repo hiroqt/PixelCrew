@@ -169,6 +169,34 @@ export function createServer(engine, options = {}) {
       return sendJson(200, { status: 'reset' });
     }
 
+    if (pathname === '/api/reports' && req.method === 'GET') {
+      const reports = await engine.getReports();
+      return sendJson(200, { reports });
+    }
+
+    if (pathname.startsWith('/api/reports/') && req.method === 'GET') {
+      const reportId = pathname.replace('/api/reports/', '');
+      const report = await engine.getReportById(reportId);
+      if (!report) {
+        return sendJson(404, { error: 'Report not found' });
+      }
+      return sendJson(200, { report });
+    }
+
+    if (pathname === '/api/reports' && req.method === 'POST') {
+      const body = await readBody();
+      if (!body.objective && !body.markdown) {
+        return sendJson(400, { error: 'Missing report objective or markdown' });
+      }
+      const reportData = engine.compileAuditReport(
+        body.objective || 'Manual Audit',
+        body.targetAgents || ['frontend', 'backend', 'database'],
+        body.findings || {}
+      );
+      await engine.saveAuditReport(reportData);
+      return sendJson(201, { status: 'created', report: reportData });
+    }
+
     if (pathname === '/api/demo' && req.method === 'POST') {
       const demoPrompt = 'Analyze CRM customer search bottlenecks & optimize Postgres Prisma queries with responsive UI';
       engine.submitTask(demoPrompt).catch(console.error);

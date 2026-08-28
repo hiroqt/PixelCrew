@@ -50,6 +50,9 @@
       </div>
 
       <div class="header-right">
+        <button class="pixel-btn btn-sm btn-info" id="btnReportsToggle" title="Open Sprint Audit Reports History [R]">
+          <span>📋</span> REPORTS (<span id="reportsCountBadge">0</span>)
+        </button>
         <button class="pixel-btn btn-sm" id="btnAudioToggle" title="Toggle 8-bit Audio SFX">
           <span id="audioIcon">🔊</span> SFX
         </button>
@@ -213,10 +216,52 @@
       </div>
     </div>
 
+    <!-- SPRINT AUDIT REPORTS & HISTORY MODAL / DRAWER -->
+    <div class="pixel-modal-backdrop" id="reportsModal">
+      <div class="pixel-modal-card reports-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-agent-icon">📋</span>
+            <h2 class="modal-agent-name" style="color: var(--color-cyan);">SPRINT AUDIT REPORTS & HISTORY</h2>
+          </div>
+          <div class="reports-header-actions">
+            <button class="pixel-btn btn-xs" id="btnToggleRawView" title="Toggle between visual card and raw markdown">
+              <span>👁️</span> <span id="toggleRawLabel">RAW MARKDOWN</span>
+            </button>
+            <button class="pixel-btn btn-xs" id="btnCopyReportMd" title="Copy markdown to clipboard">
+              <span>📄</span> COPY MD
+            </button>
+            <button class="pixel-btn btn-xs" id="btnDownloadReport" title="Download report as .md file">
+              <span>💾</span> DOWNLOAD
+            </button>
+            <button class="pixel-btn btn-sm btn-warn" id="btnCloseReportsModal">✕</button>
+          </div>
+        </div>
+        <div class="reports-modal-body">
+          <!-- SPRINT HISTORY SIDEBAR -->
+          <aside class="reports-sidebar">
+            <div class="reports-search-box">
+              <input type="text" class="pixel-input reports-search-input" id="reportsSearch" placeholder="Search past sprint reports..." />
+            </div>
+            <div class="reports-history-list" id="reportsHistoryList">
+              <!-- Populated by app.js -->
+            </div>
+          </aside>
+          
+          <!-- ACTIVE REPORT DETAIL VIEWER -->
+          <main class="reports-viewer" id="reportsViewer">
+            <!-- Populated dynamically -->
+          </main>
+        </div>
+      </div>
+    </div>
+
     <!-- ARCADE / OFFICE FOOTER -->
     <footer class="arcade-footer">
       <div class="footer-left">
-        <span>PRESS [1..6] TO OPEN EMPLOYEE PROFILE</span>
+        <span>PRESS [1..6] EMPLOYEE PROFILE</span>
+        <span>•</span>
+        <span>[R] SPRINT REPORTS</span>
         <span>•</span>
         <span>[SPACE] SPRINT DEMO</span>
       </div>

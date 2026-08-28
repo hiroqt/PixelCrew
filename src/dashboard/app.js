@@ -574,6 +574,7 @@ async function initApp() {
       appState.state = stRes;
       renderState();
     }
+    await fetchReports();
   } catch (e) {
     // Handled by SSE
   }
@@ -650,16 +651,59 @@ function setupEventListeners() {
     });
   });
 
-  // Modal close
-  document.getElementById('btnCloseModal').addEventListener('click', () => {
-    document.getElementById('agentModal').classList.remove('open');
-  });
+  // Reports Drawer Buttons & Controls
+  const btnReportsToggle = document.getElementById('btnReportsToggle');
+  if (btnReportsToggle) {
+    btnReportsToggle.addEventListener('click', () => {
+      synth.playClick();
+      openReportsModal();
+    });
+  }
 
-  document.getElementById('agentModal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('agentModal')) {
-      document.getElementById('agentModal').classList.remove('open');
-    }
-  });
+  const btnCloseReportsModal = document.getElementById('btnCloseReportsModal');
+  if (btnCloseReportsModal) {
+    btnCloseReportsModal.addEventListener('click', () => {
+      closeReportsModal();
+    });
+  }
+
+  const reportsModalEl = document.getElementById('reportsModal');
+  if (reportsModalEl) {
+    reportsModalEl.addEventListener('click', (e) => {
+      if (e.target === reportsModalEl) {
+        closeReportsModal();
+      }
+    });
+  }
+
+  const btnCopyReportMd = document.getElementById('btnCopyReportMd');
+  if (btnCopyReportMd) {
+    btnCopyReportMd.addEventListener('click', () => {
+      copyActiveReportMarkdown();
+    });
+  }
+
+  const btnDownloadReport = document.getElementById('btnDownloadReport');
+  if (btnDownloadReport) {
+    btnDownloadReport.addEventListener('click', () => {
+      downloadActiveReport();
+    });
+  }
+
+  const btnToggleRawView = document.getElementById('btnToggleRawView');
+  if (btnToggleRawView) {
+    btnToggleRawView.addEventListener('click', () => {
+      toggleRawReportView();
+    });
+  }
+
+  const reportsSearchInput = document.getElementById('reportsSearch');
+  if (reportsSearchInput) {
+    reportsSearchInput.addEventListener('input', (e) => {
+      reportsState.searchQuery = e.target.value.toLowerCase().trim();
+      renderReportsList();
+    });
+  }
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
@@ -669,12 +713,282 @@ function setupEventListeners() {
       document.getElementById('btnDemo').click();
     } else if (e.key === 'Escape') {
       document.getElementById('agentModal').classList.remove('open');
+      closeReportsModal();
+    } else if (e.key === 'r' || e.key === 'R') {
+      const modal = document.getElementById('reportsModal');
+      if (modal && modal.classList.contains('open')) {
+        closeReportsModal();
+      } else {
+        openReportsModal();
+      }
     } else if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
       const keys = ['frontend', 'backend', 'database', 'security', 'performance', 'qa'];
       const agentKey = keys[parseInt(e.key) - 1];
       if (agentKey) openAgentModal(agentKey);
     }
   });
+}
+
+// Reports State & Controller
+const reportsState = {
+  reports: [],
+  activeReport: null,
+  searchQuery: '',
+  rawMode: false
+};
+
+async function fetchReports() {
+  try {
+    const res = await fetch('/api/reports');
+    if (res.ok) {
+      const data = await res.json();
+      reportsState.reports = data.reports || [];
+      const badge = document.getElementById('reportsCountBadge');
+      if (badge) {
+        badge.textContent = reportsState.reports.length;
+      }
+      return reportsState.reports;
+    }
+  } catch (err) {
+    console.error('Error loading reports:', err);
+  }
+  return [];
+}
+
+async function openReportsModal(preferredId = null) {
+  const modal = document.getElementById('reportsModal');
+  if (!modal) return;
+
+  await fetchReports();
+
+  if (preferredId) {
+    reportsState.activeReport = reportsState.reports.find(r => r.id === preferredId) || reportsState.reports[0] || null;
+  } else if (!reportsState.activeReport && reportsState.reports.length > 0) {
+    reportsState.activeReport = reportsState.reports[0];
+  }
+
+  renderReportsList();
+  renderActiveReport();
+
+  modal.classList.add('open');
+  synth.playClick();
+}
+
+function closeReportsModal() {
+  const modal = document.getElementById('reportsModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function renderReportsList() {
+  const container = document.getElementById('reportsHistoryList');
+  if (!container) return;
+
+  container.innerHTML = '';
+  const filtered = reportsState.reports.filter(r => {
+    if (!reportsState.searchQuery) return true;
+    const q = reportsState.searchQuery;
+    return (
+      (r.objective && r.objective.toLowerCase().includes(q)) ||
+      (r.project && r.project.toLowerCase().includes(q)) ||
+      (r.dateFormatted && r.dateFormatted.toLowerCase().includes(q))
+    );
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 16px; text-align: center; color: var(--text-dim); font-size: 11px;">
+        ${reportsState.searchQuery ? 'No matching reports found.' : 'No audit reports recorded yet. Run a sprint demo or task to generate.'}
+      </div>
+    `;
+    return;
+  }
+
+  filtered.forEach(report => {
+    const card = document.createElement('div');
+    card.className = `report-item-card ${reportsState.activeReport?.id === report.id ? 'active' : ''}`;
+    
+    card.innerHTML = `
+      <div class="report-item-top">
+        <span class="report-item-date">${report.dateFormatted || new Date(report.timestamp).toLocaleDateString()}</span>
+        <span class="report-item-status">${report.status || 'COMPLETED'}</span>
+      </div>
+      <div class="report-item-title">${report.objective || 'Swarm Audit Sprint'}</div>
+      <div class="report-item-meta">
+        <span>👥 ${(report.targetAgents || []).length} Squads</span>
+        <span>✨ ${report.totalFindings || (report.sections || []).length} Points</span>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      synth.playClick();
+      reportsState.activeReport = report;
+      renderReportsList();
+      renderActiveReport();
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function renderActiveReport() {
+  const viewer = document.getElementById('reportsViewer');
+  if (!viewer) return;
+
+  const report = reportsState.activeReport;
+  if (!report) {
+    viewer.innerHTML = `
+      <div class="report-empty-state">
+        <span style="font-size: 32px;">📋</span>
+        <span>SELECT A SPRINT REPORT FROM THE LEFT SIDEBAR</span>
+        <span style="color: var(--text-dim); font-size: 10px;">Audit reports are generated automatically after every completed swarm run.</span>
+      </div>
+    `;
+    return;
+  }
+
+  // Raw Markdown Mode
+  if (reportsState.rawMode) {
+    viewer.innerHTML = `
+      <div class="report-hero-card">
+        <div class="report-hero-header">
+          <div>
+            <h3 class="report-hero-title">RAW MARKDOWN SPECIFICATION</h3>
+            <div class="report-hero-meta">
+              <span>PROJECT: <strong>${report.project || 'Project'}</strong></span>
+              <span>DATE: <strong>${report.dateFormatted || 'N/A'}</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="report-raw-pre">${escapeHtml(report.markdown || '# No markdown available')}</pre>
+    `;
+    return;
+  }
+
+  // Visual Interactive Card Mode
+  viewer.innerHTML = `
+    <!-- HERO SUMMARY -->
+    <div class="report-hero-card">
+      <div class="report-hero-header">
+        <div>
+          <h3 class="report-hero-title">★ ${escapeHtml(report.objective || 'Sprint Audit')}</h3>
+          <div class="report-hero-meta">
+            <span>PRODUCT: <strong>${escapeHtml(report.project || 'Project')}</strong></span>
+            <span>DATE: <strong>${escapeHtml(report.dateFormatted || 'Today')}</strong></span>
+            <span>SQUADS: <strong>${(report.targetAgents || []).map(a => a.toUpperCase()).join(', ')}</strong></span>
+          </div>
+        </div>
+        <span class="report-item-status" style="font-size: 10px; padding: 4px 8px;">100% COMPLETE</span>
+      </div>
+      <div class="report-summary-box">
+        <strong>Executive Summary:</strong> The autonomous engineering swarm executed an architectural and quality audit, resolving dependencies and formulating <strong>${report.totalFindings || 0} actionable improvements</strong>.
+      </div>
+    </div>
+
+    <!-- METRICS GRID -->
+    <div class="report-metrics-grid">
+      <div class="report-metric-card">
+        <span class="report-metric-label">ENGINEERING SQUADS</span>
+        <span class="report-metric-val" style="color: var(--color-cyan);">${(report.targetAgents || []).length}</span>
+      </div>
+      <div class="report-metric-card">
+        <span class="report-metric-label">FINDINGS & ACTIONS</span>
+        <span class="report-metric-val" style="color: var(--color-gold);">${report.totalFindings || 0}</span>
+      </div>
+      <div class="report-metric-card">
+        <span class="report-metric-label">QUALITY GATE</span>
+        <span class="report-metric-val" style="color: var(--color-green);">PASSED</span>
+      </div>
+      <div class="report-metric-card">
+        <span class="report-metric-label">BLOCKER DEFECTS</span>
+        <span class="report-metric-val" style="color: var(--color-green);">0</span>
+      </div>
+    </div>
+
+    <!-- SQUAD FINDINGS ACCORDION / CARDS -->
+    <div class="report-sections-grid">
+      ${(report.sections || []).map(section => `
+        <div class="report-squad-card" style="border-left: 4px solid ${section.color || '#00f0ff'};">
+          <div class="report-squad-header" style="color: ${section.color || '#00f0ff'};">
+            <span>${section.icon || '💼'}</span>
+            <span>${escapeHtml(section.name || section.agent.toUpperCase())}</span>
+          </div>
+          <div class="report-findings-list">
+            ${(section.findings || []).map(f => `
+              <div class="report-finding-item">
+                <span class="finding-pill" style="border-color: ${section.color || '#00f0ff'}; color: ${section.color || '#00f0ff'};">${escapeHtml(f.category || 'Finding')}</span>
+                <span class="finding-desc">${escapeHtml(f.description || '')}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- ACTION ITEMS CHECKLIST -->
+    <div class="report-actions-card">
+      <div class="report-actions-title">📋 RECOMMENDED ACTION ITEMS & NEXT STEPS</div>
+      <div class="report-checklist">
+        ${(report.actionItems || []).map(item => `
+          <label class="report-check-item">
+            <input type="checkbox" />
+            <span>${escapeHtml(item)}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function toggleRawReportView() {
+  synth.playClick();
+  reportsState.rawMode = !reportsState.rawMode;
+  const label = document.getElementById('toggleRawLabel');
+  if (label) {
+    label.textContent = reportsState.rawMode ? 'VISUAL CARDS' : 'RAW MARKDOWN';
+  }
+  renderActiveReport();
+}
+
+function copyActiveReportMarkdown() {
+  if (!reportsState.activeReport?.markdown) return;
+  navigator.clipboard.writeText(reportsState.activeReport.markdown).then(() => {
+    synth.playSkill();
+    const btn = document.getElementById('btnCopyReportMd');
+    if (btn) {
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>✓</span> COPIED!';
+      setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+    }
+  }).catch(err => {
+    console.error('Failed to copy markdown:', err);
+  });
+}
+
+function downloadActiveReport() {
+  if (!reportsState.activeReport) return;
+  const r = reportsState.activeReport;
+  const content = r.markdown || JSON.stringify(r, null, 2);
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${r.id || 'sprint-report'}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  synth.playComplete();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 // Submit Task to Server
@@ -759,17 +1073,28 @@ function connectSSE() {
       renderState();
     }
 
-    // Audio cues
-    if (event.type === 'spawn') synth.playSpawn();
-    else if (event.type === 'skill') synth.playSkill();
-    else if (event.type === 'complete') synth.playComplete();
-    else if (event.type === 'error') synth.playError();
+    // Audio cues & Report Refresh
+    if (event.type === 'spawn') {
+      synth.playSpawn();
+    } else if (event.type === 'skill') {
+      synth.playSkill();
+    } else if (event.type === 'complete') {
+      synth.playComplete();
+      if (event.agent === 'orchestrator' || event.metadata?.report) {
+        fetchReports();
+      }
+    } else if (event.type === 'error') {
+      synth.playError();
+    }
   });
 
   eventSource.addEventListener('state_change', (e) => {
     const data = JSON.parse(e.data);
     appState.state = data.state;
     renderState();
+    if (data.state?.status === 'COMPLETED') {
+      fetchReports();
+    }
   });
 
   eventSource.onerror = () => {

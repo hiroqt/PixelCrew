@@ -572,17 +572,21 @@ export class OrchestratorEngine extends EventEmitter {
       await this.persistState();
 
       // 5. Generate and Persist Executive Report
-      const reportMarkdown = this.compileAuditReport(taskPrompt, targetAgents, findings);
-      await this.saveAuditReport(reportMarkdown);
+      const reportData = this.compileAuditReport(taskPrompt, targetAgents, findings);
+      await this.saveAuditReport(reportData);
 
       await this.emitEvent({
         agent: 'orchestrator',
         type: 'complete',
-        message: `★ SWARM MISSION COMPLETE: Audit report generated with recommendations!`,
-        metadata: { report: reportMarkdown }
+        message: `★ SWARM MISSION COMPLETE: Audit report generated with actionable recommendations!`,
+        metadata: { 
+          report: reportData.markdown,
+          reportId: reportData.id,
+          reportData
+        }
       });
 
-      return reportMarkdown;
+      return reportData.markdown;
 
     } catch (err) {
       if (err.message !== 'Task Aborted') {
@@ -600,53 +604,161 @@ export class OrchestratorEngine extends EventEmitter {
   }
 
   /**
-   * Compiles structured markdown audit report
+   * Compiles structured audit report with both user-friendly JSON and Markdown formats
    */
   compileAuditReport(taskPrompt, targetAgents, findings) {
-    const timestamp = new Date().toLocaleTimeString();
+    const timestamp = Date.now();
+    const dateObj = new Date(timestamp);
+    const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
     const projectName = this.config?.project || path.basename(this.targetDir);
+    const reportId = `sprint-${timestamp}`;
 
-    let report = `
-╔═══════════════════════════════════════════════════════════════════╗
-║               PIXELCREW SWARM AUDIT REPORT                       ║
-╚═══════════════════════════════════════════════════════════════════╝
+    const agentMeta = {
+      frontend: { name: 'Frontend Squad', icon: '🎨', color: '#00f0ff' },
+      backend: { name: 'Backend Squad', icon: '⚡', color: '#ff007f' },
+      database: { name: 'Database Squad', icon: '🗄️', color: '#ffd700' },
+      security: { name: 'Security Squad', icon: '🛡️', color: '#ff3344' },
+      performance: { name: 'Performance SRE', icon: '🚀', color: '#39ff14' },
+      qa: { name: 'QA Squad', icon: '🧪', color: '#b026ff' },
+      orchestrator: { name: 'Lead Orchestrator', icon: '👔', color: '#ffd700' }
+    };
 
-PROJECT:         ${projectName}
-OBJECTIVE:       "${taskPrompt}"
-TIMESTAMP:       ${timestamp}
-TEAM SPRINT:     ${targetAgents.map(a => a.toUpperCase()).join(', ')}
-STATUS:          100% COMPLETED
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EXECUTIVE FINDINGS & ACTIONABLE IMPROVEMENTS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-`;
+    const sections = [];
+    const actionItems = [];
+    let totalFindings = 0;
 
     for (const [agent, items] of Object.entries(findings)) {
-      report += `\n[${agent.toUpperCase()} AGENT]:\n`;
-      for (const item of items) {
-        report += `  • ${item}\n`;
-      }
+      if (!items || !items.length) continue;
+      totalFindings += items.length;
+      const meta = agentMeta[agent] || { name: agent.toUpperCase(), icon: '💼', color: '#00f0ff' };
+      
+      const parsedFindings = items.map((item, idx) => {
+        const parts = item.split(':');
+        const category = parts.length > 1 ? parts[0].trim() : 'Recommendation';
+        const description = parts.length > 1 ? parts.slice(1).join(':').trim() : item;
+        actionItems.push(`[${agent.toUpperCase()}] ${description}`);
+        return {
+          id: `${agent}-${idx + 1}`,
+          category,
+          description
+        };
+      });
+
+      sections.push({
+        agent,
+        name: meta.name,
+        icon: meta.icon,
+        color: meta.color,
+        findings: parsedFindings
+      });
     }
 
-    report += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    report += `NEXT STEPS: Review findings and apply proposed improvements.\n`;
+    // Generate Markdown
+    let markdown = `# PixelCrew Swarm Audit Report\n\n`;
+    markdown += `**Project:** ${projectName}  \n`;
+    markdown += `**Objective:** "${taskPrompt}"  \n`;
+    markdown += `**Date:** ${dateStr} at ${timeStr}  \n`;
+    markdown += `**Team Roster:** ${targetAgents.map(a => a.toUpperCase()).join(', ')}  \n`;
+    markdown += `**Status:** 100% Completed  \n\n`;
+    markdown += `## Executive Summary\n`;
+    markdown += `The multi-agent swarm completed the assigned objective with **${totalFindings} key findings & actionable improvements** across ${targetAgents.length} specialized engineering squads.\n\n`;
+    markdown += `## Squad Findings & Recommendations\n\n`;
 
-    return report.trim();
+    for (const section of sections) {
+      markdown += `### ${section.icon} ${section.name}\n`;
+      for (const finding of section.findings) {
+        markdown += `- **${finding.category}:** ${finding.description}\n`;
+      }
+      markdown += `\n`;
+    }
+
+    markdown += `## Action Items & Next Steps\n`;
+    for (const action of actionItems) {
+      markdown += `- [ ] ${action}\n`;
+    }
+
+    const reportObject = {
+      id: reportId,
+      timestamp,
+      dateFormatted: `${dateStr}, ${timeStr}`,
+      project: projectName,
+      objective: taskPrompt,
+      status: 'COMPLETED',
+      targetAgents,
+      totalFindings,
+      sections,
+      actionItems,
+      markdown
+    };
+
+    return reportObject;
   }
 
   /**
-   * Saves audit report to .pixel-agents/reports/
+   * Saves audit report to .pixel-agents/reports/ in both JSON and Markdown format
    */
-  async saveAuditReport(reportMarkdown) {
+  async saveAuditReport(reportData) {
     const reportsDir = path.join(this.pixelAgentsDir, 'reports');
     try {
       await fs.mkdir(reportsDir, { recursive: true });
-      const filename = `audit-${Date.now()}.md`;
-      await fs.writeFile(path.join(reportsDir, filename), reportMarkdown + '\n', 'utf-8');
-    } catch {
-      // ignore
+      const baseFilename = reportData.id || `sprint-${Date.now()}`;
+      
+      // Save JSON metadata
+      await fs.writeFile(
+        path.join(reportsDir, `${baseFilename}.json`),
+        JSON.stringify(reportData, null, 2),
+        'utf-8'
+      );
+
+      // Save readable Markdown
+      if (reportData.markdown) {
+        await fs.writeFile(
+          path.join(reportsDir, `${baseFilename}.md`),
+          reportData.markdown.trim() + '\n',
+          'utf-8'
+        );
+      }
+    } catch (err) {
+      console.error('Error saving audit report:', err);
     }
+  }
+
+  /**
+   * Reads and lists all audit reports stored in .pixel-agents/reports/
+   */
+  async getReports() {
+    const reportsDir = path.join(this.pixelAgentsDir, 'reports');
+    try {
+      await fs.mkdir(reportsDir, { recursive: true });
+      const files = await fs.readdir(reportsDir);
+      const jsonFiles = files.filter(f => f.endsWith('.json'));
+
+      const reports = [];
+      for (const file of jsonFiles) {
+        try {
+          const raw = await fs.readFile(path.join(reportsDir, file), 'utf-8');
+          const data = JSON.parse(raw);
+          reports.push(data);
+        } catch {
+          // ignore corrupted files
+        }
+      }
+
+      // Sort newest first
+      reports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      return reports;
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Gets a specific report by ID
+   */
+  async getReportById(reportId) {
+    const reports = await this.getReports();
+    return reports.find(r => r.id === reportId) || null;
   }
 }
 

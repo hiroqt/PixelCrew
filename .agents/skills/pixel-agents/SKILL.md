@@ -17,7 +17,7 @@ Whenever you perform work on behalf of the user with `pixel-agents`, emit struct
 ### Step 1: Ensure Swarm Workspace Exists
 Check if `.pixel-agents/` exists in the workspace. If not, initialize it:
 ```bash
-npx github:hiroqt/PixelCrew init --yes
+npx pixelcrew init --yes
 ```
 
 ### Step 2: Stream Activity as You Work
@@ -26,22 +26,22 @@ As you analyze files, run tools, or write code, emit events corresponding to the
 
 #### 1. When Starting / Thinking:
 ```bash
-npx github:hiroqt/PixelCrew emit --agent frontend --type thinking --message "Analyzing React components and routing structure"
+npx pixelcrew emit --agent frontend --type thinking --message "Analyzing React components and routing structure"
 ```
 
 #### 2. When Reading / Modifying Files or Using Tools:
 ```bash
-npx github:hiroqt/PixelCrew emit --agent frontend --type tool --skill nextjs --message "Inspecting src/app/page.tsx for rendering bottlenecks"
+npx pixelcrew emit --agent frontend --type tool --skill nextjs --message "Inspecting src/app/page.tsx for rendering bottlenecks"
 ```
 
 #### 3. When Applying a Skill:
 ```bash
-npx github:hiroqt/PixelCrew emit --agent frontend --type skill --skill tailwind --message "Refactoring CSS grid and responsive layout"
+npx pixelcrew emit --agent frontend --type skill --skill tailwind --message "Refactoring CSS grid and responsive layout"
 ```
 
 #### 4. When Completing the Task:
 ```bash
-npx github:hiroqt/PixelCrew emit --agent frontend --type complete --message "Frontend analysis complete: identified 3 component optimizations"
+npx pixelcrew emit --agent frontend --type complete --message "Frontend analysis complete: identified 3 component optimizations"
 ```
 
 ---
