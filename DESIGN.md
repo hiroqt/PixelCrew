@@ -124,6 +124,33 @@ Sound effects are synthesized entirely in client-side JavaScript using the nativ
 
 ## 7. Accessibility & Keyboard Navigation
 
-- **Keyboard First**: Press `[1..6]` to open employee workstation profiles, `[SPACE]` to trigger a sprint demo, `[ESC]` to close modals.
+- **Keyboard First**: Press `[O]` for OneShot Studio, `[R]` for Audit Reports, `[1..6]` for workstation profiles, `[SPACE]` to trigger a sprint demo, `[ESC]` to close modals.
 - **Contrast Ratios**: All text tokens exceed WCAG 2.1 AA contrast requirements (minimum 4.5:1 ratio against dark background).
 - **Reduced Motion & Sound**: Audio and CRT shaders can be toggled on/off with persistent preferences saved to `localStorage`.
+
+---
+
+## 8. Design-First Synthesis & Anti-AI Evaluation System
+
+### Creative Direction Archetypes
+PixelCrew rejects monotonous cookie-cutter SaaS layouts in favor of intentional, archetype-driven creative strategies:
+
+| Archetype | Display Font | Body Font | Palette Strategy | Layout Cadence |
+| :--- | :--- | :--- | :--- | :--- |
+| **Editorial Asymmetric Grid** | *Instrument Serif* | *Plus Jakarta Sans* | Charcoal / Cream / Amber Glow | Asymmetric column spans (7:5 split, overlapping bounds) |
+| **Technical Lab** | *Space Grotesk* | *JetBrains Mono* | Deep Obsidian / Emerald Matrix | Monospace stats, terminal manifests, high-density telemetry |
+| **Kinetic Studio** | *Syne* | *DM Sans* | Pure Void / Electric Cyan Accent | Bold display headlines, horizontal statement tickers, Bento matrices |
+
+### 6-Dimension Anti-AI Rubric Formula
+The Visual Critic evaluates every synthesized page against 6 core criteria:
+
+$$\text{Final Score} = \frac{\text{Originality} + \text{Typography} + \text{Layout} + \text{Visual Hierarchy} + \text{Brand Consistency} + (10 - \text{Generic AI Penalty})}{6}$$
+
+- **Threshold for Approval**: $\text{Final Score} \ge 8.5 / 10.0$.
+- **Actionable Critique Format**: Every penalty generates a `{ issue, reason, fix }` critique item that drives automated code refinement.
+- **Negative Constraints**:
+  - ❌ Banned: Purple/blue blurred gradient blobs, floating glowing spheres.
+  - ❌ Banned: Symmetrical 3-card repeating grids with uniform heights.
+  - ❌ Banned: Generic copy (*"Unlock the power of AI"* or *"Get Started Today"*).
+  - ❌ Banned: Cards-in-cards nesting and meaningless pill badges.
+

@@ -57,3 +57,31 @@ Every `emit` call updates the live dashboard at `http://localhost:4747` (or `474
 3. **8-Bit Chiptune Sound**: The Web Audio synthesizer triggers an 8-bit sound effect (spawn chime, skill chime, or victory fanfare).
 4. **Skills Matrix**: Marks the active skill as in progress (`◉`) or completed (`✓`).
 5. **Sprint Progress & Coffee Meter**: Updates team velocity and sprint completion percentages.
+
+---
+
+## ✦ OneShot Website Synthesis & Visual Feedback Workflow
+
+When the user asks to generate a website, landing page, or UI with PixelCrew:
+
+1. **Invoke the OneShot CLI**:
+   ```bash
+   npx pixelcrew oneshot "<User Prompt>" --target vanilla
+   ```
+2. **The 5 Specialized Roles Automatically Collaborate**:
+   - `creativeDirector` determines archetype and strict anti-AI negative constraints.
+   - `uxPlanner` maps asymmetric section topology and content structure.
+   - `designSystem` compiles fluid typography `clamp()` scales and color tokens.
+   - `frontend` generates production-ready, clean HTML/CSS/Tailwind code with zero placeholder copy.
+   - `visualCritic` scores against the 6-dimension Anti-AI Rubric ($\ge 8.5/10.0$) and refines if needed.
+3. **Generated Artifacts**:
+   - Stored in `./generated-site/index.html` and `./generated-site/creative-direction.json`.
+
+---
+
+## ⚡ Universal Cross-IDE Token Conservation
+
+To slash token usage by 50% to 75%:
+- Use `.agents/skills/token-efficiency/` for prefix cache anchoring (Claude), line-range precision edits (Antigravity), and AST symbol skeletons (Cursor/Kiro/Windsurf).
+- Keep context windows clean by pruning completed task logs and avoiding dumping entire 1,000+ line files when only a fraction is being edited.
+

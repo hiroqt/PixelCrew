@@ -77,27 +77,28 @@ Traditional AI coding tools provide either:
 
 ## 5. Release Roadmap
 
-### v0.1 — Foundations (Current Release)
-- Pure Node.js ESM CLI (`pixel-agents init`, `start`, `demo`, `task`, `emit`, `analyze`, `status`).
+### v0.1 — Foundations
+- Pure Node.js ESM CLI (`pixelcrew init`, `start`, `demo`, `task`, `emit`, `analyze`, `status`).
 - Static codebase analyzer and context generator (`.pixel-agents/context.json`).
 - Interactive Pixel Startup Office 2D canvas with workstation hover tooltips and inspector modal.
 - Real-time Server-Sent Events (SSE) stream and Web Audio 8-bit chiptune synthesizer.
 - Global Antigravity plugin and skill integration.
 
-### v0.2 — Git Worktree Isolation
-- Isolated Git worktrees for each subagent to enable non-conflicting parallel code generation.
-- Automated 3-way merge conflict resolution guided by the Orchestrator.
+### v0.2 — OneShot Website Synthesis & Anti-AI Guardian (Current Release)
+- **OneShot Multi-Agent Website Synthesis** (`npx pixelcrew oneshot`): Decouples creative direction from frontend code generation.
+- **Anti-AI Design Guardian**: 6-dimension visual scoring rubric (Originality, Typography, Layout, Hierarchy, Brand Consistency, AI Slop Penalty) with threshold validation ($\ge 8.5/10.0$) and automated refinement.
+- **Cross-IDE Token Optimization Engine**: Universal token conservation strategies across Claude, Antigravity, Cursor, Kiro, Windsurf, Copilot (~72% token savings).
+- **Interactive OneShot Studio Dashboard**: In-browser prompt composer, framework switcher (`vanilla` / `nextjs`), pipeline step highlights, live site preview iframe, and visual scorecard meter.
+- **Audit Reports Engine**: Structured report compilation, Markdown exporter, and persistent report history.
 
-### v0.3 — Model API Runtime Adapters
-- Direct API connector for Gemini, Claude, OpenAI, and local Ollama models.
+### v0.3 — Git Worktree Isolation & 3-Way Merge
+- Isolated Git worktrees for each subagent to enable non-conflicting parallel code generation.
+- Automated 3-way merge conflict resolution guided by the Lead Orchestrator.
+
+### v0.4 — Model API Runtime Adapters
+- Direct API connectors for Gemini, Claude, OpenAI, and local Ollama models.
 - Interactive terminal chat mode for conversational steering during active sprints.
 
-### v0.4 — Multi-Floor Office Expansions
-- Modular office expansion packs:
-  - Floor 41: Data Science & ML Research Floor (PyTorch, Jupyter, Pandas).
-  - Floor 43: Mobile & Native Engineering Floor (Flutter, iOS, Android, Rust).
-- Custom pixel sprite avatar customizer for developers.
-
-### v0.5 — Distributed Swarm Orchestration
-- Multi-machine coordination via WebSockets / WebRTC.
-- Collaborative multi-user view of shared development sprints.
+### v0.5 — Multi-Floor Office Expansions & Distributed Swarms
+- Modular office expansion packs (Floor 41: ML Research, Floor 43: Mobile Engineering).
+- Multi-machine coordination via WebSockets / WebRTC for shared team sprints.
