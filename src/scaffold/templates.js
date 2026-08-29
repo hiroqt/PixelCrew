@@ -19,10 +19,62 @@ export const DEFAULT_CONFIG = {
       color: "#00f0ff",
       enabled: true,
       maxTasks: 2,
-      skills: ["react", "nextjs", "tailwind", "ui-optimization"],
+      skills: ["react", "nextjs", "tailwind", "ui-optimization", "frontend-engineering"],
       permissions: {
         read: ["src/**", "components/**", "pages/**", "app/**", "public/**", "styles/**"],
         write: ["src/components/**", "src/pages/**", "src/app/**", "src/styles/**"]
+      }
+    },
+    creativeDirector: {
+      name: "Creative Director",
+      role: "Aesthetic Direction & Art Strategy",
+      sprite: "creative",
+      color: "#ff8800",
+      enabled: true,
+      maxTasks: 1,
+      skills: ["design-director", "anti-ai-patterns", "typography-strategy"],
+      permissions: {
+        read: ["**/*"],
+        write: ["design/**", "specs/**", ".pixel-agents/design/**"]
+      }
+    },
+    uxPlanner: {
+      name: "UX Planner",
+      role: "Information Architecture & Section Flow",
+      sprite: "ux",
+      color: "#ffaa00",
+      enabled: true,
+      maxTasks: 1,
+      skills: ["ux-topology", "asymmetric-layout", "flow-architecture"],
+      permissions: {
+        read: ["**/*"],
+        write: ["design/**", "specs/**"]
+      }
+    },
+    designSystem: {
+      name: "Design System Architect",
+      role: "Tokens, Fluid Typography & Theme Engine",
+      sprite: "tokens",
+      color: "#00e676",
+      enabled: true,
+      maxTasks: 1,
+      skills: ["design-tokens", "fluid-type-scales", "tailwind-theme"],
+      permissions: {
+        read: ["styles/**", "tailwind.config.*", "src/styles/**"],
+        write: ["styles/**", "tailwind.config.*", "src/styles/**"]
+      }
+    },
+    visualCritic: {
+      name: "Visual Critic",
+      role: "Anti-AI Rubric Scorer & Refinement Loop",
+      sprite: "critic",
+      color: "#e040fb",
+      enabled: true,
+      maxTasks: 1,
+      skills: ["anti-ai-patterns", "visual-rubric-scoring", "design-review"],
+      permissions: {
+        read: ["**/*"],
+        write: ["reports/**", ".pixel-agents/reports/**"]
       }
     },
     backend: {
@@ -380,5 +432,17 @@ End-to-end browser automation, trace recording, visual regression testing, and r
 
   "performance-profiling.md": `# Performance Profiling Skill
 Flamegraph inspection, DOM layout thrashing identification, memory leak detection, and network payload minification.
+`,
+
+  "design-director.md": `# Design Director Skill
+Artistic direction and aesthetic strategy. Decouples visual soul and layout rhythm from code generation.
+`,
+
+  "anti-ai-patterns.md": `# Anti-AI Patterns Skill
+Strict aesthetic critic rejecting generic templates, purple mesh blobs, and repetitive card grids.
+`,
+
+  "token-efficiency.md": `# Token Efficiency Skill
+Context conservation across Claude, Antigravity, Cursor, Kiro, Windsurf, and Copilot through AST symbol extraction.
 `
 };

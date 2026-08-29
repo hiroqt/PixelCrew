@@ -50,6 +50,9 @@
       </div>
 
       <div class="header-right">
+        <button class="pixel-btn btn-sm btn-primary" id="btnOneShotModal" title="Open OneShot Multi-Agent Website Generator">
+          <span>✦</span> ONESHOT STUDIO
+        </button>
         <button class="pixel-btn btn-sm btn-info" id="btnReportsToggle" title="Open Sprint Audit Reports History [R]">
           <span>📋</span> REPORTS (<span id="reportsCountBadge">0</span>)
         </button>
@@ -90,10 +93,11 @@
       </form>
       <div class="quick-prompts">
         <span class="quick-title">QUICK TICKETS:</span>
+        <button class="quick-tag" data-prompt="Build a modern website for a design agency specializing in AI products. Dark, editorial, premium.">✦ OneShot: AI Agency</button>
+        <button class="quick-tag" data-prompt="Build a modern portfolio for an AI engineer inspired by editorial design and developer tools.">✦ OneShot: AI Portfolio</button>
         <button class="quick-tag" data-prompt="Find slow Prisma queries and create optimized database index">☕ DB: Optimize Indexes</button>
         <button class="quick-tag" data-prompt="Build customer CRM dashboard with React and API endpoints">🎨 FE/BE: Build CRM Module</button>
         <button class="quick-tag" data-prompt="Audit security authentication and profile Core Web Vitals">🛡️ SEC/PERF: Audit & Speed</button>
-        <button class="quick-tag" data-prompt="Run full end-to-end regression and Playwright integration suite">🧪 QA: Green Test Suite</button>
       </div>
     </section>
 
@@ -254,9 +258,128 @@
           </main>
         </div>
       </div>
-    </div>
+    <!-- ONESHOT MULTI-AGENT STUDIO MODAL -->
+    <div class="pixel-modal-backdrop" id="oneshotModal">
+      <div class="pixel-modal-card oneshot-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-agent-icon">✦</span>
+            <h2 class="modal-agent-name" style="color: #ff007f;">PIXEL CREW ONESHOT STUDIO</h2>
+          </div>
+          <button class="pixel-btn btn-sm btn-warn" id="btnCloseOneShotModal">✕</button>
+        </div>
+        <div class="oneshot-modal-body">
+          <div class="oneshot-top-grid">
+            <div class="oneshot-prompt-box">
+              <label class="oneshot-label">PROMPT / CREATIVE BRIEF:</label>
+              <textarea id="oneshotPromptInput" class="pixel-input oneshot-textarea" rows="3" placeholder="Build a modern website for a design agency specializing in AI products. Dark, editorial, premium, but not corporate. Avoid generic SaaS design."></textarea>
+              
+              <div class="oneshot-controls">
+                <div class="oneshot-framework-selector">
+                  <span class="selector-label">TARGET:</span>
+                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="vanilla" checked> Modern Web</label>
+                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="nextjs"> Next.js 14</label>
+                </div>
+                <button class="pixel-btn btn-primary" id="btnRunOneShot">
+                  <span>🚀</span> SYNTHESIZE WEBSITE
+                </button>
+              </div>
+            </div>
 
-    <!-- ARCADE / OFFICE FOOTER -->
+            <!-- TOKEN SAVINGS METRIC CARD -->
+            <div class="oneshot-token-card">
+              <div class="token-card-header">
+                <span class="token-icon">⚡</span>
+                <span class="token-title">CROSS-IDE TOKEN SAVER</span>
+              </div>
+              <div class="token-stats-grid">
+                <div class="token-stat-item">
+                  <span class="token-stat-label">RAW TOKENS:</span>
+                  <span class="token-stat-val text-muted" id="rawTokenVal">42,500</span>
+                </div>
+                <div class="token-stat-item">
+                  <span class="token-stat-label">ACTUAL USED:</span>
+                  <span class="token-stat-val" id="actualTokenVal">11,800</span>
+                </div>
+                <div class="token-stat-item highlight">
+                  <span class="token-stat-label">TOKENS SAVED:</span>
+                  <span class="token-stat-val text-green" id="savedTokenVal">30,700 (72%)</span>
+                </div>
+              </div>
+              <div class="token-strategies">
+                <span class="strat-pill">✓ AST Skeletons</span>
+                <span class="strat-pill">✓ Context Pruning</span>
+                <span class="strat-pill">✓ Prompt Caching</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- LIVE PIPELINE PROGRESS TRACKER -->
+          <div class="oneshot-pipeline-section" id="oneshotPipelineSection">
+            <div class="pipeline-header">
+              <span class="pipeline-title">CREATIVE SQUAD PIPELINE</span>
+              <span class="pipeline-status" id="pipelineStatusText">STANDBY</span>
+            </div>
+            <div class="pipeline-steps">
+              <div class="pipeline-step" id="step-creative">
+                <div class="step-icon">🎨</div>
+                <div class="step-label">Creative Director</div>
+                <div class="step-desc">Artistic Direction & Avoid Constraints</div>
+              </div>
+              <div class="pipeline-arrow">→</div>
+              <div class="pipeline-step" id="step-ux">
+                <div class="step-icon">📐</div>
+                <div class="step-label">UX Planner</div>
+                <div class="step-desc">Asymmetric Topology & Flow</div>
+              </div>
+              <div class="pipeline-arrow">→</div>
+              <div class="pipeline-step" id="step-tokens">
+                <div class="step-icon">🌿</div>
+                <div class="step-label">Design System</div>
+                <div class="step-desc">Fluid Clamp & Font Tokens</div>
+              </div>
+              <div class="pipeline-arrow">→</div>
+              <div class="pipeline-step" id="step-builder">
+                <div class="step-icon">💻</div>
+                <div class="step-label">Frontend Builder</div>
+                <div class="step-desc">Tailwind & Component Synthesis</div>
+              </div>
+              <div class="pipeline-arrow">→</div>
+              <div class="pipeline-step" id="step-critic">
+                <div class="step-icon">🔍</div>
+                <div class="step-label">Visual Critic</div>
+                <div class="step-desc">Anti-AI Rubric (Score >= 8.5)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VISUAL SCORECARD & RESULT INSPECTOR -->
+          <div class="oneshot-results-grid" id="oneshotResultsGrid" style="display: none;">
+            <div class="visual-scorecard-panel">
+              <div class="scorecard-header">
+                <span class="score-title">PIXEL CREW VISUAL SCORE</span>
+                <span class="score-badge" id="finalScoreBadge">9.1 / 10.0</span>
+              </div>
+              <div class="rubric-meters" id="rubricMeters">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <div class="oneshot-preview-panel">
+              <div class="preview-header">
+                <span class="preview-title">GENERATED BESPOKE SITE</span>
+                <a href="/api/site-preview" target="_blank" class="pixel-btn btn-xs btn-primary">
+                  <span>🌐</span> OPEN LIVE PREVIEW
+                </a>
+              </div>
+              <div class="preview-iframe-wrapper">
+                <iframe id="sitePreviewIframe" class="site-preview-iframe" src="about:blank"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <footer class="arcade-footer">
       <div class="footer-left">
         <span>PRESS [1..6] EMPLOYEE PROFILE</span>

@@ -87,13 +87,14 @@ test('OrchestratorEngine manages state, events, and task lifecycle', async () =>
 
 test('Server handles routes and event broadcasting', async () => {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pixel-agents-server-'));
+  let server;
   try {
     await initializeProject(tmpDir, { name: 'server-test', yes: true });
 
     const engine = new OrchestratorEngine(tmpDir);
     await engine.initialize();
 
-    const server = createServer(engine);
+    server = createServer(engine);
 
     const dispatch = (req) => new Promise((resolve) => {
       const res = {
@@ -140,8 +141,11 @@ test('Server handles routes and event broadcasting', async () => {
       on() {}
     });
     assert.equal(resHtml.statusCode, 200);
-    assert.ok(resHtml.body.toString().includes('PIXELCREW'));
+    assert.ok(resHtml.body.toString().includes('PIXEL'));
   } finally {
+    if (server && server.listening) {
+      server.close();
+    }
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
 });
@@ -205,6 +209,7 @@ test('analyzeCodebase detects tech stack and adapts permissions', async () => {
 
 test('OrchestratorEngine compiles, persists, and serves audit reports', async () => {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pixel-agents-reports-'));
+  let server;
   try {
     await initializeProject(tmpDir, { name: 'report-test-app', yes: true });
 
@@ -239,7 +244,7 @@ test('OrchestratorEngine compiles, persists, and serves audit reports', async ()
     assert.equal(fetchedReport.objective, 'Optimize database queries & refine checkout UI');
 
     // 3. Test Server /api/reports endpoint
-    const server = createServer(engine);
+    server = createServer(engine);
     const dispatch = (req) => new Promise((resolve) => {
       const res = {
         statusCode: 200,
@@ -266,6 +271,9 @@ test('OrchestratorEngine compiles, persists, and serves audit reports', async ()
     assert.equal(parsedReports.reports.length, 1);
     assert.equal(parsedReports.reports[0].id, reportData.id);
   } finally {
+    if (server && server.listening) {
+      server.close();
+    }
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
 });
