@@ -4,8 +4,15 @@ import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export function createServer(engine, options = {}) {
-  const rootDir = engine.rootDir;
+export function createServer(engineOrRootDir, maybeEngine, options = {}) {
+  let engine = engineOrRootDir;
+  let rootDir = engine?.rootDir || process.cwd();
+
+  if (typeof engineOrRootDir === 'string') {
+    rootDir = engineOrRootDir;
+    engine = maybeEngine;
+  }
+
   const dashboardDir = path.join(rootDir, '.pixel-agents', 'dashboard');
   const legacyDashboardDir = path.join(rootDir, '.pixel-dashboard');
   const fallbackDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));

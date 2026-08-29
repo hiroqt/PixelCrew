@@ -865,6 +865,16 @@ export class OrchestratorEngine extends EventEmitter {
       // Save multi-file project to disk
       await oneshot.saveMultiFileOutput(outputDir, buildResult, creativeDirection, uxPlan, evaluation);
 
+      // Emit granular file creation events for dashboard telemetry
+      for (const relFile of Object.keys(buildResult.files || {})) {
+        await this.emitEvent({
+          agent: relFile.startsWith('src/app/api') ? 'backend' : (relFile.endsWith('.ts') && !relFile.endsWith('.tsx') ? 'database' : 'frontend'),
+          type: 'file.created',
+          file: relFile,
+          message: `Created ${relFile}`
+        });
+      }
+
       // Save audit report to .pixel-agents/reports/
       const reportData = this.compileAuditReport(
         prompt,
@@ -872,7 +882,7 @@ export class OrchestratorEngine extends EventEmitter {
         {
           creativeDirector: [`Design Direction: ${creativeDirection.design_direction}`],
           frontend: [`Synthesized ${buildResult.fileCount} Next.js / TypeScript files`],
-          backend: ['Generated TypeScript API Route Handlers (/api/contact, /api/projects)'],
+          backend: ['Generated TypeScript API Route Handlers (/api/contact, /api/data)'],
           database: ['Grounded TypeScript data models & category taxonomy'],
           performance: ['Sub-millisecond TTFB and 100/100 Core Web Vitals optimization'],
           security: ['Enforced zero-trust API validation & sanitized payload handling'],

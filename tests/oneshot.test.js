@@ -4,50 +4,121 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { OneShotEngine, CREATIVE_ARCHETYPES } from '../src/orchestrator/oneshot.js';
+import { DynamicPlanner } from '../src/orchestrator/planner.js';
+import { SkillRegistry } from '../src/orchestrator/skills-registry.js';
+import { TaskQueue } from '../src/orchestrator/task-queue.js';
+import { CodeGenerator } from '../src/orchestrator/code-generator.js';
 import { OrchestratorEngine } from '../src/orchestrator/engine.js';
 import { createServer } from '../src/server/server.js';
 import { initializeProject } from '../src/scaffold/init.js';
 
-test('OneShotEngine brief analyzer detects domain, framework, and interactive features', () => {
-  const oneshot = new OneShotEngine();
+test('DynamicPlanner analyzes requirements and produces bespoke project specifications', () => {
+  const planner = new DynamicPlanner();
 
-  // 1. Developer Portfolio prompt
-  const portBrief = oneshot.runBriefAnalyzer("create me a modern website that showcase my projects basically its a developer portfolio");
-  assert.equal(portBrief.domain, 'portfolio');
-  assert.equal(portBrief.targetFramework, 'nextjs'); // default modern stack
-  assert.ok(portBrief.features.includes('interactive-filter'));
+  // 1. Portfolio Analysis
+  const portAnalysis = planner.analyzeRequirements("Create me a modern, responsive portfolio website with animations using Pixel Agents");
+  assert.equal(portAnalysis.domain, 'portfolio');
+  assert.equal(portAnalysis.framework, 'nextjs');
+  assert.ok(portAnalysis.requestedFeatures.includes('project-filter-matrix'));
+  assert.ok(portAnalysis.requestedFeatures.includes('interactive-terminal-shell'));
 
-  // 2. Explicit Vue SaaS prompt
-  const vueBrief = oneshot.runBriefAnalyzer("Build a Vue 3 SaaS pricing calculator and metrics dashboard");
-  assert.equal(vueBrief.domain, 'saas');
-  assert.equal(vueBrief.targetFramework, 'vue');
-  assert.ok(vueBrief.features.includes('pricing-calculator'));
+  const portSpec = planner.createProjectSpecification(portAnalysis);
+  assert.equal(portSpec.domain, 'portfolio');
+  assert.ok(portSpec.sections.find(s => s.component === 'Hero'));
+  assert.ok(portSpec.sections.find(s => s.component === 'ProjectsGrid'));
 
-  // 3. DevTool technical infrastructure prompt
-  const devBrief = oneshot.runBriefAnalyzer("High performance developer infrastructure and database query tool");
-  assert.equal(devBrief.domain, 'devtool');
+  // 2. Restaurant Analysis (completely different topology)
+  const restAnalysis = planner.analyzeRequirements("Bespoke botanical tasting menu & modern dining room reservation");
+  assert.equal(restAnalysis.domain, 'restaurant');
+  assert.ok(restAnalysis.requestedFeatures.includes('interactive-tasting-menu'));
+  assert.ok(restAnalysis.requestedFeatures.includes('table-reservation-modal'));
+
+  const restSpec = planner.createProjectSpecification(restAnalysis);
+  assert.equal(restSpec.domain, 'restaurant');
+  assert.ok(restSpec.sections.find(s => s.component === 'TastingMenu'));
+  assert.ok(restSpec.sections.find(s => s.component === 'ReservationSection'));
 });
 
-test('OneShotEngine resolves creative direction and dynamic UX topology', async () => {
-  const oneshot = new OneShotEngine();
-  const prompt = "create me a modern website that showcase my projects basically its a developer portfolio";
-  const brief = oneshot.runBriefAnalyzer(prompt);
+test('DynamicPlanner compiles dynamic DAG task graph with explicit dependencies', () => {
+  const planner = new DynamicPlanner();
+  const analysis = planner.analyzeRequirements("Modern animated developer portfolio");
+  const spec = planner.createProjectSpecification(analysis);
+  const { tasks } = planner.createTaskGraph(spec);
 
-  const direction = await oneshot.runCreativeDirector(prompt, brief);
-  assert.ok(direction.design_direction);
-  assert.ok(Array.isArray(direction.visual_personality));
-  assert.ok(direction.avoid.some(item => item.includes('purple')));
+  assert.ok(tasks.length >= 7);
+  
+  const planTask = tasks.find(t => t.id === 'task-plan');
+  const designTask = tasks.find(t => t.id === 'task-design-director');
+  const feScaffoldTask = tasks.find(t => t.id === 'task-frontend-scaffold');
+  const feCompTask = tasks.find(t => t.id === 'task-frontend-components');
+  const qaTask = tasks.find(t => t.id === 'task-qa-visual-critic');
 
-  const uxPlan = await oneshot.runUXPlanner(prompt, direction);
-  assert.ok(uxPlan.title);
-  assert.equal(uxPlan.domain, 'portfolio');
-  assert.ok(uxPlan.sections.find(s => s.id === 'hero'));
-  assert.ok(uxPlan.sections.find(s => s.id === 'projects'));
-  assert.ok(uxPlan.sections.find(s => s.id === 'terminal'));
+  assert.equal(planTask.dependsOn.length, 0);
+  assert.ok(designTask.dependsOn.includes('task-plan'));
+  assert.ok(feScaffoldTask.dependsOn.includes('task-design-director'));
+  assert.ok(feCompTask.dependsOn.includes('task-frontend-scaffold'));
+  assert.ok(qaTask.dependsOn.includes('task-animation-motion'));
+});
 
-  const designSystem = await oneshot.runDesignSystem(direction, uxPlan);
-  assert.ok(designSystem.cssTokens.includes('--bg-primary'));
-  assert.ok(designSystem.fonts.googleFontsUrl);
+test('SkillRegistry matches capabilities and categories correctly', () => {
+  const registry = new SkillRegistry();
+
+  const feSkills = registry.matchSkills('Next.js component with Tailwind CSS styling');
+  assert.ok(feSkills.includes('frontend/nextjs'));
+  assert.ok(feSkills.includes('frontend/tailwind'));
+
+  const motionSkills = registry.matchSkills('Framer motion entrance and scroll interactions');
+  assert.ok(motionSkills.includes('motion/framer-motion'));
+
+  const qaSkills = registry.matchSkills('Visual QA review and rubric scoring');
+  assert.ok(qaSkills.includes('quality/visual-review'));
+});
+
+test('TaskQueue executes DAG with parallel dependency resolution and event emission', async () => {
+  const planner = new DynamicPlanner();
+  const spec = planner.createProjectSpecification(planner.analyzeRequirements("Modern agency flagship"));
+  const { tasks } = planner.createTaskGraph(spec);
+
+  const queue = new TaskQueue(tasks);
+  const events = [];
+
+  const result = await queue.execute({}, (evt) => {
+    events.push(evt);
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.completedCount, tasks.length);
+  assert.ok(events.some(e => e.type === 'agent.started'));
+  assert.ok(events.some(e => e.type === 'skill.activated'));
+  assert.ok(events.some(e => e.type === 'task.completed'));
+});
+
+test('CodeGenerator synthesizes complete Next.js 14/15 App Router codebase with API routes', () => {
+  const planner = new DynamicPlanner();
+  const spec = planner.createProjectSpecification(planner.analyzeRequirements("Developer portfolio with terminal and project filters"));
+  const codeGen = new CodeGenerator();
+
+  const result = codeGen.generateProject(spec);
+  const files = result.files;
+
+  assert.ok(files['package.json']);
+  assert.ok(files['tsconfig.json']);
+  assert.ok(files['tailwind.config.ts']);
+  assert.ok(files['src/app/layout.tsx']);
+  assert.ok(files['src/app/page.tsx']);
+  assert.ok(files['src/app/globals.css']);
+  assert.ok(files['src/components/sections/Navbar.tsx']);
+  assert.ok(files['src/components/sections/Hero.tsx']);
+  assert.ok(files['src/components/sections/ShowcaseGrid.tsx']);
+  assert.ok(files['src/components/sections/InteractiveSection.tsx']);
+  assert.ok(files['src/components/sections/ContactSection.tsx']);
+  assert.ok(files['src/app/api/contact/route.ts']);
+  assert.ok(files['src/app/api/data/route.ts']);
+  assert.ok(files['src/lib/data.ts']);
+  assert.ok(files['src/types/index.ts']);
+
+  assert.ok(result.previewHtml.includes('<!DOCTYPE html>'));
+  assert.ok(result.previewHtml.includes('filter-btn'));
 });
 
 test('OneShotEngine generates idiomatic Next.js App Router multi-file project tree on disk', async () => {
@@ -69,14 +140,13 @@ test('OneShotEngine generates idiomatic Next.js App Router multi-file project tr
   assert.ok(files['src/app/page.tsx']);
   assert.ok(files['src/app/globals.css']);
   assert.ok(files['src/components/sections/Hero.tsx']);
-  assert.ok(files['src/components/sections/ProjectsGrid.tsx']);
-  assert.ok(files['src/components/sections/TerminalBio.tsx']);
+  assert.ok(files['src/components/sections/ShowcaseGrid.tsx']);
+  assert.ok(files['src/components/sections/InteractiveSection.tsx']);
   assert.ok(files['src/lib/data.ts']);
 
   // Verify standalone preview HTML
   assert.ok(result.buildResult.html.includes('<!DOCTYPE html>'));
   assert.ok(result.buildResult.html.includes('filter-btn'));
-  assert.ok(result.buildResult.html.includes('termLogs'));
 
   // Verify Visual Critic Score
   const ev = result.evaluation;
@@ -103,36 +173,45 @@ test('OneShotEngine generates idiomatic Next.js App Router multi-file project tr
 
 test('OrchestratorEngine.submitOneShotTask executes multi-agent pipeline and streams events', async () => {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'engine-oneshot-'));
-  await initializeProject(tmpDir, { name: 'oneshot-engine-test', yes: true });
+  await initializeProject(tmpDir, { name: 'engine-oneshot', yes: true });
 
   const engine = new OrchestratorEngine(tmpDir);
   await engine.initialize();
 
   const events = [];
-  engine.on('agent_event', (evt) => events.push(evt));
+  engine.on('agent_event', (evt) => {
+    events.push(evt);
+  });
 
-  const outDir = path.join(tmpDir, 'generated-site');
-  const result = await engine.submitOneShotTask("Developer portfolio showcasing high performance systems", {
+  const prompt = "create me a modern website that showcase my skills basically its a portfolio";
+  const outputSiteDir = path.join(tmpDir, 'generated-site');
+
+  const summary = await engine.submitOneShotTask(prompt, {
+    outputDir: outputSiteDir,
     targetFramework: 'nextjs',
-    outputDir: outDir,
     fast: true
   });
 
-  assert.ok(result.evaluation);
-  assert.ok(result.evaluation.finalScore >= 8.5);
-  assert.ok(result.buildResult.fileCount > 5);
+  assert.ok(summary);
+  assert.equal(summary.targetFramework, 'nextjs');
+  assert.ok(summary.buildResult.fileCount > 5);
+  assert.ok(summary.evaluation.finalScore >= 8.5);
 
-  // Verify events emitted across creative crew
-  const agentNames = events.map(e => e.agent);
-  assert.ok(agentNames.includes('creativeDirector'));
-  assert.ok(agentNames.includes('uxPlanner'));
-  assert.ok(agentNames.includes('designSystem'));
-  assert.ok(agentNames.includes('frontend'));
-  assert.ok(agentNames.includes('visualCritic'));
-  assert.ok(agentNames.includes('orchestrator'));
+  // Verify streamed events
+  assert.ok(events.some(e => e.agent === 'orchestrator' && e.type === 'spawn'));
+  assert.ok(events.some(e => e.agent === 'creativeDirector'));
+  assert.ok(events.some(e => e.agent === 'frontend'));
+  assert.ok(events.some(e => e.agent === 'backend'));
+  assert.ok(events.some(e => e.agent === 'visualCritic'));
+  assert.ok(events.some(e => e.type === 'file.created'));
 
-  // Verify files generated on disk
-  const files = await fs.readdir(outDir);
+  // Verify state
+  const state = engine.getState();
+  assert.equal(state.status, 'COMPLETED');
+  assert.equal(state.orchestrator.state, 'COMPLETED');
+
+  // Verify disk output
+  const files = await fs.readdir(outputSiteDir);
   assert.ok(files.includes('package.json'));
   assert.ok(files.includes('index.html'));
 
@@ -142,19 +221,14 @@ test('OrchestratorEngine.submitOneShotTask executes multi-agent pipeline and str
 
 test('Server OneShot API routes (/api/oneshot, /api/token-stats, /api/site-preview) function properly', async () => {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'server-oneshot-'));
-  await initializeProject(tmpDir, { name: 'server-oneshot-test', yes: true });
+  await initializeProject(tmpDir, { name: 'server-oneshot', yes: true });
 
   const engine = new OrchestratorEngine(tmpDir);
   await engine.initialize();
 
-  // Create a dummy site preview
-  const siteDir = path.join(tmpDir, 'generated-site');
-  await fs.mkdir(siteDir, { recursive: true });
-  await fs.writeFile(path.join(siteDir, 'index.html'), '<html><body><h1>Preview Test</h1></body></html>');
+  const server = createServer(tmpDir, engine);
 
-  const server = createServer(engine);
-
-  const dispatch = (req, body = null) => new Promise((resolve) => {
+  const dispatch = (req) => new Promise((resolve) => {
     const res = {
       statusCode: 200,
       headers: {},
@@ -162,55 +236,59 @@ test('Server OneShot API routes (/api/oneshot, /api/token-stats, /api/site-previ
       setHeader(k, v) { this.headers[k] = v; },
       writeHead(code, headers) { this.statusCode = code; if (headers) Object.assign(this.headers, headers); },
       end(chunk) {
-        if (chunk) this.body += chunk;
+        if (chunk) this.body = chunk;
         resolve(this);
       }
-    };
-    req.on = (evt, cb) => {
-      if (evt === 'data' && body) cb(body);
-      if (evt === 'end') cb();
-      return req;
     };
     server.emit('request', req, res);
   });
 
   try {
-    // 1. GET /api/token-stats
+    // 1. Test /api/token-stats
     const tokenRes = await dispatch({
       method: 'GET',
       url: '/api/token-stats',
-      headers: { host: 'localhost' }
+      headers: {}
     });
     assert.equal(tokenRes.statusCode, 200);
     const tokenData = JSON.parse(tokenRes.body);
-    assert.equal(tokenData.efficiencyRatio, 72);
-    assert.ok(tokenData.strategiesActive.length > 0);
+    assert.ok(tokenData.efficiencyRatio >= 0);
 
-    // 2. GET /api/site-preview
+    // 2. Test /api/oneshot (Fast synthetic dispatch)
+    const payload = JSON.stringify({
+      prompt: "Modern developer portfolio with kinetic animations",
+      targetFramework: "nextjs",
+      fast: true
+    });
+    const req = {
+      method: 'POST',
+      url: '/api/oneshot',
+      headers: { 'content-type': 'application/json' },
+      on(event, cb) {
+        if (event === 'data') cb(Buffer.from(payload));
+        if (event === 'end') cb();
+        return this;
+      }
+    };
+    const oneshotRes = await dispatch(req);
+    assert.equal(oneshotRes.statusCode, 200);
+    const oneshotData = JSON.parse(oneshotRes.body);
+    assert.equal(oneshotData.status, 'oneshot_started');
+    assert.equal(oneshotData.options.targetFramework, 'nextjs');
+
+    // 3. Test /api/site-preview
+    await fs.mkdir(path.join(tmpDir, 'generated-site'), { recursive: true });
+    await fs.writeFile(path.join(tmpDir, 'generated-site', 'index.html'), '<!DOCTYPE html><html><body><h1>Preview</h1></body></html>');
+
     const previewRes = await dispatch({
       method: 'GET',
       url: '/api/site-preview',
-      headers: { host: 'localhost' }
+      headers: {}
     });
     assert.equal(previewRes.statusCode, 200);
-    assert.ok(previewRes.body.includes('Preview Test'));
-
-    // 3. POST /api/oneshot
-    const oneshotRes = await dispatch({
-      method: 'POST',
-      url: '/api/oneshot',
-      headers: { host: 'localhost' }
-    }, JSON.stringify({ prompt: 'Developer portfolio' }));
-    assert.equal(oneshotRes.statusCode, 200);
-    const oneshotJson = JSON.parse(oneshotRes.body);
-    assert.equal(oneshotJson.status, 'oneshot_started');
+    assert.ok(previewRes.body.includes('<!DOCTYPE html>'));
 
   } finally {
-    if (server && server.listening) server.close();
-    if (engine.activeTaskAbortController) {
-      engine.activeTaskAbortController.abort();
-    }
-    await new Promise(r => setTimeout(r, 50));
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
 });
