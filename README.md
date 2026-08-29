@@ -9,7 +9,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="Apache 2.0 License"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen.svg" alt="Node.js 18+"></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Runtime_Dependencies-Zero-orange.svg" alt="Zero Runtime Dependencies"></a>
-  <a href="https://github.com/hiroqt/PixelCrew"><img src="https://img.shields.io/badge/Release-v0.2.3-blueviolet.svg" alt="Release v0.2.3"></a>
+  <a href="https://github.com/hiroqt/PixelCrew"><img src="https://img.shields.io/badge/Release-v0.2.4-blueviolet.svg" alt="Release v0.2.4"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
 
