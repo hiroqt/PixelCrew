@@ -134,16 +134,16 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
       return sendJson(200, { status: 'accepted', prompt });
     }
 
-    if (pathname === '/api/oneshot' && req.method === 'POST') {
+    if ((pathname === '/api/goal' || pathname === '/api/oneshot') && req.method === 'POST') {
       const body = await readBody();
-      const prompt = body.prompt || 'Build a modern portfolio for an AI engineer inspired by editorial design';
+      const prompt = body.prompt || body.goal || 'Build a modern website for a design agency specializing in AI products';
       const options = {
-        targetFramework: body.targetFramework || 'vanilla',
-        outputDir: body.outputDir || path.join(engine.rootDir, 'generated-site')
+        targetFramework: body.targetFramework || 'nextjs',
+        outputDir: body.outputDir
       };
-      // Asynchronously start OneShot pipeline
+      // Asynchronously start Multi-Agent Synthesis / Goal pipeline
       engine.submitOneShotTask(prompt, options).catch(console.error);
-      return sendJson(200, { status: 'oneshot_started', prompt, options });
+      return sendJson(200, { status: 'goal_started', prompt, options });
     }
 
     if (pathname === '/api/token-stats' && req.method === 'GET') {
@@ -164,15 +164,16 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
     }
 
     if (pathname === '/api/site-preview' && req.method === 'GET') {
-      const sitePath = path.join(engine.rootDir, 'generated-site', 'index.html');
-      try {
-        const html = await fs.readFile(sitePath, 'utf-8');
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(html);
-        return;
-      } catch {
-        return sendJson(404, { error: 'No generated site found yet. Run oneshot first.' });
+      const sitePath = engine.lastGeneratedSitePath || (engine.lastGeneratedOutputDir ? path.join(engine.lastGeneratedOutputDir, 'index.html') : null);
+      if (sitePath) {
+        try {
+          const html = await fs.readFile(sitePath, 'utf-8');
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(html);
+          return;
+        } catch {}
       }
+      return sendJson(404, { error: 'No generated site preview found yet. Execute a task or goal first.' });
     }
 
     if (pathname === '/api/emit' && req.method === 'POST') {

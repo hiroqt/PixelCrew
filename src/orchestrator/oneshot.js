@@ -396,12 +396,13 @@ body {
   async generateWebsite(userPrompt, options = {}) {
     const startTime = Date.now();
     const onProgress = options.onProgress || (() => {});
-    const outputDir = options.outputDir || path.resolve(process.cwd(), 'generated-site');
-
     // 1. Dynamic Planning & Task Graph Compilation
     const analysis = this.planner.analyzeRequirements(userPrompt, options);
     const spec = this.planner.createProjectSpecification(analysis);
     const taskGraph = this.planner.createTaskGraph(spec);
+
+    const projectSlug = spec.companyName ? spec.companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'pixel-project';
+    const outputDir = options.outputDir ? path.resolve(options.outputDir) : path.resolve(process.cwd(), '..', projectSlug);
 
     // 2. Creative Direction
     const creativeDirection = await this.runCreativeDirector(userPrompt, { domain: spec.domain, targetFramework: spec.framework }, onProgress);

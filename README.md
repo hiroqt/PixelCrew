@@ -1,77 +1,55 @@
 # PixelCrew (`@hiroqt/pixelcrew`)
 
 <p align="center">
-  <strong>Local Multi-Agent Orchestration Engine & Retro Pixel-Art Tech Startup Office</strong><br>
-  <em>Transform any codebase into an observable, autonomous, and choreographed AI engineering workspace with a single command.</em>
+  <strong>Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office</strong><br>
+  <em>Transform any codebase into an observable, choreographed AI engineering workspace with design-first synthesis and automated E2E testing.</em>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="Apache 2.0 License"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen.svg" alt="Node.js 18+"></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Runtime_Dependencies-Zero-orange.svg" alt="Zero Runtime Dependencies"></a>
-  <a href="https://github.com/hiroqt/PixelCrew"><img src="https://img.shields.io/badge/Release-v0.2.0-blueviolet.svg" alt="Release v0.2.0"></a>
+  <a href="https://github.com/hiroqt/PixelCrew"><img src="https://img.shields.io/badge/Release-v0.2.3-blueviolet.svg" alt="Release v0.2.3"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
 
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│  PIXELCREW HQ  ::  FLOOR 42                              ● SWARM LIVE  │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│                    ┌──────────────────────┐                            │
-│                    │   LEAD ORCHESTRATOR  │                            │
-│                    │        [ ◉ _ ◉ ]     │                            │
-│                    │      DAG Dispatch    │                            │
-│                    └──────────┬───────────┘                            │
-│                               │                                        │
-│          ┌────────────────────┼────────────────────┐                   │
-│          │                    │                    │                   │
-│          ▼                    ▼                    ▼                   │
-│    ┌───────────┐        ┌───────────┐        ┌───────────┐             │
-│    │ FRONTEND  │        │  BACKEND  │        │ DATABASE  │             │
-│    │  [ ◉ ▂ ◉ ]│        │  [ ◉ ▂ ◉ ]│        │  [ ◉ ⊙ ]  │             │
-│    │  working  │        │  working  │        │ analyzing │             │
-│    └───────────┘        └───────────┘        └───────────┘             │
-│          │                    │                    │                   │
-│          ▼                    ▼                    ▼                   │
-│    ┌───────────┐        ┌───────────┐        ┌───────────┐             │
-│    │ CREATIVE  │        │ANTI-AI QA │        │TOKEN SAVER│             │
-│    │  [ ★ _ ★ ]│        │  [ 🔍_🔍 ]│        │  [ ◉ ▂ ◉ ]│             │
-│    │ Director  │        │Critic >=8.5│       │72% Savings│             │
-│    └───────────┘        └───────────┘        └───────────┘             │
-│                                                                        │
-│  LIVE TELEMETRY STREAM                                                 │
-│  ────────────────────────────────────────────────────────────────────  │
-│  03:41:02  orchestrator     → decomposed objective into parallel tasks │
-│  03:41:03  creativeDirector → formulated asymmetric editorial style    │
-│  03:41:04  designSystem     → compiled fluid clamp type & tokens       │
-│  03:41:05  visualCritic     → ★ Visual Score: 9.4/10 (Passed >= 8.5)   │
-│                                                                        │
-│  ACTIVE SKILL ENGINES                                                  │
-│  ────────────────────────────────────────────────────────────────────  │
-│  ✓ Codebase Intelligence   ✓ Design Director (Anti-AI)  ✓ Token Saver  │
-│  ◉ Frontend Engineering    ◉ Database Engineering       ◉ Visual QA    │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
-```
+---
+
+## 🏢 The Background & Origin of PixelCrew
+
+### The Observability Crisis in AI Engineering
+As software development rapidly shifts toward autonomous multi-agent AI swarms—where specialized agents simultaneously refactor frontends, write database migrations, patch APIs, and run regression test suites—developers face a major problem: **the black-box opacity crisis**.
+
+Traditional AI coding tools provide either:
+1. **Opaque Spinners**: Hiding all subagent thought processes behind a single generic "Thinking..." indicator.
+2. **Terminal Log Flood**: Dumping thousands of raw console lines and unformatted JSON envelopes, making it impossible to track dependencies, bottlenecks, or breaking changes in real time.
+
+### The Philosophy: Observable, Design-First, and End-to-End Grounded
+**PixelCrew was created to turn the invisible execution loop into an observable, choreographed engineering office.**
+
+Modeled after **Floor 42 of Pixel Corps HQ**, PixelCrew pairs developers with an autonomous squad of specialized engineering personas:
+- Every subagent has a dedicated physical workstation with real-time sprite state changes, mechanical keyboard typing animations, and glowing monitor telemetry.
+- CRT phosphor scanlines, daytime/night-mode cyberpunk office lighting, and procedural 8-bit Web Audio chiptunes bring engineering progress to life.
+- **Zero AI Slop**: Enforces strict creative direction, fluid `clamp()` typography scales, and asymmetric layout rules *before* writing code, completely eliminating purple mesh gradient blobs and cliché copy.
+- **Full-Stack Grounding**: Takes every objective all the way through design, multi-file code generation, type-safe API route contracts, schema models, performance SRE profiling, and **automated Playwright / Vitest E2E user journey testing**, culminating in a comprehensive post-execution Token Optimization report.
 
 ---
 
-## ⚡ 10-Second Ignition
+## ⚡ 10-Second Quickstart
 
-No global installations or complex configuration required. Run directly in your repository:
+No global installations or complex configuration required. Run directly in your project:
 
 ```bash
-# 1. ✦ OneShot Website Generation (Design-First Multi-Agent Synthesis)
-npx pixelcrew oneshot "Build a modern website for a design agency specializing in AI products. Dark, editorial, premium."
-
-# 2. Launch the orchestrator daemon and real-time visual office dashboard
+# 1. Launch the orchestrator daemon and real-time visual office dashboard
 npx pixelcrew start
 
-# 3. Initialize and adapt PixelCrew to an existing codebase
-npx pixelcrew init
+# 2. Dispatch a full-stack goal (from design to automated E2E testing)
+npx pixelcrew task "Build a modern portfolio for an AI engineer with Next.js and E2E tests"
 
-# 4. Run an instant multi-agent sprint simulation demo
+# 3. Initialize and adapt PixelCrew to an existing codebase
+npx pixelcrew init --yes
+
+# 4. Run an instant multi-agent simulated sprint demo
 npx pixelcrew demo
 ```
 
@@ -80,59 +58,36 @@ The interactive dashboard opens automatically at:
 
 ---
 
-## ✦ OneShot Website Synthesis & Anti-AI Visual Critic
+## 🎯 The `/goal` Multi-Agent Lifecycle (From Brief to E2E Testing)
 
-### The Problem: Why Generated Websites Look Generic
-Most AI coding tools follow a naive linear prompt pattern:
-```
-User Prompt  ──>  AI immediately writes React/HTML code  ──>  Generic AI Slop
-```
-This produces cookie-cutter outputs: purple mesh gradients, repeating 3-column rounded cards, fake floating glassmorphism blobs, and cliché copy like *"Revolutionize your workflow"*.
-
-### The Solution: Decouple Design Direction from Coding
-PixelCrew enforces a strict multi-agent creative pipeline before generating code:
+When triggered via `/goal <objective>` in chat or `npx pixelcrew task "<objective>"` on the CLI, PixelCrew orchestrates an autonomous 10-stage engineering pipeline:
 
 ```mermaid
 flowchart TD
-    User["User Prompt"] --> CD["Creative Director Agent"]
-    CD --> Direction["Creative Direction JSON (Archetype, Palette, Fonts, Negative Constraints)"]
-    Direction --> UX["UX Planner Agent"]
-    UX --> Topology["Asymmetric Section Topology (Hero, Bento, Manifesto, Specs, CTA)"]
-    Topology --> DS["Design System Agent"]
-    DS --> Tokens["Design Tokens (Fluid clamp(), Google Fonts, Tailwind Config)"]
-    Tokens --> FE["Frontend Builder Agent"]
-    FE --> Code["Clean HTML5 / Tailwind / Vanilla / React Code (Zero Placeholders)"]
-    Code --> QA["Visual Critic & Anti-AI Guardian"]
-    QA --> Review{"Rubric >= 8.5/10?"}
-    Review -- No (Refine) --> FE
-    Review -- Yes (Approved) --> Done["Modern Finished Website (index.html + creative-direction.json)"]
+    Goal["Developer Goal / User Objective"] --> Orch["1. Lead Orchestrator (DAG Decomposition & Context Scan)"]
+    Orch --> CD["2. Creative Director (Authentic Visual Personality & Anti-AI Rules)"]
+    CD --> UX["3. UX Planner (Asymmetric Layout Topology & Interactive Specs)"]
+    UX --> DS["4. Design System Architect (Fluid clamp() Scales, Tailwind, Google Fonts)"]
+    DS --> FE["5. Frontend Engineer (Next.js App Router, TypeScript, Zero Slop)"]
+    FE --> BE["6. Backend & Database (Route Handlers, RFC 7807, Schema Models)"]
+    BE --> SRE["7. Performance & Security SRE (CWV LCP < 0.6s, CSP, Sanitization)"]
+    SRE --> Critic["8. Anti-AI Visual Critic (6-Dimension Rubric Score >= 8.5/10.0)"]
+    Critic --> QA["9. QA Automation & E2E Testing (Playwright User Journey Suite)"]
+    QA --> Report["10. Executive & Token Usage Report (Full Efficiency & Test Breakdown)"]
 ```
 
-### 1. Creative Director Decision Schema
-Before writing code, PixelCrew determines:
-- **Design Archetype**: *Editorial Asymmetric Grid*, *Technical Lab*, or *Kinetic Studio*.
-- **Visual Personality**: High-contrast, intentional whitespace, expressive typography.
-- **Negative Constraints**: Strictly bans purple/blue blobs, symmetrical card grids, and placeholder copy.
+### The 10 Specialized Squad Stages:
 
-### 2. 6-Dimension Visual Critic Rubric ($\ge 8.5/10.0$)
-Every generated site is scored across a weighted human design rubric:
-
-$$\text{Final Score} = \frac{\text{Originality} + \text{Typography} + \text{Layout} + \text{Visual Hierarchy} + \text{Brand Consistency} + (10 - \text{Generic AI Penalty})}{6}$$
-
-```text
-╔═════════════════════════════════════════════════════════════════════╗
-║                      PIXEL CREW VISUAL SCORE                        ║
-╠═════════════════════════════════════════════════════════════════════╣
-║  Originality:           9.1 / 10                                    ║
-║  Typography:            9.7 / 10                                    ║
-║  Layout & Rhythm:       9.1 / 10                                    ║
-║  Visual Hierarchy:      9.4 / 10                                    ║
-║  Brand Consistency:     9.3 / 10                                    ║
-║  Generic AI Penalty:    -0.4 / 10                                   ║
-║                                                                     ║
-║  FINAL VISUAL SCORE:    9.4 / 10.0   [✓ APPROVED >= 8.5]            ║
-╚═════════════════════════════════════════════════════════════════════╝
-```
+1. **Lead Orchestrator**: Analyzes repository context (`.pixel-agents/context.json`) and compiles a dynamic Directed Acyclic Graph (DAG) for parallel execution.
+2. **Creative Director & Anti-AI Guardian**: Selects a bespoke design archetype (*Editorial*, *Technical Lab*, or *Kinetic Studio*) and bans generic AI markers (purple gradient blobs, uniform 3-card grids, fake AI sparkles).
+3. **UX Planner**: Formulates dynamic section topologies (Hero, Interactive Filter Matrix, Live Terminal Shell, Proof/Specs, Inquiries).
+4. **Design System Architect**: Compiles fluid typography clamp scales, Tailwind CSS tokens, and WCAG AA contrast pairings.
+5. **Frontend Engineer**: Synthesizes idiomatic Next.js 14/15 App Router + TypeScript + Tailwind CSS code with zero placeholder copy.
+6. **Backend & Database Engineer**: Synthesizes type-safe Route Handlers (`/api/contact`, `/api/data`) and structured data models.
+7. **Performance & Security SRE**: Profiles Core Web Vitals (LCP < 0.6s, INP < 50ms, CLS = 0), CSP headers, and input sanitization.
+8. **Anti-AI Visual Critic**: Audits against the 6-dimension visual rubric ($\ge 8.5/10.0$) with automated refinement.
+9. **QA Automation & E2E Testing**: Generates and executes Playwright / Vitest test suites (`tests/e2e/user-journey.spec.ts`) covering all happy paths, responsive viewports, and edge cases.
+10. **Executive Token Usage & Audit Report**: Delivers a persistent, structured report detailing token savings, test run results, and architectural changes.
 
 ---
 
@@ -149,7 +104,7 @@ PixelCrew includes built-in token optimization rules and metrics across all majo
 ║               CROSS-IDE TOKEN OPTIMIZATION METRICS                  ║
 ╠═════════════════════════════════════════════════════════════════════╣
 ║  Raw Estimated Tokens:  42,500 tokens                               ║
-║  Actual Tokens Used:    11,800 tokens                               ║
+║  Actual Tokens Consumed: 11,800 tokens                              ║
 ║  Tokens Conserved:      30,700 tokens (72% Savings)                 ║
 ║  Active Strategy:       AST Skeletons + Pruned Boundaries           ║
 ╚═════════════════════════════════════════════════════════════════════╝
@@ -157,43 +112,29 @@ PixelCrew includes built-in token optimization rules and metrics across all majo
 
 ---
 
-## 💡 The Paradigm: Why PixelCrew?
+## 👥 Target User Personas
 
-Traditional AI agent tooling runs inside black-box terminal loops: you type a prompt, wait minutes in silence, and hope the agent doesn't hallucinate or clobber your codebase.
+| Persona | Needs & Goals | How PixelCrew Solves It |
+| :--- | :--- | :--- |
+| **Software Engineers & Founders** | Ship features fast across full-stack repositories without losing track of agent changes. | Visual state machine and live `#engineering-feed` stream shows exactly who is doing what in real-time. |
+| **Tech Leads & Architects** | Enforce permissions, verify architectural compliance, and avoid breaking changes. | Agent filesystem permissions (`read`/`write` globs), skill matrices, and DAG dependency enforcement. |
+| **AI Agents & Autonomous Swarms** | Require structured coordination, codebase grounding, and telemetry emission. | Static codebase analyzer (`.pixel-agents/context.json`) and lightweight CLI/REST event emission (`pixelcrew emit`). |
 
-**PixelCrew turns the invisible execution loop into an observable, choreographed engineering office.**
+---
 
-```mermaid
-flowchart TD
-    UserPrompt["Developer Prompt / Objective"] --> Analyzer["Codebase Static Analyzer\n(Scans Frameworks, ORMs, Testing)"]
-    Analyzer --> ContextCache[".pixel-agents/context.json\n(Project DNA & Architecture Profile)"]
-    ContextCache --> Orchestrator["Orchestrator Engine (DAG Task Planner)"]
-    
-    subgraph Swarm ["Autonomous Agent Swarm"]
-        Orchestrator --> FE["Frontend Engineer (React 19 / Next.js)"]
-        Orchestrator --> BE["Backend Architect (REST / gRPC / Auth)"]
-        Orchestrator --> DB["Database DBA (Postgres / Prisma / Drizzle)"]
-        Orchestrator --> SEC["Security Sentinel (OWASP / RLS)"]
-        Orchestrator --> PERF["Performance SRE (CWV / Profiling)"]
-        Orchestrator --> QA["QA Automation (Vitest / Playwright)"]
-    end
+## 💡 Key Differentiators
 
-    Swarm --> Telemetry["Event Pipeline (SSE & Append-only JSONL)"]
-    Telemetry --> Canvas["Floor 42 2D Canvas Dashboard\n(Procedural Sprites, CRT Shader, Web Audio SFX)"]
-    Telemetry --> IDESync["IDE Telemetry Feedback (Antigravity, Cursor, Claude)"]
-```
-
-### Core Innovations
-- **Zero Runtime Dependencies**: Pure Node.js ESM orchestrator with lightweight HTML5/CSS/Canvas. No bloated node_modules. Instant launch.
-- **Codebase Context Adaptation**: Auto-discovers frameworks (Next.js, Vite, React, Vue), ORMs (Prisma, Drizzle), and test runners (Vitest, Playwright) to tailor agent permissions and skill injection.
-- **Bi-Directional Telemetry**: Accepts event streams over CLI flags, HTTP REST endpoints (`/api/emit`), and append-only `.pixel-agents/events.jsonl` files.
-- **Floor 42 Office Engine**: Procedural 2D canvas with CRT scanline simulation, daytime/night-mode cyberpunk lighting, and retro 8-bit Web Audio chimes.
+1. **Zero Runtime Dependencies**: Pure Node.js ESM orchestrator with lightweight HTML5/CSS/Canvas. Instant startup with no bloated dependencies.
+2. **Context-Aware Adaptation**: Automatically scans existing codebases (Next.js, Prisma, Django, Go, Vitest) and configures permissions and skills to match the repo.
+3. **Decoupled Skills Architecture**: Agents are not hardcoded personas; their capabilities are dynamically composed from modular markdown skill guides under `.agents/skills/`.
+4. **Anti-AI Design Guardian**: 6-dimension visual scoring rubric with strict threshold validation ($\ge 8.5/10.0$) ensuring original, human-crafted aesthetics.
+5. **Gamified Engineering Ergonomics**: Procedural pixel characters, interactive office floor plan, audio chimes, and CRT aesthetics make pairing with AI agents fun and engaging.
 
 ---
 
 ## 🧠 The 8 Engineering Skill Pillars
 
-PixelCrew equips agents with production-grade engineering skill modules located under `.agents/skills/` (and mirrored to `.pixel-agents/skills/`):
+PixelCrew equips agents with production-grade engineering skill modules located under `.agents/skills/`:
 
 ### 1. `design-director`
 Lead creative direction and authentic visual personality engine. Decouples artistic strategy, typographic clamp scales, and negative constraints before frontend code generation.
@@ -221,91 +162,28 @@ Full-stack profiling: Core Web Vitals (LCP, INP, CLS), main-thread yielding, str
 
 ---
 
-## 🛠️ Cross-Harness Installation & IDE Setup
-
-PixelCrew integrates seamlessly with all leading AI coding assistants and agent environments:
-
-### Google Antigravity IDE (Recommended)
-Register PixelCrew globally so Antigravity agents automatically stream to your visual office:
-
-```bash
-# Register global plugin
-mkdir -p ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents
-cp plugins/plugin.json ~/.gemini/config/plugins/pixel-agents/
-cp .agents/skills/pixel-agents/SKILL.md ~/.gemini/config/plugins/pixel-agents/skills/pixel-agents/
-```
-
-Whenever you prompt inside Antigravity:
-> *"Synthesize a modern website for an AI architecture lab using PixelCrew"*
-
-The agent automatically loads the skill, executes the task, and streams live sprite animations and status logs to your browser.
-
----
-
-### Claude Code
-Install project-locally or link globally:
-
-```bash
-# Project-local install
-mkdir -p .claude/skills/pixel-agents
-cp .agents/skills/pixel-agents/SKILL.md .claude/skills/pixel-agents/
-```
-
----
-
-### Cursor IDE
-Add to your project's agent rules or skills:
-
-```bash
-mkdir -p .cursor/skills/pixel-agents
-cp .agents/skills/pixel-agents/SKILL.md .cursor/skills/pixel-agents/
-```
-
-*Ensure Agent Skills are enabled under Cursor Settings → Beta.*
-
----
-
-### OpenAI Codex CLI
-Install project-locally with native hook support:
-
-```bash
-mkdir -p .agents/skills
-cp -r .agents/skills/* .agents/skills/
-```
-
----
-
-### GitHub Copilot / Grok Build / Gemini CLI / Trae / OpenCode
-Copy the `.agents/skills/` directory into your tool's native skills folder:
-- **GitHub Copilot**: `.github/skills/pixel-agents/`
-- **Gemini CLI**: `~/.gemini/config/skills/pixel-agents/`
-- **Grok Build**: `.grok/skills/pixel-agents/`
-- **Trae**: `~/.trae/skills/` or `~/.trae-cn/skills/`
-
----
-
 ## 💻 CLI Terminal Reference
 
 | Command | Action | Example |
 | :--- | :--- | :--- |
-| `npx pixelcrew oneshot "<prompt>"` | **Synthesizes modern website with Visual Critic loop** | `npx pixelcrew oneshot "Dark editorial AI studio"` |
+| `npx pixelcrew task "<desc>"` | **Dispatches objective or website goal to the swarm** | `npx pixelcrew task "Build AI studio with E2E tests"` |
+| `npx pixelcrew goal "<goal>"` | **Executes full-stack goal through E2E verification** | `npx pixelcrew goal "Optimize SQL & profile CWV"` |
 | `npx pixelcrew start` | Launches orchestrator, SSE stream, and web dashboard | `npx pixelcrew start --port 4747` |
 | `npx pixelcrew init` | Scaffolds `.pixel-agents/` and adapts to repository | `npx pixelcrew init --yes` |
 | `npx pixelcrew analyze` | Prints detected frameworks, database, ORM, and test stack | `npx pixelcrew analyze` |
 | `npx pixelcrew demo` | Launches an interactive multi-agent simulated sprint | `npx pixelcrew demo` |
-| `npx pixelcrew task "<text>"` | Dispatches a direct objective to the running agent swarm | `npx pixelcrew task "Optimize SQL queries"` |
 | `npx pixelcrew emit [flags]` | Emits a custom telemetry event into the stream | `npx pixelcrew emit --agent db --message "Done"` |
 | `npx pixelcrew dashboard` | Opens or serves the standalone Floor 42 dashboard UI | `npx pixelcrew dashboard` |
 | `npx pixelcrew status` | Prints ASCII summary of swarm states and active sprints | `npx pixelcrew status` |
 | `npx pixelcrew help` | Displays full CLI manual and flag details | `npx pixelcrew help` |
 
 ### CLI Options & Flags:
-- `--target <framework>`: Target framework for OneShot (`vanilla`, `nextjs`)
-- `--out <dir>`: Custom destination directory for generated site (default: `./generated-site`)
+- `--target <framework>`: Target framework for project creation (`nextjs`, `vanilla`)
+- `--out <dir>`: Custom destination directory (scaffolds outside the tool folder when creating from scratch)
 - `--port <number>`: Dashboard port (default: `4747`)
 - `--no-open`: Prevents auto-launching browser on startup
 - `--yes`, `-y`: Bypasses interactive prompts during initialization
-- `--agent <name>`: Target agent for event emission (`frontend`, `backend`, `database`, `security`, `performance`, `qa`, `creativeDirector`, `uxPlanner`, `designSystem`, `visualCritic`)
+- `--agent <name>`: Target agent for event emission (`frontend`, `backend`, `database`, `security`, `performance`, `qa`, `creativeDirector`)
 - `--type <type>`: Event category (`spawn`, `thinking`, `tool`, `skill`, `complete`, `error`)
 - `--message <text>`: Description payload for the event log
 - `--skill <name>`: Skill tag associated with the action
@@ -316,26 +194,42 @@ Copy the `.agents/skills/` directory into your tool's native skills folder:
 
 | Key / Control | Function | Description |
 | :--- | :--- | :--- |
-| `[O]` | **OneShot Studio** | Opens the interactive OneShot Multi-Agent Synthesis studio |
 | `[R]` | **Audit Reports** | Toggles the comprehensive multi-agent audit reports drawer |
 | `[SPACE]` | **Launch Demo** | Boots the swarm and runs a simulated multi-agent sprint |
 | `[1] - [6]` | **Agent Inspector** | Opens the dedicated status drawer and permissions for agents 1 through 6 |
-| `[ESC]` | **Close Modals** | Closes any active OneShot studio, reports drawer, or inspector modal |
+| `[ESC]` | **Close Modals** | Closes any active modal or reports drawer |
 | `CRT Button` | **Scanline Shader** | Toggles retro arcade phosphor scanlines and vignette effect |
 | `NIGHT Button` | **Cyberpunk Shift** | Switches between warm day office and neon cyberpunk night lighting |
-| `SFX Button` | **Web Audio Synth** | Toggles procedural 8-bit chip-tune feedback sounds |essage "Done"` |
-| `npx pixelcrew dashboard` | Opens or serves the standalone Floor 42 dashboard UI | `npx pixelcrew dashboard` |
-| `npx pixelcrew status` | Prints ASCII summary of swarm states and active sprints | `npx pixelcrew status` |
-| `npx pixelcrew help` | Displays full CLI manual and flag details | `npx pixelcrew help` |
+| `SFX Button` | **Web Audio Synth** | Toggles procedural 8-bit chip-tune feedback sounds |
 
-### CLI Options & Flags:
-- `--port <number>`: Dashboard port (default: `4747`)
-- `--no-open`: Prevents auto-launching browser on startup
-- `--yes`, `-y`: Bypasses interactive prompts during initialization
-- `--agent <name>`: Target agent for event emission (`frontend`, `backend`, `database`, `security`, `performance`, `qa`)
-- `--type <type>`: Event category (`spawn`, `thinking`, `tool`, `skill`, `complete`, `error`)
-- `--message <text>`: Description payload for the event log
-- `--skill <name>`: Skill tag associated with the action
+---
+
+## 🗺️ Product Roadmap
+
+### v0.1 — Foundations
+- Pure Node.js ESM CLI (`pixelcrew init`, `start`, `demo`, `task`, `emit`, `analyze`, `status`).
+- Static codebase analyzer and context generator (`.pixel-agents/context.json`).
+- Interactive Pixel Startup Office 2D canvas with workstation hover tooltips and inspector modal.
+- Real-time Server-Sent Events (SSE) stream and Web Audio 8-bit chiptune synthesizer.
+
+### v0.2 — Dynamic Multi-Agent Synthesis & Anti-AI Guardian (Current Release)
+- **Autonomous Multi-Agent Synthesis** (`npx pixelcrew task` / `/goal`): Full-stack synthesis decoupling creative direction from code generation.
+- **Anti-AI Design Guardian**: 6-dimension visual scoring rubric with threshold validation ($\ge 8.5/10.0$) and automated refinement.
+- **Cross-IDE Token Optimization Engine**: Universal token conservation strategies across Claude, Antigravity, Cursor, Kiro, Windsurf, Copilot (~72% token savings).
+- **Automated Playwright E2E Verification**: End-to-end user journey test suite synthesis covering landmarks, interactive filters, form flows, and mobile responsiveness.
+- **Audit Reports Engine**: Structured report compilation, Markdown exporter, and persistent report history under `.pixel-agents/reports/`.
+
+### v0.3 — Git Worktree Isolation & 3-Way Merge
+- Isolated Git worktrees for each subagent to enable non-conflicting parallel code generation.
+- Automated 3-way merge conflict resolution guided by the Lead Orchestrator.
+
+### v0.4 — Model API Runtime Adapters
+- Direct API connectors for Gemini, Claude, OpenAI, and local Ollama models.
+- Interactive terminal chat mode for conversational steering during active sprints.
+
+### v0.5 — Multi-Floor Office Expansions & Distributed Swarms
+- Modular office expansion packs (Floor 41: ML Research, Floor 43: Mobile Engineering).
+- Multi-machine coordination via WebSockets / WebRTC for shared team sprints.
 
 ---
 
@@ -350,28 +244,13 @@ your-project/
 │   ├── context.json             # Cached static analysis of frameworks, ORMs, and paths
 │   ├── state.json               # Real-time state of every agent persona
 │   ├── events.jsonl             # Append-only persistent telemetry event log
+│   ├── reports/                 # Persistent Markdown & JSON executive audit reports
 │   ├── agents/                  # Specialized agent persona definitions
 │   └── skills/                  # Grounded engineering skill markdown manuals
-├── .pixel-dashboard/            # Zero-dependency HTML5 canvas visual office bundle
 ├── DESIGN.md                    # Visual tokens, canvas coordinate engine & audio specs
 ├── PRODUCT.md                   # Product vision, technical roadmap, and architectural goals
 └── README.md
 ```
-
----
-
-## 🎮 Dashboard Controls & Keybindings
-
-| Key / Control | Function | Description |
-| :--- | :--- | :--- |
-| `[O]` | **OneShot Studio** | Opens the interactive OneShot Multi-Agent Synthesis studio |
-| `[R]` | **Audit Reports** | Toggles the comprehensive multi-agent audit reports drawer |
-| `[SPACE]` | **Launch Demo** | Boots the swarm and runs a simulated multi-agent sprint |
-| `[1] - [6]` | **Agent Inspector** | Opens the dedicated status drawer and permissions for agents 1 through 6 |
-| `[ESC]` | **Close Modals** | Closes any active OneShot studio, reports drawer, or inspector modal |
-| `CRT Button` | **Scanline Shader** | Toggles retro arcade phosphor scanlines and vignette effect |
-| `NIGHT Button` | **Cyberpunk Shift** | Switches between warm day office and neon cyberpunk night lighting |
-| `SFX Button` | **Web Audio Synth** | Toggles procedural 8-bit chip-tune feedback sounds |
 
 ---
 
@@ -387,26 +266,6 @@ cd PixelCrew
 # Run the zero-dependency test suite
 npm test
 ```
-
----
-
-## 📚 Documentation & Specifications
-
-- [📐 DESIGN.md](DESIGN.md) — 2D Canvas coordinate matrix, sprite frame animations, color tokens, and Web Audio oscillator formulas.
-- [🎯 PRODUCT.md](PRODUCT.md) — Product vision, target personas, problem analysis, and development roadmap (v0.1 to v0.5).
-- [🤝 CONTRIBUTING.md](CONTRIBUTING.md) — How to author new skills, add custom agent sprites, and submit pull requests.
-- [⚖️ LICENSE](LICENSE) — Apache 2.0 open-source license.
-
----
-
-## 🌟 Community & Contributing
-
-Contributions of all types are warmly welcomed!
-
-- **Create New Skills**: Add new technology guides to `.pixel-agents/skills/` (e.g. GraphQL, Supabase, Redis, Rust, Astro).
-- **Design Office Packs**: Add custom pixel-art furniture, workstations, and seasonal office themes.
-- **Improve Orchestration**: Enhance DAG task scheduling, automated error recovery, and concurrency management.
-- **Report Bugs**: Submit issues and feature proposals at [github.com/hiroqt/PixelCrew/issues](https://github.com/hiroqt/PixelCrew/issues).
 
 ---
 

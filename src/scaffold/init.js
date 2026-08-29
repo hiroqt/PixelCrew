@@ -156,7 +156,7 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   console.log('\n\x1b[32m\x1b[1mPixel Crew initialized & adapted successfully!\x1b[0m\n');
   console.log('Next steps:');
   console.log('  \x1b[36mnpx pixelcrew start\x1b[0m           Launch orchestration server & visual dashboard');
-  console.log('  \x1b[36mnpx pixelcrew oneshot "..."\x1b[0m   Synthesize custom Next.js project with agents');
+  console.log('  \x1b[36mnpx pixelcrew task "..."\x1b[0m    Dispatch goal or full-stack task to agents');
   console.log('  \x1b[36mnpx pixelcrew demo\x1b[0m            Run interactive multi-agent visual demo\n');
 
   return { pixelAgentsDir, dashboardDir, profile };

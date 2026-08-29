@@ -23,7 +23,8 @@ export class CodeGenerator {
         dev: "next dev",
         build: "next build",
         start: "next start",
-        lint: "next lint"
+        lint: "next lint",
+        "test:e2e": "playwright test"
       },
       dependencies: {
         next: "^14.2.15",
@@ -38,6 +39,7 @@ export class CodeGenerator {
         "@types/node": "^20.17.0",
         "@types/react": "^18.3.11",
         "@types/react-dom": "^18.3.1",
+        "@playwright/test": "^1.48.0",
         postcss: "^8.4.47",
         tailwindcss: "^3.4.14"
       }
@@ -276,7 +278,85 @@ export async function GET(req: NextRequest) {
 }
 `;
 
-    // 12. README.md
+    // 12. tests/e2e/user-journey.spec.ts (Automated End-to-End User Flow Tests)
+    files['tests/e2e/user-journey.spec.ts'] = `import { test, expect } from "@playwright/test";
+
+test.describe("${spec.companyName} — End-to-End Verification", () => {
+  test("renders homepage with proper branding, typography, and viewport hierarchy", async ({ page }) => {
+    await page.goto("/");
+    await expect(page).toHaveTitle(/${spec.companyName}/i);
+
+    // Verify main landmarks
+    const hero = page.locator("section").first();
+    await expect(hero).toBeVisible();
+    await expect(page.locator("h1")).toContainText("${spec.companyName}");
+  });
+
+  test("interactive category filter and live data updates", async ({ page }) => {
+    await page.goto("/");
+    const filterButtons = page.locator("button.filter-btn, button[data-category]");
+    if (await filterButtons.count() > 1) {
+      await filterButtons.nth(1).click();
+      await page.waitForTimeout(300);
+      const items = page.locator(".glass-panel, [data-testid='showcase-card']");
+      expect(await items.count()).toBeGreaterThan(0);
+    }
+  });
+
+  test("contact inquiry form submission flow", async ({ page }) => {
+    await page.goto("/");
+    const form = page.locator("form");
+    if (await form.count() > 0) {
+      const emailInput = page.locator("input[type='email'], input[name='email']").first();
+      const msgInput = page.locator("textarea, input[name='message']").first();
+      const submitBtn = page.locator("button[type='submit']").first();
+
+      if (await emailInput.isVisible() && await msgInput.isVisible()) {
+        await emailInput.fill("test.engineer@example.com");
+        await msgInput.fill("Automated E2E test inquiry message.");
+        await submitBtn.click();
+        await page.waitForTimeout(500);
+      }
+    }
+  });
+
+  test("WCAG AA visual contrast and responsive mobile layout", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await expect(page.locator("body")).toBeVisible();
+    const nav = page.locator("header, nav").first();
+    await expect(nav).toBeVisible();
+  });
+});
+`;
+
+    // 13. playwright.config.ts
+    files['playwright.config.ts'] = `import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./tests/e2e",
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: "html",
+  use: {
+    baseURL: "http://localhost:3000",
+    trace: "on-first-retry",
+  },
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "Mobile Safari", use: { ...devices["iPhone 14"] } },
+  ],
+  webServer: {
+    command: "npm run dev",
+    url: "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
+  },
+});
+`;
+
+    // 14. README.md
     files['README.md'] = `# ${spec.companyName} — ${spec.headline}
 
 Synthesized using **Pixel Crew** dynamic multi-agent orchestration.

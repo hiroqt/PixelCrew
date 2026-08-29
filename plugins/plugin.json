@@ -13,7 +13,8 @@
     "dashboard",
     "swarm",
     "antigravity",
-    "oneshot",
+    "goal-orchestration",
+    "e2e-testing",
     "design-director",
     "anti-ai"
   ]

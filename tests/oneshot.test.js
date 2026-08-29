@@ -273,12 +273,15 @@ test('Server OneShot API routes (/api/oneshot, /api/token-stats, /api/site-previ
     const oneshotRes = await dispatch(req);
     assert.equal(oneshotRes.statusCode, 200);
     const oneshotData = JSON.parse(oneshotRes.body);
-    assert.equal(oneshotData.status, 'oneshot_started');
+    assert.equal(oneshotData.status, 'goal_started');
     assert.equal(oneshotData.options.targetFramework, 'nextjs');
 
     // 3. Test /api/site-preview
-    await fs.mkdir(path.join(tmpDir, 'generated-site'), { recursive: true });
-    await fs.writeFile(path.join(tmpDir, 'generated-site', 'index.html'), '<!DOCTYPE html><html><body><h1>Preview</h1></body></html>');
+    const previewDir = path.join(tmpDir, 'mock-generated-site');
+    await fs.mkdir(previewDir, { recursive: true });
+    const previewFile = path.join(previewDir, 'index.html');
+    await fs.writeFile(previewFile, '<!DOCTYPE html><html><body><h1>Preview</h1></body></html>');
+    engine.lastGeneratedSitePath = previewFile;
 
     const previewRes = await dispatch({
       method: 'GET',

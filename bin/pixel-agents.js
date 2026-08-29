@@ -21,20 +21,20 @@ function printHelp() {
   npx pixel-agents <command> [options]
 
 \x1b[1mCOMMANDS:\x1b[0m
-  \x1b[32moneshot\x1b[0m "<prompt>"    Synthesize a bespoke modern website using the design-first creative crew
-  \x1b[32minit\x1b[0m                     Initialize .pixel-agents/ workspace in current project
-  \x1b[32manalyze\x1b[0m                  Inspect and display detected frameworks, ORMs, and architecture
+  \x1b[32mtask\x1b[0m "<description>"     Dispatch an objective or website creation goal to the swarm
+  \x1b[32mgoal\x1b[0m "<objective>"       Execute full-stack goal from design to automated E2E testing
   \x1b[32mstart\x1b[0m                    Start multi-agent orchestrator & live pixel dashboard
   \x1b[32mdashboard\x1b[0m                Launch the visual pixel dashboard UI
   \x1b[32mdemo\x1b[0m                     Launch server and run an interactive multi-agent demo
-  \x1b[32mtask\x1b[0m "<description>"     Dispatch an objective to the agent swarm
+  \x1b[32manalyze\x1b[0m                  Inspect and display detected frameworks, ORMs, and architecture
+  \x1b[32minit\x1b[0m                     Initialize .pixel-agents/ workspace in current project
   \x1b[32memit\x1b[0m [options]           Emit an event to the stream (e.g. from external hooks)
   \x1b[32mstatus\x1b[0m                   Display active swarm state and agent roster
   \x1b[32mhelp\x1b[0m                     Show this help reference
 
 \x1b[1mOPTIONS:\x1b[0m
-  --target <nextjs|vanilla> Set output target framework (default: vanilla)
-  --out <dir>              Set output directory (default: ./generated-site)
+  --target <nextjs|vanilla> Set output target framework (default: nextjs)
+  --out <dir>              Set custom output directory
   --port <number>          Set dashboard port (default: 4747)
   --no-open                Do not automatically open the browser
   --yes, -y                Skip prompts and use defaults during init
@@ -45,10 +45,10 @@ function printHelp() {
   --skill <skill>          Associated skill for emit
 
 \x1b[1mEXAMPLES:\x1b[0m
-  npx pixel-crew oneshot "A modern portfolio for an AI engineer inspired by editorial design"
+  npx pixel-crew task "Build a modern portfolio for an AI engineer with Next.js and E2E tests"
+  npx pixel-crew goal "Refactor database indexing & verify Core Web Vitals"
   npx pixel-crew start
   npx pixel-crew demo
-  npx pixel-crew task "Find slow Prisma queries and optimize indexes"
 `);
 }
 
@@ -264,93 +264,12 @@ async function main() {
       break;
     }
 
-    case 'oneshot': {
-      const prompt = options.taskPrompt || args[1] || "Build a modern website for a design agency specializing in AI products. Dark, editorial, premium, but not corporate. Avoid generic SaaS design.";
-      const targetFramework = options.targetFramework || 'vanilla';
-      const outputDir = path.resolve(rootDir, options.outputDir || 'generated-site');
-
-      console.log(BANNER);
-      console.log(`\n\x1b[35m\x1b[1m✦ PIXEL CREW ONESHOT — Design-First Synthesis\x1b[0m`);
-      console.log(`\x1b[90mTarget:\x1b[0m   ${targetFramework.toUpperCase()}`);
-      console.log(`\x1b[90mOutput:\x1b[0m   ${outputDir}`);
-      console.log(`\x1b[90mPrompt:\x1b[0m   "${prompt}"\n`);
-
-      const engine = new OrchestratorEngine(rootDir);
-      await engine.initialize();
-
-      engine.on('agent_event', (event) => {
-        const time = new Date(event.timestamp).toTimeString().split(' ')[0];
-        let color = '\x1b[37m';
-        if (event.agent === 'creativeDirector') color = '\x1b[38;5;208m';
-        else if (event.agent === 'uxPlanner') color = '\x1b[33m';
-        else if (event.agent === 'designSystem') color = '\x1b[32m';
-        else if (event.agent === 'frontend') color = '\x1b[36m';
-        else if (event.agent === 'visualCritic') color = '\x1b[35m';
-        else if (event.agent === 'orchestrator') color = '\x1b[34m';
-
-        const agentName = (event.agent || 'orchestrator').padEnd(16);
-        console.log(`\x1b[90m${time}\x1b[0m  ${color}${agentName}\x1b[0m → ${event.message}`);
-      });
-
-      try {
-        const result = await engine.submitOneShotTask(prompt, {
-          targetFramework,
-          outputDir
-        });
-
-        const ev = result.evaluation;
-        const rub = ev.rubric;
-
-        console.log(`
-\x1b[36m╔═════════════════════════════════════════════════════════════════════╗
-║                      \x1b[1mPIXEL CREW VISUAL SCORE\x1b[0m                        ║
-╠═════════════════════════════════════════════════════════════════════╣
-║  Originality:           ${(rub.originality + ' / 10').padEnd(42)}  ║
-║  Typography:            ${(rub.typography + ' / 10').padEnd(42)}  ║
-║  Layout & Rhythm:       ${(rub.layout + ' / 10').padEnd(42)}  ║
-║  Visual Hierarchy:      ${(rub.visual_hierarchy + ' / 10').padEnd(42)}  ║
-║  Brand Consistency:     ${(rub.brand_consistency + ' / 10').padEnd(42)}  ║
-║  Generic AI Penalty:    ${('-' + rub.generic_ai_penalty + ' / 10').padEnd(42)}  ║
-║                                                                     ║
-║  \x1b[1mFINAL VISUAL SCORE:    ${(ev.finalScore + ' / 10.0').padEnd(12)}\x1b[0m \x1b[32m[✓ APPROVED >= 8.5]\x1b[0m              ║
-╚═════════════════════════════════════════════════════════════════════╝\x1b[0m`);
-
-        console.log(`
-\x1b[32m╔═════════════════════════════════════════════════════════════════════╗
-║               \x1b[1mCROSS-IDE TOKEN OPTIMIZATION METRICS\x1b[0m                  ║
-╠═════════════════════════════════════════════════════════════════════╣
-║  Raw Estimated Tokens:  ${(result.tokenStats.rawTokensEstimated.toLocaleString() + ' tokens').padEnd(42)}  ║
-║  Actual Tokens Used:    ${(result.tokenStats.actualTokensUsed.toLocaleString() + ' tokens').padEnd(42)}  ║
-║  \x1b[1mTokens Conserved:      ${(result.tokenStats.tokensSaved.toLocaleString() + ' tokens (' + result.tokenStats.efficiencyRatio + '% Savings)').padEnd(42)}\x1b[0m  ║
-║  Active Strategy:       ${('AST Skeletons + Pruned Boundaries').padEnd(42)}  ║
-╚═════════════════════════════════════════════════════════════════════╝\x1b[0m`);
-
-        console.log(`\x1b[32m\x1b[1m✓ Modern ${result.targetFramework.toUpperCase()} project generated (${result.buildResult.fileCount} files):\x1b[0m`);
-        console.log(`  \x1b[36m${outputDir}\x1b[0m`);
-        console.log(`  Preview: \x1b[33m${path.join(outputDir, 'index.html')}\x1b[0m\n`);
-
-        if (result.targetFramework !== 'vanilla') {
-          console.log(`\x1b[90mTo launch the full ${result.targetFramework.toUpperCase()} development server:\x1b[0m`);
-          console.log(`  \x1b[37mcd ${path.relative(process.cwd(), outputDir) || '.'}\x1b[0m`);
-          console.log(`  \x1b[37mnpm install && npm run dev\x1b[0m\n`);
-        }
-
-        if (!options.noOpen) {
-          openBrowser(path.join(outputDir, 'index.html'));
-        }
-      } catch (err) {
-        console.error('\x1b[31mOneShot Generation Failed:\x1b[0m', err.message);
-        process.exit(1);
-      }
-
-      break;
-    }
-
+    case 'goal':
     case 'task': {
       const taskPrompt = options.taskPrompt || args[1];
       if (!taskPrompt) {
-        console.error('\x1b[31mError: Please provide a task description.\x1b[0m');
-        console.log('Example: npx pixel-agents task "Optimize Postgres queries"');
+        console.error('\x1b[31mError: Please provide a goal or task description.\x1b[0m');
+        console.log('Example: npx pixel-agents task "Build modern portfolio with Next.js and E2E tests"');
         process.exit(1);
       }
 
@@ -361,10 +280,10 @@ async function main() {
           const res = await fetch(`${daemonUrl}/api/task`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: taskPrompt })
+            body: JSON.stringify({ prompt: taskPrompt, ...options })
           });
           if (res.ok) {
-            console.log(`\x1b[32m✓ Task dispatched to running swarm daemon (${daemonUrl}):\x1b[0m "${taskPrompt}"`);
+            console.log(`\x1b[32m✓ Goal dispatched to running swarm daemon (${daemonUrl}):\x1b[0m "${taskPrompt}"`);
             console.log(`Check live status at ${daemonUrl}`);
             return;
           }
@@ -372,21 +291,39 @@ async function main() {
       }
 
       console.log(BANNER);
-      console.log(`\x1b[33m[SWARM RUNNER]\x1b[0m Dispatching task: "${taskPrompt}"\n`);
+      console.log(`\x1b[33m[SWARM RUNNER]\x1b[0m Dispatching objective: "${taskPrompt}"\n`);
       const engine = new OrchestratorEngine(rootDir);
       await engine.initialize();
 
       engine.on('agent_event', (event) => {
         const time = new Date(event.timestamp).toTimeString().split(' ')[0];
-        const agentPadded = (event.agent || 'orchestrator').padEnd(12);
-        console.log(`\x1b[90m${time}\x1b[0m  \x1b[36m${agentPadded}\x1b[0m → ${event.message}`);
+        const agentPadded = (event.agent || 'orchestrator').padEnd(16);
+        let color = '\x1b[37m';
+        if (event.agent === 'orchestrator') color = '\x1b[33m';
+        else if (event.agent === 'frontend') color = '\x1b[36m';
+        else if (event.agent === 'backend') color = '\x1b[35m';
+        else if (event.agent === 'database') color = '\x1b[33m';
+        else if (event.agent === 'security') color = '\x1b[31m';
+        else if (event.agent === 'performance') color = '\x1b[32m';
+        else if (event.agent === 'qa' || event.agent === 'visualCritic') color = '\x1b[35m';
+        else if (event.agent === 'creativeDirector') color = '\x1b[38;5;208m';
+
+        console.log(`\x1b[90m${time}\x1b[0m  ${color}${agentPadded}\x1b[0m → ${event.message}`);
       });
 
-      const report = await engine.submitTask(taskPrompt);
-      if (report) {
-        console.log('\n\x1b[36m' + report + '\x1b[0m\n');
+      const result = await engine.submitTask(taskPrompt, options);
+      if (typeof result === 'string') {
+        console.log('\n\x1b[36m' + result + '\x1b[0m\n');
+      } else if (result?.buildResult) {
+        console.log(`\n\x1b[32m\x1b[1m✓ Goal completed successfully (${result.buildResult.fileCount} files synthesized):\x1b[0m`);
+        console.log(`  Target Directory: \x1b[36m${result.outputDir}\x1b[0m`);
+        if (result.targetFramework !== 'vanilla') {
+          console.log(`\n\x1b[90mTo start the local development server:\x1b[0m`);
+          console.log(`  \x1b[37mcd ${path.relative(process.cwd(), result.outputDir) || result.outputDir}\x1b[0m`);
+          console.log(`  \x1b[37mnpm install && npm run dev\x1b[0m\n`);
+        }
       }
-      console.log('\x1b[32m✓ Sprint audit completed successfully.\x1b[0m\n');
+      console.log('\x1b[32m✓ Sprint mission completed successfully.\x1b[0m\n');
       break;
     }
 
