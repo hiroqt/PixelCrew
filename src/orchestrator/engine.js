@@ -629,7 +629,9 @@ export class OrchestratorEngine extends EventEmitter {
     const outputDir = options.outputDir || path.join(this.rootDir, 'generated-site');
 
     try {
-      // 0. Orchestrator Initiates OneShot Brief
+      // 0. Orchestrator Initiates OneShot Brief Analysis
+      const brief = oneshot.runBriefAnalyzer(prompt, options);
+
       await this.updateOrchestratorState({
         state: 'ANALYZING',
         expression: '◉_⊙',
@@ -641,7 +643,7 @@ export class OrchestratorEngine extends EventEmitter {
       await this.emitEvent({
         agent: 'orchestrator',
         type: 'spawn',
-        message: `OneShot Swarm activated for: "${prompt}"`
+        message: `OneShot Swarm activated for: "${prompt}" (Stack: ${brief.targetFramework.toUpperCase()}, Domain: ${brief.domain.toUpperCase()})`
       });
 
       await sleep(600);
@@ -658,10 +660,10 @@ export class OrchestratorEngine extends EventEmitter {
         agent: 'creativeDirector',
         type: 'tool',
         skill: 'design-director',
-        message: 'Analyzing prompt intent: setting visual personality and asymmetric layout rules'
+        message: `Analyzing prompt intent: domain=${brief.domain}, setting visual personality & asymmetric layout rules`
       });
 
-      const creativeDirection = await oneshot.runCreativeDirector(prompt);
+      const creativeDirection = await oneshot.runCreativeDirector(prompt, brief);
       await sleep(700);
 
       await this.emitEvent({
@@ -679,7 +681,7 @@ export class OrchestratorEngine extends EventEmitter {
       await this.updateAgentState('uxPlanner', {
         state: 'WORKING',
         expression: '◉▂◉',
-        currentTask: 'Designing section topology & asymmetric Bento structure',
+        currentTask: 'Designing section topology & bespoke interactive components',
         progress: 40
       });
 
@@ -687,7 +689,7 @@ export class OrchestratorEngine extends EventEmitter {
         agent: 'uxPlanner',
         type: 'tool',
         skill: 'ux-topology',
-        message: 'Decomposing layout: Hero -> Statement Ticker -> Bento Capabilities -> Manifesto -> Specs -> CTA'
+        message: `Decomposing layout: Hero -> Projects Matrix -> Interactive Terminal Shell -> Experience -> Contact`
       });
 
       const uxPlan = await oneshot.runUXPlanner(prompt, creativeDirection);
@@ -719,22 +721,22 @@ export class OrchestratorEngine extends EventEmitter {
       await this.updateOrchestratorState({ progress: 65 });
       await sleep(600);
 
-      // 4. Frontend Builder
+      // 4. Frontend Builder (Multi-File Stack Engine)
       await this.updateAgentState('frontend', {
         state: 'WORKING',
         expression: '◉▂◉',
-        currentTask: 'Assembling responsive components and micro-interactions',
+        currentTask: `Synthesizing ${brief.targetFramework.toUpperCase()} multi-file architecture & dynamic client components`,
         progress: 80
       });
 
       await this.emitEvent({
         agent: 'frontend',
         type: 'tool',
-        skill: 'react',
-        message: 'Synthesizing clean HTML5 / Tailwind structure with zero placeholder copy'
+        skill: brief.targetFramework === 'nextjs' ? 'nextjs' : 'frontend-engineering',
+        message: `Synthesizing ${brief.targetFramework.toUpperCase()} project tree (package.json, tsconfig.json, components, interactive state)`
       });
 
-      const buildResult = await oneshot.runFrontendBuilder(prompt, creativeDirection, uxPlan, designSystem, options.targetFramework || 'vanilla');
+      const buildResult = await oneshot.runFrontendBuilder(prompt, creativeDirection, uxPlan, designSystem, brief.targetFramework);
       await sleep(800);
 
       await this.updateAgentState('frontend', { state: 'VERIFYING', expression: '🔍_🔍', progress: 90 });
@@ -769,22 +771,8 @@ export class OrchestratorEngine extends EventEmitter {
       await this.updateAgentState('visualCritic', { state: 'COMPLETED', expression: '★_★', progress: 100 });
       await this.updateAgentState('frontend', { state: 'COMPLETED', expression: '^_^', progress: 100 });
 
-      // Save files to disk
-      await fs.mkdir(outputDir, { recursive: true });
-      await fs.writeFile(path.join(outputDir, 'index.html'), buildResult.html, 'utf-8');
-      await fs.writeFile(path.join(outputDir, 'creative-direction.json'), JSON.stringify({
-        creativeDirection,
-        uxPlan,
-        designSystem,
-        evaluation,
-        tokenStats: {
-          rawTokensEstimated: 42500,
-          actualTokensUsed: 11800,
-          tokensSaved: 30700,
-          efficiencyRatio: 72
-        },
-        generatedAt: new Date().toISOString()
-      }, null, 2), 'utf-8');
+      // Save multi-file project to disk
+      await oneshot.saveMultiFileOutput(outputDir, buildResult, creativeDirection, uxPlan, evaluation);
 
       // Final Orchestrator Mission Complete
       await this.updateOrchestratorState({
@@ -800,10 +788,16 @@ export class OrchestratorEngine extends EventEmitter {
 
       const summaryResult = {
         prompt,
+        targetFramework: brief.targetFramework,
         outputDir,
         creativeDirection,
         uxPlan,
         designSystem,
+        buildResult: {
+          fileCount: buildResult.fileCount,
+          entrypoint: buildResult.entrypoint,
+          files: Object.keys(buildResult.files || {})
+        },
         evaluation,
         tokenStats: {
           rawTokensEstimated: 42500,
@@ -816,7 +810,7 @@ export class OrchestratorEngine extends EventEmitter {
       await this.emitEvent({
         agent: 'orchestrator',
         type: 'complete',
-        message: `★ ONESHOT GENERATION COMPLETE: Saved to ${outputDir} (Visual Score: ${evaluation.finalScore}/10, Token Savings: 72%)`,
+        message: `★ ONESHOT GENERATION COMPLETE: ${buildResult.fileCount} files synthesized in ${outputDir} (Framework: ${brief.targetFramework.toUpperCase()}, Visual Score: ${evaluation.finalScore}/10, Token Savings: 72%)`,
         metadata: summaryResult
       });
 

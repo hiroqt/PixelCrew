@@ -6,13 +6,44 @@ description: |
 
 # PixelCrew / Pixel Agents Orchestration Skill
 
-Use this skill whenever the user asks you to perform tasks using `pixel-agents` or `PixelCrew` (e.g., *"analyze the frontend using pixel agents"* or *"orchestrate the database optimization in pixel crew"*).
+Use this skill whenever the user asks you to perform tasks using `pixel-agents` or `PixelCrew` (e.g., *"create a modern website with pixel-agents"*, *"showcase my projects with pixel crew"*, or *"optimize queries using pixel agents"*).
 
 ---
 
-## 🕹️ Live IDE-to-Dashboard Workflow
+## ✦ MANDATORY FOR WEBSITE & UI CREATION
 
-Whenever you perform work on behalf of the user with `pixel-agents`, emit structured events to the dashboard so your actions animate on the visual office floor in real-time.
+Whenever the user asks to **create, generate, or build a website, landing page, portfolio, or UI** using PixelCrew or `[pixel-agents]`:
+
+1. **Execute the OneShot Multi-Agent Synthesis Command**:
+   ```bash
+   npx pixelcrew oneshot "<User Prompt>"
+   ```
+2. **What this command automatically does**:
+   - Decomposes the brief and determines the domain (Portfolio, Agency, DevTool, SaaS).
+   - Activates the **Creative Director** to formulate authentic visual personality and enforce strict **Anti-AI Constraints** (no purple gradients, no repeating 3-card grids, no fake sparkles).
+   - Activates the **UX Planner** to map asymmetric section topology and dynamic interactive features (project filtering, live shell, pricing calculator).
+   - Activates the **Design System** to compile mathematical fluid typography `clamp()` scales and contrast tokens.
+   - Activates the **Frontend Builder** to synthesize a clean, stack-specific multi-file project (`Next.js App Router`, `React`, `Vue`, or `Modular Vanilla`).
+   - Activates the **Visual Critic** to audit against the 6-dimension Anti-AI Rubric ($\ge 8.5/10.0$).
+   - **Streams live sprite animations, typing effects, and audio chimes to the visual dashboard at `http://localhost:4747`**.
+
+---
+
+## 🕹️ Live IDE Telemetry Emission (For General Coding Tasks)
+
+When performing general refactoring, debugging, or database tasks:
+
+Emit events as you work using `npx pixelcrew emit`:
+```bash
+# 1. When analyzing:
+npx pixelcrew emit --agent frontend --type thinking --message "Analyzing component tree"
+
+# 2. When inspecting files / tools:
+npx pixelcrew emit --agent database --type tool --skill postgresql --message "Inspecting composite indexes"
+
+# 3. When completing:
+npx pixelcrew emit --agent performance --type complete --message "Optimized bundle size by 40%"
+```
 
 ### Step 1: Ensure Swarm Workspace Exists
 Check if `.pixel-agents/` exists in the workspace. If not, initialize it:

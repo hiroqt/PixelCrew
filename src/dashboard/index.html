@@ -274,14 +274,23 @@
               <label class="oneshot-label">PROMPT / CREATIVE BRIEF:</label>
               <textarea id="oneshotPromptInput" class="pixel-input oneshot-textarea" rows="3" placeholder="Build a modern website for a design agency specializing in AI products. Dark, editorial, premium, but not corporate. Avoid generic SaaS design."></textarea>
               
+              <div class="oneshot-template-pills">
+                <span class="pill-label">QUICK TEMPLATES:</span>
+                <button type="button" class="template-pill" onclick="document.getElementById('oneshotPromptInput').value = 'create me a modern website that showcase my projects basically its a developer portfolio';">👨‍💻 Dev Portfolio</button>
+                <button type="button" class="template-pill" onclick="document.getElementById('oneshotPromptInput').value = 'High-performance AI model query infrastructure with real-time vector latency calculator';">⚡ AI Infra</button>
+                <button type="button" class="template-pill" onclick="document.getElementById('oneshotPromptInput').value = 'Editorial design studio specializing in spatial computing and bespoke generative art';">🎨 Creative Studio</button>
+              </div>
+
               <div class="oneshot-controls">
                 <div class="oneshot-framework-selector">
                   <span class="selector-label">TARGET:</span>
-                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="vanilla" checked> Modern Web</label>
-                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="nextjs"> Next.js 14</label>
+                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="nextjs" checked> Next.js App Router</label>
+                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="react"> Vite + React</label>
+                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="vue"> Vue 3</label>
+                  <label class="radio-label"><input type="radio" name="oneshotFramework" value="vanilla"> Modern Web</label>
                 </div>
                 <button class="pixel-btn btn-primary" id="btnRunOneShot">
-                  <span>🚀</span> SYNTHESIZE WEBSITE
+                  <span>🚀</span> SYNTHESIZE PROJECT
                 </button>
               </div>
             </div>

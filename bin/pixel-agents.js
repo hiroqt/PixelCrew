@@ -325,8 +325,15 @@ async function main() {
 ║  Active Strategy:       ${('AST Skeletons + Pruned Boundaries').padEnd(42)}  ║
 ╚═════════════════════════════════════════════════════════════════════╝\x1b[0m`);
 
-        console.log(`\x1b[32m\x1b[1m✓ Modern finished website generated at:\x1b[0m`);
-        console.log(`  \x1b[36m${path.join(outputDir, 'index.html')}\x1b[0m\n`);
+        console.log(`\x1b[32m\x1b[1m✓ Modern ${result.targetFramework.toUpperCase()} project generated (${result.buildResult.fileCount} files):\x1b[0m`);
+        console.log(`  \x1b[36m${outputDir}\x1b[0m`);
+        console.log(`  Preview: \x1b[33m${path.join(outputDir, 'index.html')}\x1b[0m\n`);
+
+        if (result.targetFramework !== 'vanilla') {
+          console.log(`\x1b[90mTo launch the full ${result.targetFramework.toUpperCase()} development server:\x1b[0m`);
+          console.log(`  \x1b[37mcd ${path.relative(process.cwd(), outputDir) || '.'}\x1b[0m`);
+          console.log(`  \x1b[37mnpm install && npm run dev\x1b[0m\n`);
+        }
 
         if (!options.noOpen) {
           openBrowser(path.join(outputDir, 'index.html'));
