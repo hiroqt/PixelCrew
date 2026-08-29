@@ -51,10 +51,18 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     projectName = profile.projectName;
   }
 
-  console.log(`  \x1b[90m• Languages:\x1b[0m      ${profile.languages.join(', ') || 'JavaScript'}`);
-  console.log(`  \x1b[90m• Frameworks:\x1b[0m     ${profile.frameworks.join(', ') || 'Standard Web'}`);
-  console.log(`  \x1b[90m• Backend:\x1b[0m        ${profile.backend.join(', ') || 'Node.js'}`);
-  console.log(`  \x1b[90m• Database:\x1b[0m       ${profile.database.join(', ') || 'SQL / Relational'}`);
+  const isEmptyDir = profile.files.length === 0 && profile.directories.length === 0;
+
+  if (isEmptyDir) {
+    console.log(`  \x1b[90m• Workspace:\x1b[0m      Greenfield (Empty Directory)`);
+    console.log(`  \x1b[90m• Default Stack:\x1b[0m  Next.js 14/15 (TypeScript) + Tailwind CSS`);
+    console.log(`  \x1b[90m• Backend:\x1b[0m        TypeScript Route Handlers`);
+  } else {
+    console.log(`  \x1b[90m• Languages:\x1b[0m      ${profile.languages.join(', ') || 'JavaScript'}`);
+    console.log(`  \x1b[90m• Frameworks:\x1b[0m     ${profile.frameworks.join(', ') || 'Standard Web'}`);
+    console.log(`  \x1b[90m• Backend:\x1b[0m        ${profile.backend.join(', ') || 'Node.js'}`);
+    console.log(`  \x1b[90m• Database:\x1b[0m       ${profile.database.join(', ') || 'SQL / Relational'}`);
+  }
   const pixelAgentsDir = path.join(targetDir, '.pixel-agents');
   const agentsDir = path.join(pixelAgentsDir, 'agents');
   const skillsDir = path.join(pixelAgentsDir, 'skills');
@@ -145,11 +153,11 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     }
   }
 
-  console.log('\n\x1b[32m\x1b[1mPixel Agents initialized & adapted successfully!\x1b[0m\n');
+  console.log('\n\x1b[32m\x1b[1mPixel Crew initialized & adapted successfully!\x1b[0m\n');
   console.log('Next steps:');
-  console.log('  \x1b[36mnpx pixel-agents start\x1b[0m     Launch orchestration server & dashboard');
-  console.log('  \x1b[36mnpx pixel-agents demo\x1b[0m      Run an interactive multi-agent demo');
-  console.log('  \x1b[36mnpx pixel-agents task "..."\x1b[0m Dispatch a task to the agent swarm\n');
+  console.log('  \x1b[36mnpx pixelcrew start\x1b[0m           Launch orchestration server & visual dashboard');
+  console.log('  \x1b[36mnpx pixelcrew oneshot "..."\x1b[0m   Synthesize custom Next.js project with agents');
+  console.log('  \x1b[36mnpx pixelcrew demo\x1b[0m            Run interactive multi-agent visual demo\n');
 
   return { pixelAgentsDir, dashboardDir, profile };
 }
