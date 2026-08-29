@@ -10,22 +10,32 @@ Use this skill whenever the user asks you to perform tasks using `pixel-agents` 
 
 ---
 
-## ✦ MANDATORY FOR WEBSITE & UI CREATION
+## ✦ MANDATORY FOR WEBSITE & APPLICATION CREATION
 
-Whenever the user asks to **create, generate, or build a website, landing page, portfolio, or UI** using PixelCrew or `[pixel-agents]`:
+Whenever the user asks to **create, generate, or build a website, landing page, portfolio, or fullstack app** using PixelCrew or `[pixel-agents]` or `/pixel-agents`:
 
-1. **Execute the OneShot Multi-Agent Synthesis Command**:
+1. **Default Stack Standard**:
+   - **Frontend**: Next.js 14/15 (App Router + TypeScript + Tailwind CSS)
+   - **Backend**: TypeScript Route Handlers (`src/app/api/...`) & strict type safety
+   - **Architecture**: Asymmetric layout, fluid clamp() typography scales, zero AI slop.
+
+2. **Execute the OneShot Multi-Agent Synthesis Command**:
    ```bash
-   npx pixelcrew oneshot "<User Prompt>"
+   npx pixelcrew oneshot "<User Prompt>" --target nextjs
    ```
-2. **What this command automatically does**:
-   - Decomposes the brief and determines the domain (Portfolio, Agency, DevTool, SaaS).
-   - Activates the **Creative Director** to formulate authentic visual personality and enforce strict **Anti-AI Constraints** (no purple gradients, no repeating 3-card grids, no fake sparkles).
-   - Activates the **UX Planner** to map asymmetric section topology and dynamic interactive features (project filtering, live shell, pricing calculator).
-   - Activates the **Design System** to compile mathematical fluid typography `clamp()` scales and contrast tokens.
-   - Activates the **Frontend Builder** to synthesize a clean, stack-specific multi-file project (`Next.js App Router`, `React`, `Vue`, or `Modular Vanilla`).
-   - Activates the **Visual Critic** to audit against the 6-dimension Anti-AI Rubric ($\ge 8.5/10.0$).
-   - **Streams live sprite animations, typing effects, and audio chimes to the visual dashboard at `http://localhost:4747`**.
+
+3. **Autonomous Multi-Agent Collaboration & Dashboard Sync**:
+   - Decomposes the brief and automatically assigns tasks across the specialized squad:
+     - **Creative Director & Anti-AI Guardian**: Bans purple gradients, repeating cards, and fake AI sparkles.
+     - **UX Planner**: Architects dynamic topologies (interactive filtering, live shell, pricing calculator).
+     - **Frontend Engineer**: Builds the Next.js App Router project tree.
+     - **Backend Engineer**: Generates TypeScript API route handlers.
+     - **Database Engineer**: Compiles data models and category taxonomy.
+     - **Performance Engineer**: Profiles Core Web Vitals (LCP < 0.6s).
+     - **Security Engineer**: Enforces CSP and input sanitization.
+     - **QA Engineer**: Validates against the 6-dimension Anti-AI Rubric ($\ge 8.5/10.0$).
+   - **Streams continuous live sprite typing animations, state shifts, and sound chimes to the visual dashboard at `http://localhost:4747` until the entire task is complete**.
+   - **Keeps all framework state inside `.pixel-agents/`** (no extra `.pixel-dashboard` or `reports` root folders).
 
 ---
 

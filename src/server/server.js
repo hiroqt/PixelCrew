@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 export function createServer(engine, options = {}) {
   const rootDir = engine.rootDir;
-  const dashboardDir = path.join(rootDir, '.pixel-dashboard');
+  const dashboardDir = path.join(rootDir, '.pixel-agents', 'dashboard');
+  const legacyDashboardDir = path.join(rootDir, '.pixel-dashboard');
   const fallbackDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));
 
   const sseClients = new Set();
@@ -233,9 +234,14 @@ export function createServer(engine, options = {}) {
       try {
         await fs.access(filePath);
       } catch {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('404 Not Found');
-        return;
+        filePath = path.join(legacyDashboardDir, filename);
+        try {
+          await fs.access(filePath);
+        } catch {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('404 Not Found');
+          return;
+        }
       }
     }
 

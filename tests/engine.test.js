@@ -33,8 +33,8 @@ test('Project initialization scaffolds required structure', async () => {
   assert.ok(skills.includes('prisma.md'));
   assert.ok(skills.includes('postgresql.md'));
 
-  // Verify dashboard files
-  const dashFiles = await fs.readdir(path.join(tmpDir, '.pixel-dashboard'));
+  // Verify dashboard files inside .pixel-agents
+  const dashFiles = await fs.readdir(path.join(tmpDir, '.pixel-agents', 'dashboard'));
   assert.ok(dashFiles.includes('index.html'));
   assert.ok(dashFiles.includes('styles.css'));
   assert.ok(dashFiles.includes('app.js'));

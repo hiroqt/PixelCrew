@@ -55,17 +55,17 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   console.log(`  \x1b[90m• Frameworks:\x1b[0m     ${profile.frameworks.join(', ') || 'Standard Web'}`);
   console.log(`  \x1b[90m• Backend:\x1b[0m        ${profile.backend.join(', ') || 'Node.js'}`);
   console.log(`  \x1b[90m• Database:\x1b[0m       ${profile.database.join(', ') || 'SQL / Relational'}`);
-  console.log(`  \x1b[90m• Testing:\x1b[0m        ${profile.testing.join(', ') || 'Standard Testing'}`);
-
   const pixelAgentsDir = path.join(targetDir, '.pixel-agents');
   const agentsDir = path.join(pixelAgentsDir, 'agents');
   const skillsDir = path.join(pixelAgentsDir, 'skills');
-  const dashboardDir = path.join(targetDir, '.pixel-dashboard');
+  const reportsDir = path.join(pixelAgentsDir, 'reports');
+  const dashboardDir = path.join(pixelAgentsDir, 'dashboard');
 
-  // Create directories
+  // Create directories inside .pixel-agents
   await fs.mkdir(pixelAgentsDir, { recursive: true });
   await fs.mkdir(agentsDir, { recursive: true });
   await fs.mkdir(skillsDir, { recursive: true });
+  await fs.mkdir(reportsDir, { recursive: true });
   if (enableDashboard) {
     await fs.mkdir(dashboardDir, { recursive: true });
   }
@@ -139,7 +139,7 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
       await fs.writeFile(path.join(dashboardDir, 'index.html'), html, 'utf-8');
       await fs.writeFile(path.join(dashboardDir, 'styles.css'), css, 'utf-8');
       await fs.writeFile(path.join(dashboardDir, 'app.js'), js, 'utf-8');
-      console.log('  \x1b[32m✓\x1b[0m Created .pixel-dashboard/ (index.html, styles.css, app.js)');
+      console.log('  \x1b[32m✓\x1b[0m Created .pixel-agents/dashboard/ (index.html, styles.css, app.js)');
     } catch (err) {
       // ignore
     }

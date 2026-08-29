@@ -1029,6 +1029,53 @@ export default function Home() {
 }
 `;
 
+    // src/app/api/contact/route.ts (TypeScript Backend API Route)
+    files['src/app/api/contact/route.ts'] = `import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { name, email, message } = body;
+
+    if (!email || !message) {
+      return NextResponse.json(
+        { error: "Invalid Request", detail: "Email and message are required fields." },
+        { status: 400 }
+      );
+    }
+
+    // Process inquiry
+    return NextResponse.json({
+      success: true,
+      message: "Message received successfully. We will get back to you within 24 hours.",
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error", detail: "Failed to process contact submission." },
+      { status: 500 }
+    );
+  }
+}
+`;
+
+    // src/app/api/projects/route.ts (TypeScript Backend API Route)
+    files['src/app/api/projects/route.ts'] = `import { NextRequest, NextResponse } from "next/server";
+import { PROJECTS_DATA } from "@/lib/data";
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const category = searchParams.get("category");
+
+  if (category && category !== "All") {
+    const filtered = PROJECTS_DATA.filter(p => p.category.toLowerCase() === category.toLowerCase());
+    return NextResponse.json({ projects: filtered, total: filtered.length });
+  }
+
+  return NextResponse.json({ projects: PROJECTS_DATA, total: PROJECTS_DATA.length });
+}
+`;
+
     // README.md
     files['README.md'] = `# ${uxPlan.companyName} — Modern Web Project
 
