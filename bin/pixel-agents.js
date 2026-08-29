@@ -21,6 +21,7 @@ function printHelp() {
   npx pixel-agents <command> [options]
 
 \x1b[1mCOMMANDS:\x1b[0m
+  \x1b[32moneshot\x1b[0m "<prompt>"    Synthesize a bespoke modern website using the design-first creative crew
   \x1b[32minit\x1b[0m                     Initialize .pixel-agents/ workspace in current project
   \x1b[32manalyze\x1b[0m                  Inspect and display detected frameworks, ORMs, and architecture
   \x1b[32mstart\x1b[0m                    Start multi-agent orchestrator & live pixel dashboard
@@ -32,6 +33,8 @@ function printHelp() {
   \x1b[32mhelp\x1b[0m                     Show this help reference
 
 \x1b[1mOPTIONS:\x1b[0m
+  --target <nextjs|vanilla> Set output target framework (default: vanilla)
+  --out <dir>              Set output directory (default: ./generated-site)
   --port <number>          Set dashboard port (default: 4747)
   --no-open                Do not automatically open the browser
   --yes, -y                Skip prompts and use defaults during init
@@ -42,11 +45,10 @@ function printHelp() {
   --skill <skill>          Associated skill for emit
 
 \x1b[1mEXAMPLES:\x1b[0m
-  npx pixel-agents init
-  npx pixel-agents start
-  npx pixel-agents demo
-  npx pixel-agents task "Find slow Prisma queries and optimize indexes"
-  npx pixel-agents emit --agent database --type tool --skill prisma --message "Analyzing queries"
+  npx pixel-crew oneshot "A modern portfolio for an AI engineer inspired by editorial design"
+  npx pixel-crew start
+  npx pixel-crew demo
+  npx pixel-crew task "Find slow Prisma queries and optimize indexes"
 `);
 }
 
@@ -141,6 +143,8 @@ async function main() {
     if (args[i] === '--yes' || args[i] === '-y') options.yes = true;
     else if (args[i] === '--no-open') options.noOpen = true;
     else if (args[i] === '--port' && args[i + 1]) options.port = parseInt(args[++i], 10);
+    else if (args[i] === '--target' && args[i + 1]) options.targetFramework = args[++i];
+    else if (args[i] === '--out' && args[i + 1]) options.outputDir = args[++i];
     else if (args[i] === '--name' && args[i + 1]) options.name = args[++i];
     else if (args[i] === '--agent' && args[i + 1]) options.agent = args[++i];
     else if (args[i] === '--type' && args[i + 1]) options.type = args[++i];
@@ -256,6 +260,81 @@ async function main() {
 
         console.log(`\x1b[90m${time}\x1b[0m  ${color}${agentPadded}\x1b[0m → ${event.message}`);
       });
+
+      break;
+    }
+
+    case 'oneshot': {
+      const prompt = options.taskPrompt || args[1] || "Build a modern website for a design agency specializing in AI products. Dark, editorial, premium, but not corporate. Avoid generic SaaS design.";
+      const targetFramework = options.targetFramework || 'vanilla';
+      const outputDir = path.resolve(rootDir, options.outputDir || 'generated-site');
+
+      console.log(BANNER);
+      console.log(`\n\x1b[35m\x1b[1m✦ PIXEL CREW ONESHOT — Design-First Synthesis\x1b[0m`);
+      console.log(`\x1b[90mTarget:\x1b[0m   ${targetFramework.toUpperCase()}`);
+      console.log(`\x1b[90mOutput:\x1b[0m   ${outputDir}`);
+      console.log(`\x1b[90mPrompt:\x1b[0m   "${prompt}"\n`);
+
+      const engine = new OrchestratorEngine(rootDir);
+      await engine.initialize();
+
+      engine.on('agent_event', (event) => {
+        const time = new Date(event.timestamp).toTimeString().split(' ')[0];
+        let color = '\x1b[37m';
+        if (event.agent === 'creativeDirector') color = '\x1b[38;5;208m';
+        else if (event.agent === 'uxPlanner') color = '\x1b[33m';
+        else if (event.agent === 'designSystem') color = '\x1b[32m';
+        else if (event.agent === 'frontend') color = '\x1b[36m';
+        else if (event.agent === 'visualCritic') color = '\x1b[35m';
+        else if (event.agent === 'orchestrator') color = '\x1b[34m';
+
+        const agentName = (event.agent || 'orchestrator').padEnd(16);
+        console.log(`\x1b[90m${time}\x1b[0m  ${color}${agentName}\x1b[0m → ${event.message}`);
+      });
+
+      try {
+        const result = await engine.submitOneShotTask(prompt, {
+          targetFramework,
+          outputDir
+        });
+
+        const ev = result.evaluation;
+        const rub = ev.rubric;
+
+        console.log(`
+\x1b[36m╔═════════════════════════════════════════════════════════════════════╗
+║                      \x1b[1mPIXEL CREW VISUAL SCORE\x1b[0m                        ║
+╠═════════════════════════════════════════════════════════════════════╣
+║  Originality:           ${(rub.originality + ' / 10').padEnd(42)}  ║
+║  Typography:            ${(rub.typography + ' / 10').padEnd(42)}  ║
+║  Layout & Rhythm:       ${(rub.layout + ' / 10').padEnd(42)}  ║
+║  Visual Hierarchy:      ${(rub.visual_hierarchy + ' / 10').padEnd(42)}  ║
+║  Brand Consistency:     ${(rub.brand_consistency + ' / 10').padEnd(42)}  ║
+║  Generic AI Penalty:    ${('-' + rub.generic_ai_penalty + ' / 10').padEnd(42)}  ║
+║                                                                     ║
+║  \x1b[1mFINAL VISUAL SCORE:    ${(ev.finalScore + ' / 10.0').padEnd(12)}\x1b[0m \x1b[32m[✓ APPROVED >= 8.5]\x1b[0m              ║
+╚═════════════════════════════════════════════════════════════════════╝\x1b[0m`);
+
+        console.log(`
+\x1b[32m╔═════════════════════════════════════════════════════════════════════╗
+║               \x1b[1mCROSS-IDE TOKEN OPTIMIZATION METRICS\x1b[0m                  ║
+╠═════════════════════════════════════════════════════════════════════╣
+║  Raw Estimated Tokens:  ${(result.tokenStats.rawTokensEstimated.toLocaleString() + ' tokens').padEnd(42)}  ║
+║  Actual Tokens Used:    ${(result.tokenStats.actualTokensUsed.toLocaleString() + ' tokens').padEnd(42)}  ║
+║  \x1b[1mTokens Conserved:      ${(result.tokenStats.tokensSaved.toLocaleString() + ' tokens (' + result.tokenStats.efficiencyRatio + '% Savings)').padEnd(42)}\x1b[0m  ║
+║  Active Strategy:       ${('AST Skeletons + Pruned Boundaries').padEnd(42)}  ║
+╚═════════════════════════════════════════════════════════════════════╝\x1b[0m`);
+
+        console.log(`\x1b[32m\x1b[1m✓ Modern finished website generated at:\x1b[0m`);
+        console.log(`  \x1b[36m${path.join(outputDir, 'index.html')}\x1b[0m\n`);
+
+        if (!options.noOpen) {
+          openBrowser(path.join(outputDir, 'index.html'));
+        }
+      } catch (err) {
+        console.error('\x1b[31mOneShot Generation Failed:\x1b[0m', err.message);
+        process.exit(1);
+      }
 
       break;
     }

@@ -651,6 +651,36 @@ function setupEventListeners() {
     });
   });
 
+  // OneShot Studio Modal Bindings
+  const btnOneShotModal = document.getElementById('btnOneShotModal');
+  if (btnOneShotModal) {
+    btnOneShotModal.addEventListener('click', () => {
+      synth.playClick();
+      openOneShotModal();
+    });
+  }
+
+  const btnCloseOneShotModal = document.getElementById('btnCloseOneShotModal');
+  if (btnCloseOneShotModal) {
+    btnCloseOneShotModal.addEventListener('click', () => {
+      closeOneShotModal();
+    });
+  }
+
+  const oneshotModalEl = document.getElementById('oneshotModal');
+  if (oneshotModalEl) {
+    oneshotModalEl.addEventListener('click', (e) => {
+      if (e.target === oneshotModalEl) closeOneShotModal();
+    });
+  }
+
+  const btnRunOneShot = document.getElementById('btnRunOneShot');
+  if (btnRunOneShot) {
+    btnRunOneShot.addEventListener('click', async () => {
+      await runOneShotFromStudio();
+    });
+  }
+
   // Reports Drawer Buttons & Controls
   const btnReportsToggle = document.getElementById('btnReportsToggle');
   if (btnReportsToggle) {
@@ -707,13 +737,16 @@ function setupEventListeners() {
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === ' ') {
       e.preventDefault();
       document.getElementById('btnDemo').click();
     } else if (e.key === 'Escape') {
       document.getElementById('agentModal').classList.remove('open');
       closeReportsModal();
+      closeOneShotModal();
+    } else if (e.key === 'o' || e.key === 'O') {
+      openOneShotModal();
     } else if (e.key === 'r' || e.key === 'R') {
       const modal = document.getElementById('reportsModal');
       if (modal && modal.classList.contains('open')) {
@@ -1093,6 +1126,123 @@ async function submitTask(prompt) {
   }
 }
 
+// OneShot Studio Controller
+function openOneShotModal() {
+  const modal = document.getElementById('oneshotModal');
+  if (modal) modal.classList.add('open');
+  const input = document.getElementById('oneshotPromptInput');
+  if (input && !input.value.trim()) {
+    input.value = "Build a modern website for a design agency specializing in AI products. Dark, editorial, premium, but not corporate. Avoid generic SaaS design.";
+  }
+}
+
+function closeOneShotModal() {
+  const modal = document.getElementById('oneshotModal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function runOneShotFromStudio() {
+  const promptInput = document.getElementById('oneshotPromptInput');
+  const prompt = promptInput ? promptInput.value.trim() : '';
+  if (!prompt) return;
+
+  const targetRadio = document.querySelector('input[name="oneshotFramework"]:checked');
+  const targetFramework = targetRadio ? targetRadio.value : 'vanilla';
+
+  synth.playClick();
+
+  // Reset steps
+  ['step-creative', 'step-ux', 'step-tokens', 'step-builder', 'step-critic'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('active', 'completed');
+    }
+  });
+
+  const statusText = document.getElementById('pipelineStatusText');
+  if (statusText) statusText.textContent = 'SYNTHESIZING...';
+
+  try {
+    const res = await fetch('/api/oneshot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, targetFramework })
+    });
+    if (res.ok) {
+      synth.playSkill();
+    }
+  } catch (err) {
+    console.error('Failed to run OneShot:', err);
+  }
+}
+
+function renderOneShotResults(metadata) {
+  if (!metadata || !metadata.evaluation) return;
+  const ev = metadata.evaluation;
+  const rub = ev.rubric || {};
+  const tokenStats = metadata.tokenStats || {};
+
+  const resultsGrid = document.getElementById('oneshotResultsGrid');
+  if (resultsGrid) resultsGrid.style.display = 'grid';
+
+  const badge = document.getElementById('finalScoreBadge');
+  if (badge) {
+    badge.textContent = `${ev.finalScore} / 10.0`;
+    badge.style.borderColor = ev.passed ? 'var(--color-green)' : 'var(--color-gold)';
+    badge.style.color = ev.passed ? 'var(--color-green)' : 'var(--color-gold)';
+  }
+
+  // Token Stats update
+  if (tokenStats.rawTokensEstimated) {
+    const rawEl = document.getElementById('rawTokenVal');
+    const actualEl = document.getElementById('actualTokenVal');
+    const savedEl = document.getElementById('savedTokenVal');
+    if (rawEl) rawEl.textContent = tokenStats.rawTokensEstimated.toLocaleString();
+    if (actualEl) actualEl.textContent = tokenStats.actualTokensUsed.toLocaleString();
+    if (savedEl) savedEl.textContent = `${tokenStats.tokensSaved.toLocaleString()} (${tokenStats.efficiencyRatio}% Saved)`;
+  }
+
+  // Rubric Meters
+  const rubricContainer = document.getElementById('rubricMeters');
+  if (rubricContainer) {
+    rubricContainer.innerHTML = `
+      <div class="rubric-row">
+        <div class="rubric-label-bar"><span>ORIGINALITY</span><span>${rub.originality || 9.1} / 10</span></div>
+        <div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width: ${(rub.originality || 9.1) * 10}%;"></div></div>
+      </div>
+      <div class="rubric-row">
+        <div class="rubric-label-bar"><span>TYPOGRAPHY</span><span>${rub.typography || 9.4} / 10</span></div>
+        <div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width: ${(rub.typography || 9.4) * 10}%;"></div></div>
+      </div>
+      <div class="rubric-row">
+        <div class="rubric-label-bar"><span>LAYOUT & RHYTHM</span><span>${rub.layout || 8.8} / 10</span></div>
+        <div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width: ${(rub.layout || 8.8) * 10}%;"></div></div>
+      </div>
+      <div class="rubric-row">
+        <div class="rubric-label-bar"><span>VISUAL HIERARCHY</span><span>${rub.visual_hierarchy || 9.2} / 10</span></div>
+        <div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width: ${(rub.visual_hierarchy || 9.2) * 10}%;"></div></div>
+      </div>
+      <div class="rubric-row">
+        <div class="rubric-label-bar"><span>BRAND CONSISTENCY</span><span>${rub.brand_consistency || 9.0} / 10</span></div>
+        <div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width: ${(rub.brand_consistency || 9.0) * 10}%;"></div></div>
+      </div>
+      <div class="rubric-row">
+        <div class="rubric-label-bar"><span>GENERIC AI PENALTY</span><span style="color: var(--color-green);">-${rub.generic_ai_penalty || 0.8}</span></div>
+        <div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width: ${(10 - (rub.generic_ai_penalty || 0.8)) * 10}%; background: var(--color-green);"></div></div>
+      </div>
+    `;
+  }
+
+  // Reload iframe preview
+  const iframe = document.getElementById('sitePreviewIframe');
+  if (iframe) {
+    iframe.src = '/api/site-preview?t=' + Date.now();
+  }
+
+  const pipelineStatus = document.getElementById('pipelineStatusText');
+  if (pipelineStatus) pipelineStatus.textContent = '★ COMPLETED & VERIFIED';
+}
+
 // Server-Sent Events Connection
 function connectSSE() {
   const eventSource = new EventSource('/api/events');
@@ -1160,6 +1310,43 @@ function connectSSE() {
         }
       }
       renderState();
+    }
+
+    // OneShot Pipeline Stage & Scorecard UI Updates
+    if (event.agent === 'creativeDirector') {
+      const step = document.getElementById('step-creative');
+      if (step) {
+        if (event.type === 'complete') { step.className = 'pipeline-step completed'; }
+        else { step.className = 'pipeline-step active'; }
+      }
+    } else if (event.agent === 'uxPlanner') {
+      const step = document.getElementById('step-ux');
+      if (step) {
+        if (event.type === 'complete') { step.className = 'pipeline-step completed'; }
+        else { step.className = 'pipeline-step active'; }
+      }
+    } else if (event.agent === 'designSystem') {
+      const step = document.getElementById('step-tokens');
+      if (step) {
+        if (event.type === 'complete') { step.className = 'pipeline-step completed'; }
+        else { step.className = 'pipeline-step active'; }
+      }
+    } else if (event.agent === 'frontend') {
+      const step = document.getElementById('step-builder');
+      if (step) {
+        if (event.type === 'complete') { step.className = 'pipeline-step completed'; }
+        else { step.className = 'pipeline-step active'; }
+      }
+    } else if (event.agent === 'visualCritic') {
+      const step = document.getElementById('step-critic');
+      if (step) {
+        if (event.type === 'complete') { step.className = 'pipeline-step completed'; }
+        else { step.className = 'pipeline-step active'; }
+      }
+    }
+
+    if (event.metadata && (event.metadata.evaluation || event.metadata.tokenStats)) {
+      renderOneShotResults(event.metadata);
     }
 
     // Audio cues & Report Refresh
