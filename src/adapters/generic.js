@@ -10,6 +10,7 @@ import { AgentAdapter } from './adapter.interface.js';
 export class GenericAdapter extends AgentAdapter {
   constructor(options = {}) {
     super('generic', 'Generic CLI Runner', {
+      icon: '💻',
       description: 'Local portable Node.js and subshell execution runner (Zero external dependencies required)',
       capabilities: {
         fileAccess: true,
@@ -21,6 +22,10 @@ export class GenericAdapter extends AgentAdapter {
       },
       ...options
     });
+  }
+
+  async detectScore() {
+    return 10;
   }
 
   async detect() {

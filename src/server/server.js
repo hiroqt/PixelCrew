@@ -87,15 +87,39 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
 
     // API Routes
     if (pathname === '/api/info' && req.method === 'GET') {
+      let activeProv = { activeProvider: 'generic', activeProviderName: 'Generic CLI Runner', activeProviderIcon: '💻' };
+      if (engine.providerRegistry) {
+        try {
+          const scan = await engine.providerRegistry.scanEnvironment();
+          activeProv = {
+            activeProvider: scan.activeProvider,
+            activeProviderName: scan.activeProviderName,
+            activeProviderIcon: scan.activeProviderIcon
+          };
+        } catch {}
+      }
       return sendJson(200, {
         rootDir: engine.rootDir,
         project: engine.getConfig()?.project || path.basename(engine.rootDir),
-        version: '0.1.0'
+        version: '0.2.4',
+        ...activeProv
       });
     }
 
     if (pathname === '/api/state' && req.method === 'GET') {
-      return sendJson(200, engine.getState());
+      const state = engine.getState() || {};
+      let activeProv = { activeProvider: 'generic', activeProviderName: 'Generic CLI Runner', activeProviderIcon: '💻' };
+      if (engine.providerRegistry) {
+        try {
+          const scan = await engine.providerRegistry.scanEnvironment();
+          activeProv = {
+            activeProvider: scan.activeProvider,
+            activeProviderName: scan.activeProviderName,
+            activeProviderIcon: scan.activeProviderIcon
+          };
+        } catch {}
+      }
+      return sendJson(200, { ...state, ...activeProv });
     }
 
     if (pathname === '/api/config' && req.method === 'GET') {
@@ -110,11 +134,24 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
         'Connection': 'keep-alive'
       });
 
+      let activeProv = { activeProvider: 'generic', activeProviderName: 'Generic CLI Runner', activeProviderIcon: '💻' };
+      if (engine.providerRegistry) {
+        try {
+          const scan = await engine.providerRegistry.scanEnvironment();
+          activeProv = {
+            activeProvider: scan.activeProvider,
+            activeProviderName: scan.activeProviderName,
+            activeProviderIcon: scan.activeProviderIcon
+          };
+        } catch {}
+      }
+
       // Send initial history
       const initialPayload = `event: init\ndata: ${JSON.stringify({
-        state: engine.getState(),
+        state: { ...(engine.getState() || {}), ...activeProv },
         config: engine.getConfig(),
-        history: engine.getEvents()
+        history: engine.getEvents(),
+        provider: activeProv
       })}\n\n`;
       res.write(initialPayload);
 
@@ -145,13 +182,50 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
 
     if (pathname === '/api/providers' && req.method === 'GET') {
       if (engine.providerRegistry) {
-        const { available, missing } = await engine.providerRegistry.scanEnvironment();
+        const scan = await engine.providerRegistry.scanEnvironment(true);
         return sendJson(200, {
-          available: available.map(a => ({ id: a.id, name: a.name, description: a.description, capabilities: a.capabilities })),
-          missing: missing.map(a => ({ id: a.id, name: a.name }))
+          activeProvider: scan.activeProvider,
+          activeProviderName: scan.activeProviderName,
+          activeProviderIcon: scan.activeProviderIcon,
+          activeProviderDescription: scan.activeProviderDescription,
+          available: scan.available.map(a => ({ 
+            id: a.id, 
+            name: a.name, 
+            icon: a.icon || '🤖', 
+            description: a.description, 
+            capabilities: a.capabilities 
+          })),
+          missing: scan.missing.map(a => ({ 
+            id: a.id, 
+            name: a.name, 
+            icon: a.icon || '🤖' 
+          }))
         });
       }
-      return sendJson(200, { available: [{ id: 'generic', name: 'Generic CLI Runner' }], missing: [] });
+      return sendJson(200, { 
+        activeProvider: 'generic', 
+        activeProviderName: 'Generic CLI Runner', 
+        activeProviderIcon: '💻',
+        available: [{ id: 'generic', name: 'Generic CLI Runner', icon: '💻' }], 
+        missing: [] 
+      });
+    }
+
+    if (pathname === '/api/providers/select' && req.method === 'POST') {
+      const body = await readBody();
+      const providerId = body.provider || body.id;
+      if (engine.providerRegistry && providerId) {
+        const adapter = engine.providerRegistry.getAdapter(providerId);
+        if (adapter) {
+          return sendJson(200, { 
+            success: true, 
+            activeProvider: adapter.id, 
+            activeProviderName: adapter.name, 
+            activeProviderIcon: adapter.icon || '🤖' 
+          });
+        }
+      }
+      return sendJson(400, { success: false, error: 'Provider not found' });
     }
 
     if (pathname === '/api/plan' && req.method === 'POST') {
@@ -315,24 +389,118 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
   heartbeat.unref();
 
   let isWatching = false;
+  let workspaceWatcher = null;
+  const debouncedFiles = new Map();
 
-  server.once('listening', () => {
+  function inferAgentFromFile(relPath) {
+    const p = relPath.toLowerCase();
+    if (p.includes('test') || p.includes('spec') || p.includes('playwright') || p.includes('vitest') || p.includes('cypress')) {
+      return { agent: 'qa', skill: 'playwright-e2e' };
+    }
+    if (p.includes('prisma') || p.includes('schema') || p.includes('sql') || p.includes('database') || p.includes('migration') || p.includes('postgres')) {
+      return { agent: 'database', skill: 'postgresql' };
+    }
+    if (p.includes('auth') || p.includes('security') || p.includes('sentinel') || p.includes('policy') || p.includes('cert')) {
+      return { agent: 'security', skill: 'security-audit' };
+    }
+    if (p.includes('perf') || p.includes('benchmark') || p.includes('docker') || p.includes('k8s') || p.includes('sre') || p.includes('lcp')) {
+      return { agent: 'performance', skill: 'performance-profiling' };
+    }
+    if (p.includes('api/') || p.includes('server/') || p.includes('routes/') || p.includes('services/') || p.includes('backend') || p.endsWith('.go') || p.endsWith('.py') || p.endsWith('.rs')) {
+      return { agent: 'backend', skill: 'backend' };
+    }
+    if (p.endsWith('.css') || p.endsWith('.scss') || p.includes('tailwind') || p.includes('theme') || p.includes('tokens')) {
+      return { agent: 'frontend', skill: 'design-tokens' };
+    }
+    return { agent: 'frontend', skill: 'react' };
+  }
+
+  function startWatchers() {
     if (isWatching) return;
     isWatching = true;
 
-    // Watch events.jsonl for direct external CLI / IDE writes
-    let lastKnownEventCount = 0;
-    if (engine.eventsPath) {
+    // 1. Live Workspace File Watcher (Captures IDE code edits in real-time)
+    try {
+      workspaceWatcher = fsSync.watch(rootDir, { recursive: true }, (eventType, filename) => {
+        if (!filename) return;
+
+        // Filter out noisy / internal directories
+        const normalized = filename.replace(/\\/g, '/');
+        if (
+          normalized.startsWith('.git') ||
+          normalized.includes('node_modules') ||
+          normalized.includes('.next') ||
+          normalized.includes('.vite') ||
+          normalized.includes('dist') ||
+          normalized.includes('build') ||
+          normalized.includes('coverage') ||
+          normalized.includes('.DS_Store') ||
+          normalized.includes('events.jsonl') ||
+          normalized.includes('state.json') ||
+          normalized.includes('daemon.json') ||
+          normalized.startsWith('.gemini') ||
+          normalized.endsWith('.log')
+        ) {
+          return;
+        }
+
+        const now = Date.now();
+        const lastSeen = debouncedFiles.get(normalized) || 0;
+        if (now - lastSeen < 200) return; // Debounce rapid writes
+        debouncedFiles.set(normalized, now);
+
+        const inferred = inferAgentFromFile(normalized);
+        const event = {
+          agent: inferred.agent,
+          type: 'tool',
+          skill: inferred.skill,
+          message: `Edited ${normalized} (+live IDE workspace update)`,
+          timestamp: now,
+          metadata: {
+            file: normalized,
+            action: 'EDIT',
+            source: 'ide_realtime_watcher'
+          }
+        };
+
+        if (engine && typeof engine.emitEvent === 'function') {
+          engine.emitEvent(event).catch(() => {});
+        } else {
+          engine.eventHistory.push(event);
+          if (engine.eventHistory.length > 300) engine.eventHistory.shift();
+          const payload = `event: agent_event\ndata: ${JSON.stringify(event)}\n\n`;
+          for (const client of sseClients) {
+            try { client.write(payload); } catch {}
+          }
+        }
+      });
+
+      if (workspaceWatcher && typeof workspaceWatcher.on === 'function') {
+        workspaceWatcher.on('error', () => {});
+      }
+    } catch {}
+
+    // 2. Watch events.jsonl for direct external CLI / IDE writes
+    const possibleEventsPaths = [
+      engine?.eventsPath,
+      path.join(rootDir, '.pixel-crew', 'events.jsonl'),
+      path.join(rootDir, '.pixel-agents', 'events.jsonl')
+    ].filter(Boolean);
+
+    const uniqueEventsPaths = Array.from(new Set(possibleEventsPaths));
+
+    for (const ePath of uniqueEventsPaths) {
+      let lastKnownEventCount = 0;
       try {
-        const initialContent = fsSync.readFileSync(engine.eventsPath, 'utf-8');
+        const initialContent = fsSync.readFileSync(ePath, 'utf-8');
         lastKnownEventCount = initialContent.trim().split('\n').filter(Boolean).length;
       } catch {
         lastKnownEventCount = 0;
       }
 
-      fsSync.watchFile(engine.eventsPath, { interval: 150 }, async () => {
+      fsSync.watchFile(ePath, { interval: 150 }, async () => {
         try {
-          const content = await fs.readFile(engine.eventsPath, 'utf-8');
+          const content = await fs.readFile(ePath, 'utf-8');
           const lines = content.trim().split('\n').filter(Boolean);
           if (lines.length > lastKnownEventCount) {
             const newLines = lines.slice(lastKnownEventCount);
@@ -341,7 +509,7 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
               try {
                 const event = JSON.parse(line);
                 engine.eventHistory.push(event);
-                if (engine.eventHistory.length > 200) engine.eventHistory.shift();
+                if (engine.eventHistory.length > 300) engine.eventHistory.shift();
 
                 const payload = `event: agent_event\ndata: ${JSON.stringify(event)}\n\n`;
                 for (const client of sseClients) {
@@ -354,13 +522,21 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
       });
     }
 
-    // Watch state.json for direct external updates
-    if (engine.statePath) {
-      fsSync.watchFile(engine.statePath, { interval: 150 }, async () => {
+    // 3. Watch state.json for direct external updates
+    const possibleStatePaths = [
+      engine?.statePath,
+      path.join(rootDir, '.pixel-crew', 'state.json'),
+      path.join(rootDir, '.pixel-agents', 'state.json')
+    ].filter(Boolean);
+
+    const uniqueStatePaths = Array.from(new Set(possibleStatePaths));
+
+    for (const sPath of uniqueStatePaths) {
+      fsSync.watchFile(sPath, { interval: 150 }, async () => {
         try {
-          const content = await fs.readFile(engine.statePath, 'utf-8');
+          const content = await fs.readFile(sPath, 'utf-8');
           const state = JSON.parse(content);
-          engine.state = state;
+          if (engine) engine.state = state;
           const payload = `event: state_change\ndata: ${JSON.stringify({ state })}\n\n`;
           for (const client of sseClients) {
             try { client.write(payload); } catch {}
@@ -368,17 +544,31 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
         } catch {}
       });
     }
-  });
+  }
+
+  // Start watchers when server begins listening
+  server.on('listening', startWatchers);
 
   server.on('close', () => {
     clearInterval(heartbeat);
-    if (engine.eventsPath) {
-      try { fsSync.unwatchFile(engine.eventsPath); } catch {}
+    isWatching = false;
+    if (workspaceWatcher) {
+      try { workspaceWatcher.close(); } catch {}
     }
-    if (engine.statePath) {
-      try { fsSync.unwatchFile(engine.statePath); } catch {}
+    const possiblePaths = [
+      engine?.eventsPath,
+      engine?.statePath,
+      path.join(rootDir, '.pixel-crew', 'events.jsonl'),
+      path.join(rootDir, '.pixel-agents', 'events.jsonl'),
+      path.join(rootDir, '.pixel-crew', 'state.json'),
+      path.join(rootDir, '.pixel-agents', 'state.json')
+    ].filter(Boolean);
+
+    for (const p of possiblePaths) {
+      try { fsSync.unwatchFile(p); } catch {}
     }
   });
 
   return server;
 }
+

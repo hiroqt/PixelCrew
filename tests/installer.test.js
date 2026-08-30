@@ -231,6 +231,14 @@ test('detectActiveIDE detects active terminal environment and maps global paths'
   const originalEnv = { ...process.env };
 
   try {
+    const ambientVars = [
+      'KIRO', 'KIRO_AGENT', 'KIRO_SESSION', 'KIRO_APP_DIR',
+      'CURSOR', 'CURSOR_AGENT', 'CURSOR_SESSION', 'CURSOR_APP_DIR',
+      'ANTIGRAVITY_APP_DIR', 'AGY_SESSION', 'ANTIGRAVITY', 'ANTIGRAVITY_IDE', 'AGY', 'CORPUS_NAME', 'CONVERSATION_ID',
+      'CLAUDE_CODE', 'CLAUDE_SESSION', 'CLAUDE_AGENT'
+    ];
+    for (const v of ambientVars) delete process.env[v];
+
     // 1. Kiro
     process.env.KIRO_SESSION = 'kiro_sess_1';
     const kiro = detectActiveIDE();

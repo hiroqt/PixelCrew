@@ -1,5 +1,5 @@
 /**
- * PIXEL CORPS HQ — Interactive Startup Office Engine & Pixel Art Canvas Renderer
+ * PIXEL CREW HQ — Autonomous Multi-Agent Office & Realtime Telemetry Engine
  */
 
 // Global State
@@ -8,9 +8,15 @@ const appState = {
   state: null,
   events: [],
   activeFilter: 'all',
+  streamMode: 'sidechat', // 'sidechat' | 'slack'
+  autoScrollEnabled: true,
   audioEnabled: true,
   crtEnabled: true,
   nightMode: false,
+  activeProvider: 'antigravity',
+  activeProviderName: 'Google Antigravity',
+  activeProviderIcon: '🪐',
+  providersData: null,
   missionStartTime: null,
   missionTimerInterval: null,
   hoveredDesk: null
@@ -104,7 +110,303 @@ const WORKSTATIONS = {
   }
 };
 
-// Retro Web Audio Synthesizer
+// ============================================================================
+// PROCEDURAL LO-FI MUSIC SYNTHESIZER & AMBIENT RADIO
+// ============================================================================
+class LofiMusicEngine {
+  constructor() {
+    this.ctx = null;
+    this.isPlaying = false;
+    this.currentTrack = 'floor42';
+    this.volume = 0.7;
+    this.loopTimer = null;
+    this.noiseNode = null;
+    this.noiseGain = null;
+    this.chordStep = 0;
+    this.bpm = 75;
+  }
+
+  initContext() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  setVolume(val) {
+    this.volume = Math.max(0, Math.min(1, val));
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setValueAtTime(this.volume * 0.8, this.ctx.currentTime);
+    }
+  }
+
+  setTrack(trackId) {
+    this.currentTrack = trackId;
+    this.chordStep = 0;
+    if (this.isPlaying) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  start() {
+    this.initContext();
+    if (!this.ctx) return;
+    if (this.isPlaying) return;
+    this.isPlaying = true;
+
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.setValueAtTime(this.volume * 0.8, this.ctx.currentTime);
+    this.masterGain.connect(this.ctx.destination);
+
+    this.startVinylNoise();
+    this.scheduleNextBeat();
+
+    const btn = document.getElementById('btnLofiToggle');
+    const visualizer = document.getElementById('lofiVisualizer');
+    const playIcon = document.getElementById('lofiPlayIcon');
+    if (btn) btn.classList.add('playing');
+    if (visualizer) visualizer.classList.add('playing');
+    if (playIcon) playIcon.textContent = '⏸';
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.loopTimer) {
+      clearTimeout(this.loopTimer);
+      this.loopTimer = null;
+    }
+    this.stopVinylNoise();
+
+    const btn = document.getElementById('btnLofiToggle');
+    const visualizer = document.getElementById('lofiVisualizer');
+    const playIcon = document.getElementById('lofiPlayIcon');
+    if (btn) btn.classList.remove('playing');
+    if (visualizer) visualizer.classList.remove('playing');
+    if (playIcon) playIcon.textContent = '▶';
+  }
+
+  toggle() {
+    if (this.isPlaying) this.stop();
+    else this.start();
+  }
+
+  startVinylNoise() {
+    if (!this.ctx || this.noiseNode) return;
+    try {
+      const bufferSize = this.ctx.sampleRate * 2;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        const isPop = Math.random() < 0.0008;
+        data[i] = (white * 0.035) + (isPop ? (Math.random() * 0.35 - 0.17) : 0);
+      }
+
+      this.noiseNode = this.ctx.createBufferSource();
+      this.noiseNode.buffer = buffer;
+      this.noiseNode.loop = true;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1600;
+
+      this.noiseGain = this.ctx.createGain();
+      this.noiseGain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+
+      this.noiseNode.connect(filter);
+      filter.connect(this.noiseGain);
+      this.noiseGain.connect(this.masterGain);
+
+      this.noiseNode.start();
+    } catch {}
+  }
+
+  stopVinylNoise() {
+    if (this.noiseNode) {
+      try { this.noiseNode.stop(); } catch {}
+      this.noiseNode = null;
+    }
+  }
+
+  playWarmChord(freqs, duration = 2.4, gainLevel = 0.07) {
+    if (!this.ctx || !this.isPlaying) return;
+    const now = this.ctx.currentTime;
+
+    freqs.forEach((freq, i) => {
+      try {
+        const osc = this.ctx.createOscillator();
+        const subOsc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+
+        subOsc.type = 'sine';
+        subOsc.frequency.setValueAtTime(freq * 0.5, now);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1400, now);
+        filter.frequency.exponentialRampToValueAtTime(500, now + duration);
+
+        const stagger = i * 0.022;
+        gain.gain.setValueAtTime(0.0001, now + stagger);
+        gain.gain.exponentialRampToValueAtTime(gainLevel / freqs.length, now + stagger + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(filter);
+        subOsc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start(now + stagger);
+        subOsc.start(now + stagger);
+        osc.stop(now + duration);
+        subOsc.stop(now + duration);
+      } catch {}
+    });
+  }
+
+  playLofiKick() {
+    if (!this.ctx || !this.isPlaying) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.frequency.setValueAtTime(110, now);
+      osc.frequency.exponentialRampToValueAtTime(42, now + 0.16);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(now);
+      osc.stop(now + 0.18);
+    } catch {}
+  }
+
+  playLofiSnare() {
+    if (!this.ctx || !this.isPlaying) return;
+    try {
+      const now = this.ctx.currentTime;
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.14, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1100, now);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      noise.start(now);
+      noise.stop(now + 0.14);
+    } catch {}
+  }
+
+  playLofiHat() {
+    if (!this.ctx || !this.isPlaying) return;
+    try {
+      const now = this.ctx.currentTime;
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.04, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(6500, now);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.018, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      noise.start(now);
+      noise.stop(now + 0.04);
+    } catch {}
+  }
+
+  scheduleNextBeat() {
+    if (!this.isPlaying) return;
+
+    const CHORD_PROGRESSIONS = {
+      floor42: [
+        [293.66, 349.23, 440.00, 523.25, 659.25], // Dm9
+        [392.00, 493.88, 587.33, 698.46, 880.00], // G13
+        [261.63, 329.63, 392.00, 493.88, 587.33], // Cmaj9
+        [220.00, 277.18, 329.63, 440.00, 554.37]  // A7b13
+      ],
+      rainy: [
+        [349.23, 440.00, 523.25, 659.25, 783.99], // Fmaj9
+        [329.63, 392.00, 493.88, 587.33],         // Em7
+        [293.66, 349.23, 440.00, 523.25],         // Dm7
+        [220.00, 261.63, 329.63, 392.00, 493.88]  // Am9
+      ],
+      antigravity: [
+        [261.63, 329.63, 392.00, 523.25, 659.25], // Cmaj7/9
+        [220.00, 261.63, 329.63, 440.00, 587.33], // Am9
+        [349.23, 440.00, 523.25, 698.46],         // Fmaj7
+        [196.00, 246.94, 293.66, 392.00, 493.88]  // G6
+      ],
+      retro8bit: [
+        [261.63, 329.63, 392.00, 523.25], // C
+        [220.00, 261.63, 329.63, 440.00], // Am
+        [174.61, 220.00, 261.63, 349.23], // F
+        [196.00, 246.94, 293.66, 392.00]  // G
+      ]
+    };
+
+    const chords = CHORD_PROGRESSIONS[this.currentTrack] || CHORD_PROGRESSIONS.floor42;
+    const currentChord = chords[this.chordStep % chords.length];
+
+    this.playWarmChord(currentChord, 2.4, 0.08);
+
+    const beatInterval = (60 / this.bpm) * 1000;
+
+    this.playLofiKick();
+    this.playLofiHat();
+
+    setTimeout(() => { if (this.isPlaying) { this.playLofiSnare(); this.playLofiHat(); } }, beatInterval);
+    setTimeout(() => { if (this.isPlaying) { this.playLofiKick(); this.playLofiHat(); } }, beatInterval * 2);
+    setTimeout(() => { if (this.isPlaying) { this.playLofiHat(); } }, beatInterval * 2.5);
+    setTimeout(() => { if (this.isPlaying) { this.playLofiSnare(); this.playLofiHat(); } }, beatInterval * 3);
+
+    this.chordStep++;
+    this.loopTimer = setTimeout(() => {
+      this.scheduleNextBeat();
+    }, beatInterval * 4);
+  }
+}
+
+const lofiEngine = new LofiMusicEngine();
+
+// ============================================================================
+// RETRO SFX AUDIO SYNTHESIZER
+// ============================================================================
 class RetroAudioSynth {
   constructor() {
     this.ctx = null;
@@ -122,7 +424,7 @@ class RetroAudioSynth {
     }
   }
 
-  playTone(freq, type = 'square', duration = 0.08, gainVal = 0.05) {
+  playTone(freq, type = 'square', duration = 0.08, gainVal = 0.04) {
     if (!appState.audioEnabled) return;
     try {
       this.initContext();
@@ -140,36 +442,40 @@ class RetroAudioSynth {
 
       osc.start();
       osc.stop(this.ctx.currentTime + duration);
-    } catch (e) {
-      // Audio autoplay policy
-    }
+    } catch {}
   }
 
   playSpawn() {
     if (!appState.audioEnabled) return;
     this.playTone(330, 'triangle', 0.06);
-    setTimeout(() => this.playTone(440, 'triangle', 0.06), 60);
-    setTimeout(() => this.playTone(660, 'square', 0.1), 120);
+    setTimeout(() => this.playTone(440, 'triangle', 0.06), 55);
+    setTimeout(() => this.playTone(660, 'square', 0.09), 110);
+  }
+
+  playTool() {
+    if (!appState.audioEnabled) return;
+    this.playTone(520, 'triangle', 0.04, 0.03);
+    setTimeout(() => this.playTone(780, 'square', 0.04, 0.02), 35);
   }
 
   playSkill() {
     if (!appState.audioEnabled) return;
-    this.playTone(659.25, 'square', 0.05, 0.04);
-    setTimeout(() => this.playTone(987.77, 'square', 0.1, 0.04), 50);
+    this.playTone(659.25, 'square', 0.05, 0.03);
+    setTimeout(() => this.playTone(987.77, 'square', 0.09, 0.03), 45);
   }
 
   playComplete() {
     if (!appState.audioEnabled) return;
     const notes = [523.25, 659.25, 783.99, 1046.50];
     notes.forEach((note, i) => {
-      setTimeout(() => this.playTone(note, 'square', 0.12, 0.05), i * 80);
+      setTimeout(() => this.playTone(note, 'square', 0.1, 0.04), i * 75);
     });
   }
 
   playError() {
     if (!appState.audioEnabled) return;
-    this.playTone(180, 'sawtooth', 0.15, 0.08);
-    setTimeout(() => this.playTone(140, 'sawtooth', 0.25, 0.08), 100);
+    this.playTone(180, 'sawtooth', 0.12, 0.06);
+    setTimeout(() => this.playTone(140, 'sawtooth', 0.2, 0.06), 90);
   }
 
   playClick() {
@@ -179,7 +485,9 @@ class RetroAudioSynth {
 
 const synth = new RetroAudioSynth();
 
-// Pixel Office Canvas Renderer
+// ============================================================================
+// PIXEL OFFICE CANVAS RENDERER (HIGH-DPI RETINA SUPPORT)
+// ============================================================================
 let officeCanvas, officeCtx;
 let animFrame = 0;
 
@@ -188,11 +496,20 @@ function initOfficeCanvas() {
   if (!officeCanvas) return;
   officeCtx = officeCanvas.getContext('2d');
 
+  // Handle Retina / High-DPI Display Scaling
+  const dpr = window.devicePixelRatio || 1;
+  const baseW = 960;
+  const baseH = 420;
+
+  officeCanvas.width = baseW * dpr;
+  officeCanvas.height = baseH * dpr;
+  officeCtx.scale(dpr, dpr);
+
   // Mouse interaction for tooltips and clicking workstations
   officeCanvas.addEventListener('mousemove', (e) => {
     const rect = officeCanvas.getBoundingClientRect();
-    const scaleX = officeCanvas.width / rect.width;
-    const scaleY = officeCanvas.height / rect.height;
+    const scaleX = baseW / rect.width;
+    const scaleY = baseH / rect.height;
     const mouseX = (e.clientX - rect.left) * scaleX;
     const mouseY = (e.clientY - rect.top) * scaleY;
 
@@ -433,6 +750,12 @@ function renderOfficeWorker(ctx, agentKey, state, x, y, frame) {
 
   const suitColor = colors[agentKey] || '#00f0ff';
 
+  // Monitor Glow Reflection on Desk
+  if (state === 'WORKING' || state === 'ANALYZING') {
+    ctx.fillStyle = suitColor + '18';
+    ctx.fillRect(x - 14, y + 14, 40, 16);
+  }
+
   // Hair / Head
   ctx.fillStyle = '#ffd1a4'; // skin
   ctx.fillRect(x, y + offsetY, 10, 10);
@@ -464,16 +787,55 @@ function renderOfficeWorker(ctx, agentKey, state, x, y, frame) {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(x + ((frame * 3) % 12) - 2, y + 8, 2, 2);
   } else if (state === 'ANALYZING') {
-    // Thinking bubble
+    // Small thought icon
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(x + 12, y - 6, 8, 6);
+    ctx.fillRect(x + 12, y - 6 + offsetY, 8, 6);
     ctx.fillStyle = '#000000';
-    ctx.fillRect(x + 14, y - 4, 4, 2);
+    ctx.fillRect(x + 14, y - 4 + offsetY, 4, 2);
   } else if (state === 'COMPLETED') {
     // Victory hands up
     ctx.fillStyle = '#ffd1a4';
     ctx.fillRect(x - 5, y + 6 + offsetY, 3, 5);
     ctx.fillRect(x + 12, y + 6 + offsetY, 3, 5);
+  }
+
+  // Floating Live Task / Speech Bubble above Worker's Head
+  if (state === 'WORKING' || state === 'ANALYZING') {
+    const aData = (appState.state && appState.state.agents) ? appState.state.agents[agentKey] : null;
+    let label = state === 'ANALYZING' ? '🧠 Thinking...' : '⚡ Building...';
+    if (aData && aData.currentTask && aData.currentTask !== 'Idle') {
+      const t = aData.currentTask;
+      if (t.includes('view_file') || t.includes('reading') || t.includes('Read')) label = '📄 ' + (t.split('/').pop().slice(0, 12) || 'file');
+      else if (t.includes('replace_file') || t.includes('writing') || t.includes('Edit')) label = '📝 ' + (t.split('/').pop().slice(0, 12) || 'code');
+      else if (t.includes('run_command') || t.includes('exec') || t.includes('npm')) label = '⚡ ' + (t.split(' ')[0].slice(0, 10) || 'exec');
+      else if (t.includes('grep') || t.includes('search')) label = '🔍 Search';
+      else label = t.length > 14 ? t.slice(0, 12) + '..' : t;
+    }
+
+    ctx.font = '7px "Press Start 2P", monospace';
+    const textWidth = ctx.measureText(label).width;
+    const bubbleW = textWidth + 12;
+    const bubbleH = 15;
+    const bubbleX = x - bubbleW / 2 + 5;
+    const bubbleY = y - 22 + offsetY;
+
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(bubbleX + 2, bubbleY + 2, bubbleW, bubbleH);
+    ctx.fillStyle = '#0a0e1c';
+    ctx.fillRect(bubbleX, bubbleY, bubbleW, bubbleH);
+    ctx.strokeStyle = suitColor;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bubbleX, bubbleY, bubbleW, bubbleH);
+
+    ctx.fillStyle = '#0a0e1c';
+    ctx.beginPath();
+    ctx.moveTo(x + 3, bubbleY + bubbleH);
+    ctx.lineTo(x + 7, bubbleY + bubbleH);
+    ctx.lineTo(x + 5, bubbleY + bubbleH + 3);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(label, bubbleX + 6, bubbleY + 10);
   }
 }
 
@@ -493,7 +855,6 @@ function renderBreakLounge(ctx, x, y, w, h) {
   // Espresso Bar
   ctx.fillStyle = '#2c223b';
   ctx.fillRect(x + 14, y + 30, 65, 45);
-  ctx.fillStyle = '#silver';
   ctx.fillStyle = '#a0aab8';
   ctx.fillRect(x + 20, y + 34, 24, 20); // coffee maker
   ctx.fillStyle = '#00f0ff';
@@ -552,7 +913,284 @@ function startOfficeAnimationLoop() {
   requestAnimationFrame(loop);
 }
 
-// Initialize Application
+// ============================================================================
+// REALTIME ANTIGRAVITY SIDECHAT VIEW ENGINE
+// ============================================================================
+function updateActiveTaskHud(taskText, toolName = null) {
+  const hudTaskText = document.getElementById('hudActiveTaskText');
+  const hudToolBadge = document.getElementById('hudToolBadge');
+  const hudToolName = document.getElementById('hudToolName');
+
+  if (hudTaskText && taskText) {
+    hudTaskText.textContent = taskText;
+    hudTaskText.title = taskText;
+  }
+
+  if (hudToolBadge && hudToolName) {
+    if (toolName) {
+      hudToolBadge.style.display = 'inline-flex';
+      hudToolName.textContent = toolName.toUpperCase();
+    } else {
+      hudToolBadge.style.display = 'none';
+    }
+  }
+}
+
+function parseToolAction(msg, metadata = {}) {
+  if (!msg) return { action: 'EXEC', file: '', snippet: '' };
+  const lower = msg.toLowerCase();
+
+  let action = metadata.action || 'EXEC';
+  let file = metadata.file || '';
+  let snippet = msg;
+
+  if (!metadata.action) {
+    if (lower.includes('view_file') || lower.includes('reading') || lower.includes('read ')) {
+      action = 'READ';
+    } else if (lower.includes('replace_file') || lower.includes('writing') || lower.includes('modify') || lower.includes('edit')) {
+      action = 'EDIT';
+    } else if (lower.includes('run_command') || lower.includes('npm') || lower.includes('executing')) {
+      action = 'EXEC';
+    } else if (lower.includes('grep') || lower.includes('search') || lower.includes('finding')) {
+      action = 'SEARCH';
+    } else if (lower.includes('browser') || lower.includes('open_url')) {
+      action = 'BROWSER';
+    }
+  }
+
+  // Extract file path if not already provided
+  if (!file) {
+    const fileMatch = msg.match(/(?:file|path|to|in|edited|reading)\s*[:=]?\s*[`"']?([a-zA-Z0-9_\-./\\]+\.[a-zA-Z0-9]+)[`"']?/i);
+    if (fileMatch) {
+      file = fileMatch[1];
+    }
+  }
+
+  return { action, file, snippet };
+}
+
+function appendSidechatCard(event) {
+  const container = document.getElementById('sidechatStream');
+  if (!container) return;
+
+  const timeStr = new Date(event.timestamp || Date.now()).toTimeString().split(' ')[0];
+  const agentKey = event.agent || 'orchestrator';
+  const ws = WORKSTATIONS[agentKey] || { name: 'Tech Lead', color: '#ffd700', icon: '👔' };
+  const agentColor = ws.color || '#00f0ff';
+  const agentIcon = ws.icon || '🤖';
+  const agentUpper = agentKey.toUpperCase();
+
+  const card = document.createElement('div');
+  card.className = `sidechat-card card-${agentKey}`;
+
+  if (event.type === 'thinking' || (agentKey === 'orchestrator' && event.type === 'progress')) {
+    card.innerHTML = `
+      <div class="sidechat-card-header">
+        <span class="sidechat-agent-badge" style="color: ${agentColor}; border-color: ${agentColor};">
+          ${agentIcon} #${agentUpper}
+        </span>
+        <span class="sidechat-type-badge">THINKING</span>
+        <span class="sidechat-timestamp">${timeStr}</span>
+      </div>
+      <div class="sidechat-thought-box">
+        <span class="thought-brain-icon">🧠</span>
+        <div class="thought-content">
+          ${escapeHtml(event.message)}
+          <span class="thought-typing-dots"></span>
+        </div>
+      </div>
+    `;
+    updateActiveTaskHud(event.message, 'REASONING');
+  } else if (event.type === 'tool' || event.type === 'tool_call' || event.skill || event.message.includes('file') || event.message.includes('npm') || event.message.includes('run') || event.message.includes('Edit')) {
+    const toolInfo = parseToolAction(event.message, event.metadata || {});
+    const actionClass = toolInfo.action.toLowerCase();
+
+    card.innerHTML = `
+      <div class="sidechat-card-header">
+        <span class="sidechat-agent-badge" style="color: ${agentColor}; border-color: ${agentColor};">
+          ${agentIcon} #${agentUpper}
+        </span>
+        <span class="sidechat-type-badge">${toolInfo.action}</span>
+        <span class="sidechat-timestamp">${timeStr}</span>
+      </div>
+      <div class="sidechat-tool-box">
+        <div class="tool-box-header">
+          <span class="tool-action-pill ${actionClass}">[${toolInfo.action}]</span>
+          ${toolInfo.file ? `<span class="tool-target-path">${escapeHtml(toolInfo.file)}</span>` : ''}
+        </div>
+        <div class="tool-snippet-block">${escapeHtml(event.message)}</div>
+      </div>
+    `;
+    updateActiveTaskHud(event.message, toolInfo.action);
+    synth.playTool();
+  } else if (event.type === 'complete') {
+    card.innerHTML = `
+      <div class="sidechat-card-header">
+        <span class="sidechat-agent-badge" style="color: #39ff14; border-color: #39ff14;">
+          ${agentIcon} #${agentUpper}
+        </span>
+        <span class="sidechat-type-badge" style="background: #0e2016; color: #39ff14;">COMPLETED</span>
+        <span class="sidechat-timestamp">${timeStr}</span>
+      </div>
+      <div style="background: #0c1a14; border: 1px solid #165b38; padding: 8px 10px; color: #39ff14; font-size: 12px;">
+        ✓ ${escapeHtml(event.message)}
+      </div>
+    `;
+    updateActiveTaskHud(event.message, 'SUCCESS');
+  } else if (event.type === 'error') {
+    card.innerHTML = `
+      <div class="sidechat-card-header">
+        <span class="sidechat-agent-badge" style="color: #ff3344; border-color: #ff3344;">
+          ${agentIcon} #${agentUpper}
+        </span>
+        <span class="sidechat-type-badge" style="background: #2a0c0e; color: #ff3344;">ERROR</span>
+        <span class="sidechat-timestamp">${timeStr}</span>
+      </div>
+      <div style="background: #1c0606; border: 1px solid #551111; padding: 8px 10px; color: #ff3344; font-size: 12px;">
+        ⚠ ${escapeHtml(event.message)}
+      </div>
+    `;
+  } else {
+    card.innerHTML = `
+      <div class="sidechat-card-header">
+        <span class="sidechat-agent-badge" style="color: ${agentColor}; border-color: ${agentColor};">
+          ${agentIcon} #${agentUpper}
+        </span>
+        <span class="sidechat-type-badge">LOG</span>
+        <span class="sidechat-timestamp">${timeStr}</span>
+      </div>
+      <div style="color: #cbd5e1; font-size: 12px; line-height: 1.4;">
+        ${escapeHtml(event.message)}
+      </div>
+    `;
+  }
+
+  container.appendChild(card);
+  if (appState.autoScrollEnabled) {
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+function renderSidechat(events) {
+  const container = document.getElementById('sidechatStream');
+  if (!container) return;
+  container.innerHTML = '';
+  for (const evt of events) {
+    appendSidechatCard(evt);
+  }
+}
+
+// ============================================================================
+// ACCURATE PROVIDER SWITCHER & DIAGNOSTICS MODAL
+// ============================================================================
+function updateProviderUI(provData) {
+  if (!provData) return;
+  appState.providersData = provData;
+
+  const activeId = provData.activeProvider || 'antigravity';
+  const activeName = provData.activeProviderName || 'Google Antigravity';
+  const activeIcon = provData.activeProviderIcon || '🪐';
+  const activeDesc = provData.activeProviderDescription || 'Integrated Antigravity IDE Autonomous Pair Programming Engine';
+
+  appState.activeProvider = activeId;
+  appState.activeProviderName = activeName;
+  appState.activeProviderIcon = activeIcon;
+
+  // Header Badge
+  const badgeNameEl = document.getElementById('providerName');
+  const badgeIconEl = document.getElementById('providerIcon');
+  if (badgeNameEl) badgeNameEl.textContent = activeId.toUpperCase();
+  if (badgeIconEl) badgeIconEl.textContent = activeIcon;
+
+  // Modal Header
+  const modalNameEl = document.getElementById('modalActiveProvName');
+  const modalIconEl = document.getElementById('modalActiveProvIcon');
+  const modalDescEl = document.getElementById('modalActiveProvDesc');
+  if (modalNameEl) modalNameEl.textContent = `${activeIcon} ${activeName} (${activeId.toUpperCase()})`;
+  if (modalIconEl) modalIconEl.textContent = activeIcon;
+  if (modalDescEl) modalDescEl.textContent = activeDesc;
+
+  // Render Grid
+  renderProvidersGrid(provData);
+}
+
+function renderProvidersGrid(provData) {
+  const grid = document.getElementById('providerGrid');
+  if (!grid || !provData) return;
+
+  grid.innerHTML = '';
+
+  const allProviders = [
+    ...(provData.available || []),
+    ...(provData.missing || [])
+  ];
+
+  allProviders.forEach(p => {
+    const isActive = p.id === provData.activeProvider;
+    const isAvailable = (provData.available || []).some(av => av.id === p.id);
+    const card = document.createElement('div');
+    card.className = `provider-card ${isActive ? 'active' : (isAvailable ? 'available' : 'missing')}`;
+
+    card.innerHTML = `
+      <div class="provider-card-header">
+        <div class="provider-card-title">
+          <span>${p.icon || '💻'}</span>
+          <span>${p.name}</span>
+        </div>
+        <span class="provider-card-status">
+          ${isActive ? 'ACTIVE' : (isAvailable ? 'DETECTED' : 'UNAVAILABLE')}
+        </span>
+      </div>
+      <div class="provider-card-desc">${p.description || ''}</div>
+    `;
+
+    card.addEventListener('click', async () => {
+      synth.playClick();
+      await selectProvider(p.id);
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+async function selectProvider(providerId) {
+  try {
+    const res = await fetch('/api/providers/select', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: providerId })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.providers) {
+        updateProviderUI(data.providers);
+      }
+      synth.playSkill();
+    }
+  } catch (err) {
+    console.error('Failed to select provider:', err);
+  }
+}
+
+function openProviderModal() {
+  const modal = document.getElementById('providerModal');
+  if (modal) {
+    if (appState.providersData) {
+      updateProviderUI(appState.providersData);
+    }
+    modal.classList.add('open');
+    synth.playClick();
+  }
+}
+
+function closeProviderModal() {
+  const modal = document.getElementById('providerModal');
+  if (modal) modal.classList.remove('open');
+}
+
+// ============================================================================
+// INITIALIZATION & DOM BINDINGS
+// ============================================================================
 async function initApp() {
   setupEventListeners();
   initOfficeCanvas();
@@ -575,13 +1213,8 @@ async function initApp() {
       appState.state = stRes;
       renderState();
     }
-    if (provRes && provRes.available && provRes.available.length > 0) {
-      const provEl = document.getElementById('providerName');
-      if (provEl) {
-        const top = provRes.available.find(p => p.id !== 'generic') || provRes.available[0];
-        provEl.textContent = top.id.toUpperCase();
-        provEl.title = `Active: ${top.name} (${top.description || ''})`;
-      }
+    if (provRes) {
+      updateProviderUI(provRes);
     }
     await fetchReports();
   } catch (e) {
@@ -596,6 +1229,98 @@ let currentSuggestions = [];
 
 // Setup DOM Event Listeners
 function setupEventListeners() {
+  // Provider Badge & Switcher Modal
+  const providerBadge = document.getElementById('providerBadge');
+  if (providerBadge) {
+    providerBadge.addEventListener('click', () => {
+      openProviderModal();
+    });
+  }
+
+  const btnCloseProviderModal = document.getElementById('btnCloseProviderModal');
+  if (btnCloseProviderModal) {
+    btnCloseProviderModal.addEventListener('click', () => {
+      closeProviderModal();
+    });
+  }
+
+  const providerModal = document.getElementById('providerModal');
+  if (providerModal) {
+    providerModal.addEventListener('click', (e) => {
+      if (e.target === providerModal) closeProviderModal();
+    });
+  }
+
+  // Lo-Fi Music Synthesizer Controls
+  const btnLofiToggle = document.getElementById('btnLofiToggle');
+  if (btnLofiToggle) {
+    btnLofiToggle.addEventListener('click', () => {
+      synth.playClick();
+      lofiEngine.toggle();
+    });
+  }
+
+  const lofiTrackSelect = document.getElementById('lofiTrackSelect');
+  if (lofiTrackSelect) {
+    lofiTrackSelect.addEventListener('change', (e) => {
+      lofiEngine.setTrack(e.target.value);
+    });
+  }
+
+  const lofiVolSlider = document.getElementById('lofiVolSlider');
+  if (lofiVolSlider) {
+    lofiVolSlider.addEventListener('input', (e) => {
+      lofiEngine.setVolume(parseFloat(e.target.value));
+    });
+  }
+
+  // Stream Tab Switcher (#AI-SIDECHAT vs #TEAM-SLACK)
+  const tabSidechat = document.getElementById('tabSidechat');
+  const tabSlack = document.getElementById('tabSlack');
+  const sidechatStream = document.getElementById('sidechatStream');
+  const terminalLogs = document.getElementById('terminalLogs');
+
+  if (tabSidechat && tabSlack) {
+    tabSidechat.addEventListener('click', () => {
+      synth.playClick();
+      tabSidechat.classList.add('active');
+      tabSlack.classList.remove('active');
+      if (sidechatStream) sidechatStream.style.display = 'flex';
+      if (terminalLogs) terminalLogs.style.display = 'none';
+      appState.streamMode = 'sidechat';
+    });
+
+    tabSlack.addEventListener('click', () => {
+      synth.playClick();
+      tabSlack.classList.add('active');
+      tabSidechat.classList.remove('active');
+      if (sidechatStream) sidechatStream.style.display = 'none';
+      if (terminalLogs) terminalLogs.style.display = 'flex';
+      appState.streamMode = 'slack';
+    });
+  }
+
+  // Auto Scroll Toggle Button
+  const btnAutoScroll = document.getElementById('btnAutoScroll');
+  if (btnAutoScroll) {
+    btnAutoScroll.addEventListener('click', () => {
+      synth.playClick();
+      appState.autoScrollEnabled = !appState.autoScrollEnabled;
+      btnAutoScroll.classList.toggle('active', appState.autoScrollEnabled);
+      btnAutoScroll.textContent = appState.autoScrollEnabled ? 'AUTO-SCROLL ON' : 'AUTO-SCROLL OFF';
+    });
+  }
+
+  // Clear Sidechat / Clear Logs
+  const btnClearSidechat = document.getElementById('btnClearSidechat');
+  if (btnClearSidechat) {
+    btnClearSidechat.addEventListener('click', () => {
+      synth.playClick();
+      if (sidechatStream) sidechatStream.innerHTML = '';
+      if (terminalLogs) terminalLogs.innerHTML = '';
+    });
+  }
+
   // Task form submission
   const taskForm = document.getElementById('taskForm');
   const taskInput = document.getElementById('taskInput');
@@ -690,6 +1415,7 @@ function setupEventListeners() {
     const prompt = taskInput.value.trim();
     if (!prompt) return;
     synth.playClick();
+    updateActiveTaskHud(prompt, 'RUNNING');
     await submitTask(prompt);
     taskInput.value = '';
   });
@@ -699,6 +1425,7 @@ function setupEventListeners() {
     btn.addEventListener('click', async () => {
       synth.playClick();
       const prompt = btn.getAttribute('data-prompt');
+      updateActiveTaskHud(prompt, 'RUNNING');
       await submitTask(prompt);
     });
   });
@@ -706,11 +1433,13 @@ function setupEventListeners() {
   // Header buttons
   document.getElementById('btnDemo').addEventListener('click', async () => {
     synth.playClick();
+    updateActiveTaskHud('Running Full PixelCrew Multi-Agent Sprint Demo', 'SPRINT');
     await fetch('/api/demo', { method: 'POST' });
   });
 
   document.getElementById('btnReset').addEventListener('click', async () => {
     synth.playClick();
+    updateActiveTaskHud('Standing by for sprint assignment', null);
     await fetch('/api/reset', { method: 'POST' });
   });
 
@@ -736,6 +1465,8 @@ function setupEventListeners() {
   document.getElementById('btnClearLogs').addEventListener('click', () => {
     synth.playClick();
     document.getElementById('terminalLogs').innerHTML = '';
+    const sidechat = document.getElementById('sidechatStream');
+    if (sidechat) sidechat.innerHTML = '';
   });
 
   // Log filter chips
@@ -1359,17 +2090,30 @@ function connectSSE() {
     appState.state = data.state;
     appState.events = data.history || [];
 
+    if (data.providers) {
+      updateProviderUI(data.providers);
+    } else if (data.state?.activeProvider) {
+      updateProviderUI({
+        activeProvider: data.state.activeProvider,
+        activeProviderName: data.state.activeProviderName,
+        activeProviderIcon: data.state.activeProviderIcon,
+        available: [{ id: data.state.activeProvider, name: data.state.activeProviderName, icon: data.state.activeProviderIcon }]
+      });
+    }
+
     renderProjectInfo();
     renderAgentGrid();
     renderSkillsList();
     renderState();
     renderLogs(appState.events);
+    renderSidechat(appState.events);
   });
 
   eventSource.addEventListener('agent_event', (e) => {
     const event = JSON.parse(e.data);
     appState.events.push(event);
     appendLog(event);
+    appendSidechatCard(event);
 
     // Real-time visual state & sprite animation update
     if (appState.state && event.agent) {

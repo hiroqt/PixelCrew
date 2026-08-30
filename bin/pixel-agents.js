@@ -130,10 +130,8 @@ function startServerWithPortFallback(server, initialPort, maxTries = 20) {
     let attempts = 0;
 
     function tryListen() {
-      server.removeAllListeners('error');
-      server.removeAllListeners('listening');
-
-      server.once('error', (err) => {
+      const onError = (err) => {
+        server.removeListener('listening', onListening);
         if (err.code === 'EADDRINUSE') {
           attempts++;
           if (attempts >= maxTries) {
@@ -146,11 +144,15 @@ function startServerWithPortFallback(server, initialPort, maxTries = 20) {
         } else {
           reject(err);
         }
-      });
+      };
 
-      server.once('listening', () => {
+      const onListening = () => {
+        server.removeListener('error', onError);
         resolve(currentPort);
-      });
+      };
+
+      server.once('error', onError);
+      server.once('listening', onListening);
 
       server.listen(currentPort);
     }

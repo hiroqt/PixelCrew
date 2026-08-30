@@ -43,34 +43,29 @@ export class ProviderRegistry {
   }
 
   /**
-   * Scans system to detect available providers
+   * Scans system to detect available providers and determine the active runtime
    * @param {boolean} forceRefresh
-   * @returns {Promise<{ available: import('./adapter.interface.js').AgentAdapter[], missing: import('./adapter.interface.js').AgentAdapter[] }>}
+   * @param {string} targetDir
+   * @returns {Promise<{ activeProvider: string, activeProviderName: string, activeProviderIcon: string, activeProviderDescription: string, available: import('./adapter.interface.js').AgentAdapter[], missing: import('./adapter.interface.js').AgentAdapter[] }>}
    */
   async scanEnvironment(forceRefresh = false, targetDir = process.cwd()) {
     const now = Date.now();
-    if (!forceRefresh && now - this.lastScanTime < 5000 && this.detectedCache.size > 0) {
-      const available = [];
-      const missing = [];
-      for (const adapter of this.adapters.values()) {
-        if (this.detectedCache.get(adapter.id)) {
-          available.push(adapter);
-        } else {
-          missing.push(adapter);
-        }
-      }
-      return { available, missing };
+    if (!forceRefresh && now - this.lastScanTime < 4000 && this.detectedCache.size > 0 && this.lastScanResult) {
+      return this.lastScanResult;
     }
 
-    const available = [];
+    const availableWithScores = [];
     const missing = [];
 
     for (const adapter of this.adapters.values()) {
       try {
-        const isDetected = await adapter.detect(targetDir);
-        this.detectedCache.set(adapter.id, isDetected);
-        if (isDetected) {
-          available.push(adapter);
+        const score = typeof adapter.detectScore === 'function' 
+          ? await adapter.detectScore(targetDir) 
+          : ((await adapter.detect(targetDir)) ? 100 : 0);
+
+        this.detectedCache.set(adapter.id, score > 0);
+        if (score > 0) {
+          availableWithScores.push({ adapter, score });
         } else {
           missing.push(adapter);
         }
@@ -80,8 +75,30 @@ export class ProviderRegistry {
       }
     }
 
+    // Sort available adapters by confidence score descending
+    availableWithScores.sort((a, b) => {
+      // Prioritize higher score
+      if (b.score !== a.score) return b.score - a.score;
+      // If score is equal, prioritize Antigravity / Kiro / Claude over generic
+      if (a.adapter.id === 'generic') return 1;
+      if (b.adapter.id === 'generic') return -1;
+      return 0;
+    });
+
+    const available = availableWithScores.map(item => item.adapter);
+    const top = available.find(a => a.id !== 'generic') || available[0] || this.getAdapter('generic');
+
     this.lastScanTime = now;
-    return { available, missing };
+    this.lastScanResult = {
+      activeProvider: top?.id || 'generic',
+      activeProviderName: top?.name || 'Generic CLI Runner',
+      activeProviderIcon: top?.icon || '💻',
+      activeProviderDescription: top?.description || '',
+      available,
+      missing
+    };
+
+    return this.lastScanResult;
   }
 
   /**
@@ -102,29 +119,30 @@ export class ProviderRegistry {
       if (assigned) return assigned;
     }
 
-    const { available } = await this.scanEnvironment();
-
-    // Priority ordering for 'auto' strategy:
-    // Claude Code -> Antigravity -> Cursor -> Codex -> Kiro -> Generic
-    const priorityOrder = ['claude-code', 'antigravity', 'cursor', 'codex', 'kiro', 'generic'];
+    const { activeProvider, available } = await this.scanEnvironment();
 
     if (strategy === 'hybrid') {
       // Hybrid crew strategy:
-      // - Design / Frontend -> Claude Code / Cursor
-      // - Backend / Data -> Codex / Antigravity
-      // - QA / Review -> Claude Code / Generic
+      // - Design / Frontend -> Claude Code / Cursor / Antigravity
+      // - Backend / Data -> Codex / Antigravity / Kiro
+      // - QA / Review -> Claude Code / Generic / Antigravity
       if (task.agent === 'frontend' || task.agent === 'creativeDirector') {
-        const preferred = available.find(a => a.id === 'claude-code' || a.id === 'cursor');
+        const preferred = available.find(a => a.id === 'claude-code' || a.id === 'cursor' || a.id === 'antigravity');
         if (preferred) return preferred;
       } else if (task.agent === 'backend' || task.agent === 'database') {
-        const preferred = available.find(a => a.id === 'codex' || a.id === 'antigravity');
+        const preferred = available.find(a => a.id === 'codex' || a.id === 'antigravity' || a.id === 'kiro');
         if (preferred) return preferred;
       }
     }
 
-    for (const id of priorityOrder) {
-      const match = available.find(a => a.id === id);
-      if (match) return match;
+    // In 'auto' mode: Use the top-scored active provider
+    if (activeProvider) {
+      const activeAdapter = this.getAdapter(activeProvider);
+      if (activeAdapter) return activeAdapter;
+    }
+
+    if (available.length > 0) {
+      return available[0];
     }
 
     return this.getAdapter('generic');

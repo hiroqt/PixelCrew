@@ -129,3 +129,57 @@ test('All coding agent adapters detect via environment variables and workspace m
     await cleanupTestWorkspace(tmpDir);
   }
 });
+
+test('ProviderRegistry accurately detects active provider with score priority (Antigravity & Kiro)', async () => {
+  const tmpDir = await createTestWorkspace('priority-provider-test');
+  const originalEnv = { ...process.env };
+  try {
+    // Clean ambient IDE session env vars for controlled testing
+    const agyVars = [
+      'ANTIGRAVITY_AGENT', 'ANTIGRAVITY_CONVERSATION_ID', 'ANTIGRAVITY_EDITOR_APP_ROOT',
+      'ANTIGRAVITY_APP_DIR', 'ANTIGRAVITY_TRAJECTORY_ID', 'ANTIGRAVITY_LS_ADDRESS',
+      'AGY_SESSION', 'ANTIGRAVITY', 'AGY', 'AGY_WORKSPACE', 'GEMINI_CLI'
+    ];
+    const kiroVars = [
+      'KIRO_AGENT', 'KIRO_SESSION', 'KIRO_WORKSPACE', 'KIRO_APP_DIR',
+      'KIRO_PORT', 'KIRO', 'KIRO_IDE'
+    ];
+    for (const v of [...agyVars, ...kiroVars]) {
+      delete process.env[v];
+    }
+
+    // 1. Antigravity priority detection
+    process.env.ANTIGRAVITY_AGENT = 'true';
+    process.env.ANTIGRAVITY_CONVERSATION_ID = 'test-conv-123';
+    const regAgy = new ProviderRegistry();
+    const scanAgy = await regAgy.scanEnvironment(false, tmpDir);
+    assert.equal(scanAgy.activeProvider, 'antigravity');
+    assert.equal(scanAgy.activeProviderIcon, '🪐');
+    assert.equal(scanAgy.activeProviderName, 'Google Antigravity');
+
+    const task = createTask({ id: 't-test', title: 'Test Task', agent: 'orchestrator' });
+    const bestAgy = await regAgy.getBestAgent(task, 'auto');
+    assert.equal(bestAgy.id, 'antigravity');
+
+    for (const v of agyVars) {
+      delete process.env[v];
+    }
+
+    // 2. Kiro priority detection
+    process.env.KIRO_AGENT = 'true';
+    process.env.KIRO_SESSION = 'kiro-sess-456';
+    const regKiro = new ProviderRegistry();
+    const scanKiro = await regKiro.scanEnvironment(false, tmpDir);
+    assert.equal(scanKiro.activeProvider, 'kiro');
+    assert.equal(scanKiro.activeProviderIcon, '🗡️');
+    assert.equal(scanKiro.activeProviderName, 'Kiro');
+
+    const bestKiro = await regKiro.getBestAgent(task, 'auto');
+    assert.equal(bestKiro.id, 'kiro');
+  } finally {
+    process.env = originalEnv;
+    await cleanupTestWorkspace(tmpDir);
+  }
+});
+
+

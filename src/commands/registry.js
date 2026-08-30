@@ -4,6 +4,8 @@
  * Manages command registration, fuzzy autocomplete matching, and execution dispatch.
  */
 
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import { InputParser } from './parser.js';
 import { MasterPixelCrewCommand } from './pixelcrew.js';
 import { AssembleCommand } from './assemble.js';
@@ -162,6 +164,71 @@ export class CommandRegistry {
   }
 
   /**
+   * Helper to broadcast command telemetry to local engine, daemon server, and events.jsonl
+   */
+  async _emitTelemetry(context, event) {
+    // 1. Direct Engine Broadcast
+    if (context.engine?.emitEvent) {
+      try {
+        await context.engine.emitEvent(event);
+      } catch {}
+    }
+
+    // 2. Persist to events.jsonl
+    const targetDir = context.targetDir || process.cwd();
+    const possiblePaths = [
+      path.join(targetDir, '.pixel-crew', 'events.jsonl'),
+      path.join(targetDir, '.pixel-agents', 'events.jsonl')
+    ];
+
+    for (const p of possiblePaths) {
+      try {
+        const parent = path.dirname(p);
+        const parentExists = await fs.access(parent).then(() => true).catch(() => false);
+        if (parentExists) {
+          await fs.appendFile(p, JSON.stringify(event) + '\n', 'utf-8');
+        }
+      } catch {}
+    }
+
+    // 3. Notify Running Dashboard Daemon if active
+    try {
+      const daemonPaths = [
+        path.join(targetDir, '.pixel-crew', 'daemon.json'),
+        path.join(targetDir, '.pixel-agents', 'daemon.json')
+      ];
+      for (const dPath of daemonPaths) {
+        try {
+          const raw = await fs.readFile(dPath, 'utf-8');
+          const info = JSON.parse(raw);
+          if (info?.url) {
+            await fetch(`${info.url}/api/emit`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(event),
+              signal: AbortSignal.timeout(400)
+            });
+            break;
+          }
+        } catch {}
+      }
+    } catch {}
+  }
+
+  _inferAgentFromCommand(cmdName) {
+    const c = (cmdName || '').toLowerCase();
+    if (['assemble', 'craft', 'oneshot', 'init', 'manifest'].includes(c)) return 'orchestrator';
+    if (['blueprint', 'shape', 'plan'].includes(c)) return 'uxPlanner';
+    if (['render', 'critique', 'review'].includes(c)) return 'creativeDirector';
+    if (['typeset', 'bento', 'chromatic', 'colorize', 'retrofit'].includes(c)) return 'designSystem';
+    if (['bolder', 'quieter', 'de-slop', 'clarify', '8bit', 'delight', 'overdrive', 'build'].includes(c)) return 'frontend';
+    if (['sentinel', 'harden'].includes(c)) return 'security';
+    if (['audit', 'polish', 'boss-fight', 'fix'].includes(c)) return 'qa';
+    if (['warp', 'optimize', 'calibrate', 'adapt'].includes(c)) return 'performance';
+    return 'orchestrator';
+  }
+
+  /**
    * Dispatches execution from raw input string or structured command
    */
   async execute(input, context = {}) {
@@ -179,7 +246,40 @@ export class CommandRegistry {
           message: `Unknown command: "/${parsed.command}". Type "/" to see available commands.`
         };
       }
-      return await cmd.execute(context, parsed.args || []);
+
+      const agentPersona = this._inferAgentFromCommand(cmd.name);
+      const now = Date.now();
+
+      // Emit Start Event to Dashboard
+      await this._emitTelemetry(context, {
+        agent: agentPersona,
+        type: 'tool',
+        skill: cmd.name,
+        message: `[/${cmd.name}] Executing command${parsed.args?.length ? `: ${parsed.args.join(' ')}` : ''}`,
+        timestamp: now,
+        metadata: {
+          command: cmd.name,
+          args: parsed.args,
+          source: 'command_execution'
+        }
+      });
+
+      const res = await cmd.execute(context, parsed.args || []);
+
+      // Emit Completion Event to Dashboard
+      await this._emitTelemetry(context, {
+        agent: agentPersona,
+        type: res?.success === false ? 'error' : 'complete',
+        skill: cmd.name,
+        message: `[/${cmd.name}] ${res?.message || (res?.success === false ? 'Command failed' : 'Execution completed')}`,
+        timestamp: Date.now(),
+        metadata: {
+          command: cmd.name,
+          success: res?.success !== false
+        }
+      });
+
+      return res;
     }
 
     // Natural Language Chat Routing
@@ -210,3 +310,4 @@ export class CommandRegistry {
     }
   }
 }
+

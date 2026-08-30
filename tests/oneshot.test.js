@@ -292,6 +292,10 @@ test('Server OneShot API routes (/api/oneshot, /api/token-stats, /api/site-previ
     assert.ok(previewRes.body.includes('<!DOCTYPE html>'));
 
   } finally {
+    if (server) {
+      server.close();
+    }
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
 });
+

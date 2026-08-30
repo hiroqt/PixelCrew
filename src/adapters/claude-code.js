@@ -13,6 +13,7 @@ import { AgentAdapter } from './adapter.interface.js';
 export class ClaudeCodeAdapter extends AgentAdapter {
   constructor(options = {}) {
     super('claude-code', 'Claude Code', {
+      icon: '🤖',
       description: 'Anthropic Claude Code CLI & autonomous agent runtime',
       capabilities: {
         fileAccess: true,
@@ -26,44 +27,46 @@ export class ClaudeCodeAdapter extends AgentAdapter {
     });
   }
 
-  async detect(targetDir = process.cwd()) {
-    // 1. Environment variables
+  async detectScore(targetDir = process.cwd()) {
+    let score = 0;
+
+    // 1. Environment variables (Active Claude Code session) (+1000 points)
     if (
       process.env.CLAUDE_CODE ||
       process.env.CLAUDE_AGENT ||
       process.env.CLAUDE_SESSION ||
       process.env.CLAUDE_WORKSPACE ||
-      process.env.CLAUDE_APP_DIR ||
-      process.env.ANTHROPIC_API_KEY
+      process.env.CLAUDE_APP_DIR
     ) {
-      return true;
+      score += 1000;
     }
 
-    // 2. Workspace indicators (.claude/, .claude-plugin/, CLAUDE.md, claude.json, .claude.json)
+    // 2. Workspace indicators (.claude/, .claude-plugin/, CLAUDE.md, claude.json, .claude.json) (+200 points)
     const indicators = ['.claude', '.claude-plugin', 'CLAUDE.md', 'claude.json', '.claude.json'];
     for (const item of indicators) {
       try {
         await fs.access(path.join(targetDir, item));
-        return true;
+        score += 200;
+        break;
       } catch {}
     }
 
-    // 3. User home directory (~/.claude, ~/.claude.json)
+    // 3. User home directory (~/.claude, ~/.claude.json) (+50 points)
     try {
       const home = os.homedir();
       if (home) {
         try {
           await fs.access(path.join(home, '.claude'));
-          return true;
+          score += 50;
         } catch {}
         try {
           await fs.access(path.join(home, '.claude.json'));
-          return true;
+          score += 50;
         } catch {}
       }
     } catch {}
 
-    // 4. macOS Application bundle detection
+    // 4. macOS Application bundle detection (+30 points)
     if (process.platform === 'darwin') {
       const macApps = [
         '/Applications/Claude.app',
@@ -73,12 +76,13 @@ export class ClaudeCodeAdapter extends AgentAdapter {
       for (const appPath of macApps) {
         try {
           await fs.access(appPath);
-          return true;
+          score += 30;
+          break;
         } catch {}
       }
     }
 
-    // 5. Binary CLI in PATH (claude, claude-code, claude-cli)
+    // 5. Binary CLI in PATH (claude, claude-code, claude-cli) (+30 points)
     const binaries = ['claude', 'claude-code', 'claude-cli'];
     for (const bin of binaries) {
       const isFound = await new Promise((resolve) => {
@@ -91,10 +95,18 @@ export class ClaudeCodeAdapter extends AgentAdapter {
           resolve(false);
         }
       });
-      if (isFound) return true;
+      if (isFound) {
+        score += 30;
+        break;
+      }
     }
 
-    return false;
+    return score;
+  }
+
+  async detect(targetDir = process.cwd()) {
+    const score = await this.detectScore(targetDir);
+    return score > 0;
   }
 
   /**
