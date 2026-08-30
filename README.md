@@ -35,30 +35,87 @@ Modeled after **Floor 42 of Pixel Corps HQ**, PixelCrew pairs developers with an
 
 ---
 
-## ⚡ 10-Second Quickstart
+## ⚡ Quickstart: Initialize, Install Skills & Supercharge Your AI Agents
 
-No global installations or complex configuration required. Run directly in your project:
+PixelCrew requires **zero global installations**. You can initialize your project, install skills across your preferred AI coding agents, and start sprinting in seconds.
+
+---
+
+### 1️⃣ Step 1: Initialize PixelCrew in Your Repository
+
+Scaffold the `.pixel-crew/` workspace control layer and automatically adapt agent permissions to your detected tech stack (Next.js, Node.js, Prisma, Tailwind, Vitest, etc.):
 
 ```bash
-# 1. Preview installation with zero-mutation --dry-run
+# Preview what directories & files would be configured (zero disk mutation)
 npx pixelcrew init --dry-run
 
-# 2. Initialize and adapt PixelCrew to your repository
+# Initialize and adapt PixelCrew to your active project
 npx pixelcrew init --yes
-
-# 3. Install & sync skills across Claude Code, Cursor, Antigravity, Kiro, Codex, Grok
-npx pixelcrew add design/ui-design
-npx pixelcrew sync
-
-# 4. Launch the orchestrator daemon and real-time visual office dashboard
-npx pixelcrew start
-
-# 5. Dispatch a full-stack goal or assemble a complete website with multi-agent synthesis
-npx pixelcrew assemble "Build modern SaaS analytics platform with Next.js and E2E tests" --out ./my-app
 ```
 
-The interactive dashboard opens automatically at:  
-👉 **`http://localhost:4747`** *(auto-recovers to `4748`+ if port 4747 is occupied)*
+---
+
+### 2️⃣ Step 2: Install & Add Skills for Your Coding Agents
+
+PixelCrew formats and writes standardized `SKILL.md` bundles with proper YAML frontmatter and deep domain instructions directly into your AI agent's native directory:
+
+```bash
+# Install a skill across ALL detected AI agent directories simultaneously
+npx pixelcrew add design/ui-design
+npx pixelcrew add anti-ai/slop-guardian
+npx pixelcrew add token-efficiency
+
+# Or target a specific AI agent environment:
+npx pixelcrew add design/ui-design --provider claude-code   # -> .claude/skills/
+npx pixelcrew add design/ui-design --provider cursor        # -> .cursor/skills/
+npx pixelcrew add design/ui-design --provider antigravity   # -> .agents/skills/
+npx pixelcrew add design/ui-design --provider kiro          # -> .kiro/skills/
+
+# Re-sync all installed skills across all agent provider folders at any time
+npx pixelcrew sync
+```
+
+#### Supported AI Agent Directories:
+- **Anthropic Claude Code**: `.claude/skills/<skill-name>/SKILL.md` & `.claude-plugin/`
+- **Cursor AI**: `.cursor/skills/<skill-name>/SKILL.md`
+- **Google Antigravity & Universal Agents**: `.agents/skills/<skill-name>/SKILL.md` & `.agent/`
+- **Google Gemini CLI**: `.gemini/skills/<skill-name>/SKILL.md`
+- **Kiro AI**: `.kiro/skills/<skill-name>/SKILL.md`
+- **OpenAI Codex CLI**: `.codex/skills/<skill-name>/SKILL.md`
+- **xAI Grok**: `.grok/skills/<skill-name>/SKILL.md`
+- **Hermes, OpenCode & Pi**: `.hermes/skills/`, `.opencode/skills/`, `.pi/skills/`
+
+---
+
+### 3️⃣ Step 3: Use Floor 42 Slash Commands in Your Agent Chat
+
+Once installed, your coding agent immediately recognizes PixelCrew's Floor 42 command suite. Simply type any slash command into your agent's chat box:
+
+```text
+/assemble "Build high-performance AI analytics platform with Next.js and E2E tests"
+/blueprint "Plan responsive pricing calculator and task DAG"
+/render                               # Runs 6-dimension Anti-AI design & layout audit
+/boss-fight "Fix modal hydration bug" # Dispatches bug blitz squad
+/8bit                                 # Injects procedural Web Audio chimes & CRT shaders
+/sentinel                             # Security audit, OWASP headers & RFC 7807 envelopes
+/warp                                 # Performance speedrun & AST token caching (72% savings)
+```
+
+---
+
+### 4️⃣ Step 4: Launch Floor 42 Live Startup Office Dashboard
+
+Watch your multi-agent swarm execute tasks, type on mechanical keyboards, and emit real-time telemetry:
+
+```bash
+# Start the orchestrator daemon and open the Floor 42 dashboard
+npx pixelcrew start
+# Or via the slash command alias
+npx pixelcrew /office
+```
+
+👉 The interactive dashboard opens at: **`http://localhost:4747`** *(auto-recovers to `4748`+ if occupied)*
+
 
 
 
