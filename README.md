@@ -105,7 +105,7 @@ Once installed, your coding agent immediately recognizes PixelCrew's Floor 42 co
 
 ### 4️⃣ Step 4: Launch Floor 42 Live Startup Office Dashboard
 
-Watch your multi-agent swarm execute tasks, type on mechanical keyboards, and emit real-time telemetry:
+Watch your multi-agent swarm execute tasks, type on mechanical keyboards, and stream real-time IDE telemetry:
 
 ```bash
 # Start the orchestrator daemon and open the Floor 42 dashboard
@@ -116,8 +116,12 @@ npx pixelcrew /office
 
 👉 The interactive dashboard opens at: **`http://localhost:4747`** *(auto-recovers to `4748`+ if occupied)*
 
-
-
+#### 🌟 Floor 42 Dashboard Features:
+- **⚡ Real-Time `#AI-SIDECHAT` Stream Mirroring**: Directly mirrors your coding agent's sidechat (Google Antigravity, Kiro, Claude Code, Cursor) with live **`🧠 THINKING`** reasoning cards, syntax-highlighted **`[EDIT]`**, **`[READ]`**, **`[EXEC]`**, **`[SEARCH]`** tool cards, and an active sprint task HUD.
+- **🪐 Accurate Multi-IDE Provider Scoring**: Uses confidence-based scoring to accurately identify your active coding agent (`🪐 ANTIGRAVITY`, `🗡️ KIRO`, `🤖 CLAUDE`, `⚡ CURSOR`, `⚙️ CODEX`). Click the provider badge in the header to open the **Provider Switcher & Diagnostics Modal**.
+- **🎧 Zero-Dependency Procedural Lo-Fi Music Synthesizer**: Built-in Web Audio player with 4 chill tracks (*Floor 42 Midnight*, *Rainy Terminal*, *Antigravity Orbit*, *8-Bit Retro Café*), animated 5-bar equalizer visualizer, master volume slider, and click-free retro mechanical audio feedback.
+- **🎨 High-DPI Retina Canvas & Live Speech Bubbles**: High-DPI canvas scaling with floating live thought bubbles (`📄 Navbar.tsx`, `⚡ npm test`, `🧠 Thinking...`) and desk monitor screen reflections matching squad colors.
+- **🔍 Autonomous Workspace File Watcher**: Automatically monitors project file modifications in real time and attributes edits to the matching squad persona (`frontend`, `database`, `qa`, `security`, `performance`).
 
 ---
 
@@ -328,9 +332,14 @@ npx pixelcrew sync
 | `[SPACE]` | **Launch Demo** | Boots the swarm and runs a simulated multi-agent sprint |
 | `[1] - [6]` | **Agent Inspector** | Opens the dedicated status drawer and permissions for agents 1 through 6 |
 | `[ESC]` | **Close Modals** | Closes any active modal or reports drawer |
+| `⚡ #AI-SIDECHAT` | **Sidechat Stream** | Live Antigravity/Kiro/Claude sidechat reasoning cards and tool executions |
+| `💬 #TEAM-SLACK` | **Slack Channels** | Agent chat filtered by squad (`#lead`, `#fe`, `#be`, `#db`, `#sec`, `#qa`) |
+| `📻 LO-FI Button` | **Lo-Fi Player** | Toggles procedural chill-hop music with animated 5-bar equalizer bars |
+| `🪐 Provider Badge`| **Provider Switcher** | Opens the active AI IDE Provider selector and diagnostics modal |
 | `CRT Button` | **Scanline Shader** | Toggles retro arcade phosphor scanlines and vignette effect |
 | `NIGHT Button` | **Cyberpunk Shift** | Switches between warm day office and neon cyberpunk night lighting |
-| `SFX Button` | **Web Audio Synth** | Toggles procedural 8-bit chip-tune feedback sounds |
+| `SFX Button` | **Web Audio Synth** | Toggles procedural 8-bit chip-tune and typewriter feedback sounds |
+| `AUTO-SCROLL` | **Feed Scroll Lock** | Toggles automatic scrolling on incoming live stream cards |
 
 ---
 
