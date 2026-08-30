@@ -44,8 +44,9 @@ export class DoctorCommand extends PixelCommand {
     const nodeVer = process.version;
     const gitCheck = await this.checkCommand('git');
 
+    const targetDir = context?.targetDir || process.cwd();
     // Check agent providers
-    const { available, missing } = await registry.scanEnvironment(true);
+    const { available, missing } = await registry.scanEnvironment(true, targetDir);
 
     const lines = [];
     lines.push('╔══════════════════════════════════════════════════════════════════╗');

@@ -154,6 +154,9 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     }
   }
 
+  // Ensure workspace has clean .gitignore rules (ignoring .vite, .next, .turbo, logs, temp)
+  const gitignoreResult = await ensureGitignore(targetDir, { dryRun, reporter });
+
   if (dryRun) {
     reporter.print();
     return {
@@ -162,7 +165,8 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
       profile,
       pixelCrewDir,
       pixelAgentsDir,
-      dashboardDir: path.join(pixelCrewDir, 'dashboard')
+      dashboardDir: path.join(pixelCrewDir, 'dashboard'),
+      gitignore: gitignoreResult
     };
   }
 
@@ -175,6 +179,9 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   if (enableDashboard) {
     console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/dashboard/ (index.html, styles.css, app.js)');
   }
+  if (gitignoreResult.created || gitignoreResult.updated) {
+    console.log('  \x1b[32m✓\x1b[0m Clean workspace configured in .gitignore (ignoring .vite/, .next/, build/ & cache directories)');
+  }
 
   console.log('\n\x1b[32m\x1b[1mPixel Crew initialized & adapted successfully!\x1b[0m\n');
   console.log('Next steps:');
@@ -183,6 +190,71 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   console.log('  \x1b[36mnpx pixelcrew doctor\x1b[0m          Check available coding agent providers');
   console.log('  \x1b[36mnpx pixelcrew demo\x1b[0m            Run interactive multi-agent visual demo\n');
 
-  return { pixelCrewDir, pixelAgentsDir, dashboardDir: path.join(pixelCrewDir, 'dashboard'), profile };
+  return { pixelCrewDir, pixelAgentsDir, dashboardDir: path.join(pixelCrewDir, 'dashboard'), profile, gitignore: gitignoreResult };
+}
+
+/**
+ * Ensures target workspace has clean ignore rules for .vite, .next, and build/cache folders
+ */
+export async function ensureGitignore(targetDir, { dryRun = false, reporter } = {}) {
+  const gitignorePath = path.join(targetDir, '.gitignore');
+  const requiredPatterns = [
+    'node_modules/',
+    '.vite/',
+    '.next/',
+    '.turbo/',
+    'dist/',
+    'build/',
+    '*.log',
+    '.DS_Store',
+    '.pixel-temp/',
+    'scratch/',
+    'tmp/'
+  ];
+
+  let existingContent = '';
+  let exists = false;
+  try {
+    existingContent = await fs.readFile(gitignorePath, 'utf-8');
+    exists = true;
+  } catch {}
+
+  const lines = existingContent.split('\n').map(l => l.trim());
+  const missing = requiredPatterns.filter(p => !lines.includes(p));
+
+  if (!exists) {
+    const newContent = [
+      '# Dependencies',
+      'node_modules/',
+      'package-lock.json',
+      '',
+      '# Build and Cache Artifacts',
+      '.vite/',
+      '.next/',
+      '.turbo/',
+      'dist/',
+      'build/',
+      '',
+      '# Runtime & Workspace Temp',
+      '.pixel-temp/',
+      'scratch/',
+      'tmp/',
+      '',
+      '# Logs & OS',
+      '*.log',
+      '.DS_Store',
+      ''
+    ].join('\n');
+
+    await safeWriteFile(gitignorePath, newContent, { dryRun, reporter, targetDir });
+    return { created: true, updated: false, missing: requiredPatterns };
+  } else if (missing.length > 0) {
+    const addition = `\n# Build Caches & Workspace Temp\n${missing.join('\n')}\n`;
+    const updatedContent = existingContent.endsWith('\n') ? existingContent + addition : existingContent + '\n' + addition;
+    await safeWriteFile(gitignorePath, updatedContent, { dryRun, reporter, targetDir });
+    return { created: false, updated: true, missing };
+  }
+
+  return { created: false, updated: false, missing: [] };
 }
 

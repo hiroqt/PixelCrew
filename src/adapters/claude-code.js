@@ -4,6 +4,9 @@
  * Execution adapter for Anthropic Claude Code CLI.
  */
 
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
 import { spawn } from 'node:child_process';
 import { AgentAdapter } from './adapter.interface.js';
 
@@ -23,20 +26,75 @@ export class ClaudeCodeAdapter extends AgentAdapter {
     });
   }
 
-  async detect() {
-    // Check if claude command exists or environment variable is set
-    if (process.env.CLAUDE_CODE || process.env.ANTHROPIC_API_KEY) {
+  async detect(targetDir = process.cwd()) {
+    // 1. Environment variables
+    if (
+      process.env.CLAUDE_CODE ||
+      process.env.CLAUDE_AGENT ||
+      process.env.CLAUDE_SESSION ||
+      process.env.CLAUDE_WORKSPACE ||
+      process.env.CLAUDE_APP_DIR ||
+      process.env.ANTHROPIC_API_KEY
+    ) {
       return true;
     }
-    return new Promise((resolve) => {
+
+    // 2. Workspace indicators (.claude/, .claude-plugin/, CLAUDE.md, claude.json, .claude.json)
+    const indicators = ['.claude', '.claude-plugin', 'CLAUDE.md', 'claude.json', '.claude.json'];
+    for (const item of indicators) {
       try {
-        const proc = spawn('which', ['claude'], { stdio: 'ignore' });
-        proc.on('close', (code) => resolve(code === 0));
-        proc.on('error', () => resolve(false));
-      } catch {
-        resolve(false);
+        await fs.access(path.join(targetDir, item));
+        return true;
+      } catch {}
+    }
+
+    // 3. User home directory (~/.claude, ~/.claude.json)
+    try {
+      const home = os.homedir();
+      if (home) {
+        try {
+          await fs.access(path.join(home, '.claude'));
+          return true;
+        } catch {}
+        try {
+          await fs.access(path.join(home, '.claude.json'));
+          return true;
+        } catch {}
       }
-    });
+    } catch {}
+
+    // 4. macOS Application bundle detection
+    if (process.platform === 'darwin') {
+      const macApps = [
+        '/Applications/Claude.app',
+        path.join(os.homedir() || '', 'Applications', 'Claude.app'),
+        '/Applications/Claude Code.app'
+      ];
+      for (const appPath of macApps) {
+        try {
+          await fs.access(appPath);
+          return true;
+        } catch {}
+      }
+    }
+
+    // 5. Binary CLI in PATH (claude, claude-code, claude-cli)
+    const binaries = ['claude', 'claude-code', 'claude-cli'];
+    for (const bin of binaries) {
+      const isFound = await new Promise((resolve) => {
+        try {
+          const cmd = process.platform === 'win32' ? 'where' : 'which';
+          const proc = spawn(cmd, [bin], { stdio: 'ignore' });
+          proc.on('close', (code) => resolve(code === 0));
+          proc.on('error', () => resolve(false));
+        } catch {
+          resolve(false);
+        }
+      });
+      if (isFound) return true;
+    }
+
+    return false;
   }
 
   /**

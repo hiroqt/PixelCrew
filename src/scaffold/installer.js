@@ -30,18 +30,21 @@ export async function detectInstalledProviders(targetDir = process.cwd()) {
   const detected = new Set(['pixel-crew']);
 
   const checks = [
-    { provider: 'claude-code', dir: path.join(targetDir, '.claude') },
-    { provider: 'cursor', dir: path.join(targetDir, '.cursor') },
-    { provider: 'kiro', dir: path.join(targetDir, '.kiro') },
-    { provider: 'antigravity', dir: path.join(targetDir, '.agents') },
-    { provider: 'pixel-crew', dir: path.join(targetDir, '.pixel-agents') }
+    { provider: 'claude-code', paths: [path.join(targetDir, '.claude')] },
+    { provider: 'cursor', paths: [path.join(targetDir, '.cursor'), path.join(targetDir, '.cursorrules')] },
+    { provider: 'kiro', paths: [path.join(targetDir, '.kiro'), path.join(targetDir, '.kirorules'), path.join(targetDir, 'kiro.json'), path.join(targetDir, '.kiro.json')] },
+    { provider: 'antigravity', paths: [path.join(targetDir, '.agents'), path.join(targetDir, '.gemini')] },
+    { provider: 'pixel-crew', paths: [path.join(targetDir, '.pixel-crew'), path.join(targetDir, '.pixel-agents')] }
   ];
 
   for (const check of checks) {
-    try {
-      await fs.access(check.dir);
-      detected.add(check.provider);
-    } catch {}
+    for (const p of check.paths) {
+      try {
+        await fs.access(p);
+        detected.add(check.provider);
+        break;
+      } catch {}
+    }
   }
 
   return Array.from(detected);

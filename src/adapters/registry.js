@@ -47,7 +47,7 @@ export class ProviderRegistry {
    * @param {boolean} forceRefresh
    * @returns {Promise<{ available: import('./adapter.interface.js').AgentAdapter[], missing: import('./adapter.interface.js').AgentAdapter[] }>}
    */
-  async scanEnvironment(forceRefresh = false) {
+  async scanEnvironment(forceRefresh = false, targetDir = process.cwd()) {
     const now = Date.now();
     if (!forceRefresh && now - this.lastScanTime < 5000 && this.detectedCache.size > 0) {
       const available = [];
@@ -67,7 +67,7 @@ export class ProviderRegistry {
 
     for (const adapter of this.adapters.values()) {
       try {
-        const isDetected = await adapter.detect();
+        const isDetected = await adapter.detect(targetDir);
         this.detectedCache.set(adapter.id, isDetected);
         if (isDetected) {
           available.push(adapter);
