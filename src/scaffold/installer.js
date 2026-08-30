@@ -12,6 +12,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { SKILL_DEFINITIONS } from '../orchestrator/skills-registry.js';
 import { SKILL_MARKDOWNS } from './templates.js';
 import { getSkillBundle, sanitizeFrontmatter } from './skills-bundle.js';
@@ -80,8 +81,11 @@ export function detectActiveIDE() {
     env.ANTIGRAVITY_APP_DIR ||
     env.AGY_SESSION ||
     env.ANTIGRAVITY ||
+    env.ANTIGRAVITY_IDE ||
     env.AGY ||
-    env.TERM_PROGRAM === 'antigravity'
+    env.TERM_PROGRAM === 'antigravity' ||
+    env.VSCODE_GIT_ASKPASS_NODE?.toLowerCase().includes('antigravity') ||
+    (env.CORPUS_NAME && env.CONVERSATION_ID)
   ) {
     return {
       id: 'antigravity',
@@ -262,6 +266,10 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
       targetProviders = await detectInstalledProviders(targetDir);
       if (activeIDE.id !== 'pixel-crew' && !targetProviders.includes(activeIDE.id)) {
         targetProviders.push(activeIDE.id);
+      }
+      // Always ensure Antigravity workspace skills (.agents/skills) are provisioned
+      if (!targetProviders.includes('antigravity')) {
+        targetProviders.push('antigravity');
       }
       if (options.allProviders || scope === 'all') {
         targetProviders = Object.keys(PROVIDER_PATHS);
@@ -501,6 +509,29 @@ Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
     }
   }
 
+  // 3. Synchronize Dashboard Assets if workspace dashboard directory exists
+  const srcDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));
+  const dashboardTargets = [
+    path.join(targetDir, '.pixel-crew', 'dashboard'),
+    path.join(targetDir, '.pixel-agents', 'dashboard')
+  ];
+
+  for (const dashDir of dashboardTargets) {
+    try {
+      const parentDir = path.dirname(dashDir);
+      const parentExists = await fs.access(parentDir).then(() => true).catch(() => false);
+      if (parentExists) {
+        await safeMkdir(dashDir, { dryRun, reporter });
+        const html = await fs.readFile(path.join(srcDashboardDir, 'index.html'), 'utf-8');
+        const css = await fs.readFile(path.join(srcDashboardDir, 'styles.css'), 'utf-8');
+        const js = await fs.readFile(path.join(srcDashboardDir, 'app.js'), 'utf-8');
+        await safeWriteFile(path.join(dashDir, 'index.html'), html, { dryRun, reporter, targetDir });
+        await safeWriteFile(path.join(dashDir, 'styles.css'), css, { dryRun, reporter, targetDir });
+        await safeWriteFile(path.join(dashDir, 'app.js'), js, { dryRun, reporter, targetDir });
+      }
+    } catch {}
+  }
+
   return {
     success: true,
     skillsSynced: Array.from(skillsToSync),
@@ -510,3 +541,4 @@ Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
     reporter
   };
 }
+

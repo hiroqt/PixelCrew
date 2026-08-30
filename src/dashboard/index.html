@@ -17,6 +17,7 @@
 
   <div class="pixel-app">
     <!-- STARTUP OFFICE HEADER -->
+    <!-- STARTUP OFFICE HEADER -->
     <header class="arcade-header">
       <div class="header-left">
         <div class="logo-box">
@@ -34,28 +35,53 @@
 
       <div class="header-center">
         <div class="office-meters">
-          <div class="meter-item">
+          <div class="meter-item" title="Team Fuel Meter">
             <span class="meter-label">☕ COFFEE:</span>
-            <div class="pixel-meter"><div class="pixel-meter-fill" id="coffeeFill" style="width: 88%;"></div></div>
+            <div class="pixel-meter"><div class="pixel-meter-fill" id="coffeeFill" style="width: 92%;"></div></div>
           </div>
-          <div class="meter-item">
+          <div class="meter-item" title="Swarm Execution Velocity">
             <span class="meter-label">⚡ VELOCITY:</span>
-            <div class="pixel-meter"><div class="pixel-meter-fill velocity" id="velocityFill" style="width: 95%;"></div></div>
+            <div class="pixel-meter"><div class="pixel-meter-fill velocity" id="velocityFill" style="width: 98%;"></div></div>
           </div>
         </div>
         <div class="status-indicator" id="swarmStatusBadge">
           <span class="status-dot" id="statusDot"></span>
           <span class="status-text" id="swarmStatusText">STANDBY</span>
         </div>
-        <div class="provider-indicator" id="providerBadge" title="Active Execution Provider">
-          <span class="provider-label">PROVIDER:</span>
-          <span class="provider-name" id="providerName">AUTO</span>
+        <div class="provider-indicator clickable-badge" id="providerBadge" title="Click to inspect / switch Coding Agent Provider">
+          <span class="provider-icon" id="providerIcon">🪐</span>
+          <div class="provider-meta">
+            <span class="provider-label">PROVIDER:</span>
+            <span class="provider-name" id="providerName">ANTIGRAVITY</span>
+          </div>
+          <span class="provider-chevron">▼</span>
         </div>
       </div>
 
       <div class="header-right">
+        <!-- PROCEDURAL LO-FI MUSIC PLAYER -->
+        <div class="lofi-player-box" id="lofiPlayerBox" title="Procedural Lo-Fi Music Synthesizer & Radio">
+          <button class="pixel-btn btn-sm btn-lofi" id="btnLofiToggle" title="Play / Pause Lo-Fi Beats">
+            <span id="lofiPlayIcon">▶</span> <span id="lofiBtnLabel">LO-FI BEATS</span>
+          </button>
+          <div class="lofi-visualizer" id="lofiVisualizer">
+            <div class="lofi-bar"></div>
+            <div class="lofi-bar"></div>
+            <div class="lofi-bar"></div>
+            <div class="lofi-bar"></div>
+            <div class="lofi-bar"></div>
+          </div>
+          <select class="lofi-select" id="lofiTrackSelect" title="Select Lo-Fi Track Preset">
+            <option value="floor42">☕ Floor 42 Midnight</option>
+            <option value="rainy">🌧️ Rainy Terminal</option>
+            <option value="antigravity">🪐 Antigravity Orbit</option>
+            <option value="retro8bit">🕹️ 8-Bit Retro Café</option>
+          </select>
+          <input type="range" class="lofi-vol-slider" id="lofiVolSlider" min="0" max="100" value="70" title="Lo-Fi Volume" />
+        </div>
+
         <button class="pixel-btn btn-sm btn-primary" id="btnOneShotModal" title="Open OneShot Multi-Agent Website Generator">
-          <span>✦</span> ONESHOT STUDIO
+          <span>✦</span> ONESHOT
         </button>
         <button class="pixel-btn btn-sm btn-info" id="btnReportsToggle" title="Open Sprint Audit Reports History [R]">
           <span>📋</span> REPORTS (<span id="reportsCountBadge">0</span>)
@@ -73,10 +99,29 @@
           <span>🔄</span> RESET
         </button>
         <button class="pixel-btn btn-sm btn-primary" id="btnDemo" title="Launch Startup Sprint Demo">
-          <span>🚀</span> SPRINT DEMO
+          <span>🚀</span> DEMO
         </button>
       </div>
     </header>
+
+    <!-- LIVE ACTIVE TASK HUD BANNER -->
+    <section class="active-task-hud" id="activeTaskHud">
+      <div class="hud-left">
+        <span class="hud-pulse-dot"></span>
+        <span class="hud-label">ACTIVE OBJECTIVE:</span>
+        <span class="hud-task-text" id="hudActiveTaskText">Ready for mission dispatch — type / or select a ticket below</span>
+      </div>
+      <div class="hud-right">
+        <div class="hud-tool-badge" id="hudToolBadge" style="display: none;">
+          <span class="tool-badge-icon">⚡</span>
+          <span class="tool-badge-name" id="hudToolName">TOOL: view_file</span>
+        </div>
+        <div class="hud-timer-box">
+          <span class="hud-timer-label">SPRINT TIME:</span>
+          <span class="hud-timer-val" id="hudTimerVal">00:00</span>
+        </div>
+      </div>
+    </section>
 
     <!-- SPRINT OBJECTIVE & TASK BAR -->
     <section class="task-dispatch-section">
@@ -168,16 +213,20 @@
         </div>
       </section>
 
-      <!-- BOTTOM SPLIT: SLACK / TERMINAL & JIRA SKILLS -->
+      <!-- BOTTOM SPLIT: SIDECHAT STREAM / SLACK & JIRA SKILLS -->
       <div class="bottom-split-section">
-        <!-- STARTUP SLACK CHAT & LIVE TERMINAL -->
+        <!-- STARTUP STREAM & LIVE CODING AGENT SIDECHAT -->
         <section class="activity-panel pixel-panel">
           <div class="panel-header">
-            <div class="terminal-controls">
-              <span class="term-btn term-red"></span>
-              <span class="term-btn term-yellow"></span>
-              <span class="term-btn term-green"></span>
-              <span class="panel-title">#engineering-feed // SLACK STREAM</span>
+            <div class="stream-tab-controls">
+              <button class="stream-tab active" id="tabSidechat" data-mode="sidechat">
+                <span class="tab-dot live-pulse"></span>
+                <span>⚡ #AI-SIDECHAT</span>
+                <span class="tab-badge" id="sidechatCountBadge">LIVE</span>
+              </button>
+              <button class="stream-tab" id="tabSlack" data-mode="slack">
+                <span>💬 #TEAM-SLACK</span>
+              </button>
             </div>
             <div class="activity-actions">
               <div class="filter-group" id="agentFilters">
@@ -190,10 +239,28 @@
                 <button class="filter-chip" data-filter="performance">#PERF</button>
                 <button class="filter-chip" data-filter="qa">#QA</button>
               </div>
+              <button class="pixel-btn btn-xs" id="btnAutoScroll" title="Toggle Auto-Scroll Lock">
+                <span id="autoScrollIcon">⬇️</span> LOCK
+              </button>
               <button class="pixel-btn btn-xs" id="btnClearLogs">CLEAR</button>
             </div>
           </div>
-          <div class="terminal-logs" id="terminalLogs">
+
+          <!-- SIDECHAT STREAM CONTAINER (ANTIGRAVITY IDE SIDECHAT VIEW) -->
+          <div class="sidechat-stream-container" id="sidechatStream">
+            <div class="sidechat-intro-card">
+              <div class="sidechat-intro-header">
+                <span class="intro-icon">🪐</span>
+                <div>
+                  <div class="intro-title">ANTIGRAVITY REALTIME AGENT STREAM</div>
+                  <div class="intro-sub">Live telemetry: thought reasoning, tool invocations, subagents & file modifications</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STANDARD SLACK TERMINAL LOGS -->
+          <div class="terminal-logs" id="terminalLogs" style="display: none;">
             <div class="log-entry log-system">
               <span class="log-time">[09:00:00]</span>
               <span class="log-agent log-agent-orchestrator">SLACKBOT</span>
@@ -392,14 +459,40 @@
                   <span>🌐</span> OPEN LIVE PREVIEW
                 </a>
               </div>
-              <div class="preview-iframe-wrapper">
-                <iframe id="sitePreviewIframe" class="site-preview-iframe" src="about:blank"></iframe>
+    <!-- PROVIDER SELECTOR & ENVIRONMENT DIAGNOSTICS MODAL -->
+    <div class="pixel-modal-backdrop" id="providerModal">
+      <div class="pixel-modal-card provider-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-agent-icon">🪐</span>
+            <h2 class="modal-agent-name" style="color: var(--color-cyan);">CODING AGENT PROVIDER & RUNTIME</h2>
+          </div>
+          <button class="pixel-btn btn-sm btn-warn" id="btnCloseProviderModal">✕</button>
+        </div>
+        <div class="modal-body provider-modal-body">
+          <div class="provider-info-banner">
+            <div class="provider-banner-left">
+              <span class="active-prov-icon" id="modalActiveProvIcon">🪐</span>
+              <div>
+                <div class="active-prov-title">ACTIVE: <span id="modalActiveProvName">Google Antigravity</span></div>
+                <div class="active-prov-desc" id="modalActiveProvDesc">Google Antigravity SDK & Advanced Agentic Coding environment</div>
               </div>
             </div>
+            <span class="active-status-badge">● RUNNING IN REALTIME</span>
+          </div>
+
+          <div class="provider-list-title">DETECTED PROVIDERS & IDES:</div>
+          <div class="provider-grid" id="providerGrid">
+            <!-- Populated by app.js -->
+          </div>
+
+          <div class="provider-tips">
+            <span>💡 <strong>Tip:</strong> PixelCrew automatically syncs skills and streams live actions across Google Antigravity, Kiro, Claude Code, and Cursor IDE.</span>
           </div>
         </div>
       </div>
     </div>
+
     <footer class="arcade-footer">
       <div class="footer-left">
         <span>PRESS [1..6] EMPLOYEE PROFILE</span>

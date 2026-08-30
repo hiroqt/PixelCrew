@@ -14,15 +14,28 @@ export class AgentAdapter {
     }
     this.id = id;
     this.name = name;
+    this.icon = options.icon || '🤖';
     this.description = options.description || '';
     this.capabilities = normalizeCapabilities(options.capabilities || {});
   }
 
   /**
+   * Returns a confidence score for whether this provider is currently active
+   * (>= 1000: active runtime session, >= 200: workspace config, >= 50: installed app/cli, 0: not detected)
+   * @param {string} targetDir
+   * @returns {Promise<number>}
+   */
+  async detectScore(targetDir = process.cwd()) {
+    const isDetected = await this.detect(targetDir);
+    return isDetected ? 100 : 0;
+  }
+
+  /**
    * Detects if this provider/IDE is available in the current environment
+   * @param {string} targetDir
    * @returns {Promise<boolean>}
    */
-  async detect() {
+  async detect(targetDir = process.cwd()) {
     return false;
   }
 

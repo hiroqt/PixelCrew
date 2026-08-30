@@ -13,6 +13,7 @@ import { AgentAdapter } from './adapter.interface.js';
 export class KiroAdapter extends AgentAdapter {
   constructor(options = {}) {
     super('kiro', 'Kiro', {
+      icon: '🗡️',
       description: 'Kiro autonomous agent and multi-agent runtime',
       capabilities: {
         fileAccess: true,
@@ -26,8 +27,10 @@ export class KiroAdapter extends AgentAdapter {
     });
   }
 
-  async detect(targetDir = process.cwd()) {
-    // 1. Environment variables (Active Kiro session/agent environment)
+  async detectScore(targetDir = process.cwd()) {
+    let score = 0;
+
+    // 1. Environment variables (Active Kiro session/agent environment) (+1000 points)
     if (
       process.env.KIRO ||
       process.env.KIRO_AGENT ||
@@ -37,34 +40,35 @@ export class KiroAdapter extends AgentAdapter {
       process.env.KIRO_CONFIG_DIR ||
       process.env.KIRO_PATH
     ) {
-      return true;
+      score += 1000;
     }
 
-    // 2. Target Workspace files/folders (.kiro, .kirorules, kiro.json, .kiro.json)
+    // 2. Target Workspace files/folders (.kiro, .kirorules, kiro.json, .kiro.json) (+200 points)
     const indicators = ['.kiro', '.kirorules', 'kiro.json', '.kiro.json'];
     for (const item of indicators) {
       try {
         await fs.access(path.join(targetDir, item));
-        return true;
+        score += 200;
+        break;
       } catch {}
     }
 
-    // 3. User Home Directory (~/.kiro, ~/.config/kiro)
+    // 3. User Home Directory (~/.kiro, ~/.config/kiro) (+50 points)
     try {
       const home = os.homedir();
       if (home) {
         try {
           await fs.access(path.join(home, '.kiro'));
-          return true;
+          score += 50;
         } catch {}
         try {
           await fs.access(path.join(home, '.config', 'kiro'));
-          return true;
+          score += 50;
         } catch {}
       }
     } catch {}
 
-    // 4. macOS Application bundle detection
+    // 4. macOS Application bundle detection (+30 points)
     if (process.platform === 'darwin') {
       const macApps = [
         '/Applications/Kiro.app',
@@ -74,12 +78,13 @@ export class KiroAdapter extends AgentAdapter {
       for (const appPath of macApps) {
         try {
           await fs.access(appPath);
-          return true;
+          score += 30;
+          break;
         } catch {}
       }
     }
 
-    // 5. Binary CLI in PATH (kiro, kiro-cli, kiro-agent, kiro-ai)
+    // 5. Binary CLI in PATH (kiro, kiro-cli, kiro-agent, kiro-ai) (+30 points)
     const binaries = ['kiro', 'kiro-cli', 'kiro-agent', 'kiro-ai'];
     for (const bin of binaries) {
       const isFound = await new Promise((resolve) => {
@@ -92,10 +97,18 @@ export class KiroAdapter extends AgentAdapter {
           resolve(false);
         }
       });
-      if (isFound) return true;
+      if (isFound) {
+        score += 30;
+        break;
+      }
     }
 
-    return false;
+    return score;
+  }
+
+  async detect(targetDir = process.cwd()) {
+    const score = await this.detectScore(targetDir);
+    return score > 0;
   }
 
   async execute(task, context = {}) {

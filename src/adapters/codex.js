@@ -13,6 +13,7 @@ import { AgentAdapter } from './adapter.interface.js';
 export class CodexAdapter extends AgentAdapter {
   constructor(options = {}) {
     super('codex', 'Codex', {
+      icon: '🧠',
       description: 'OpenAI Codex & Assistant code execution environment',
       capabilities: {
         fileAccess: true,
@@ -26,45 +27,46 @@ export class CodexAdapter extends AgentAdapter {
     });
   }
 
-  async detect(targetDir = process.cwd()) {
-    // 1. Environment variables
+  async detectScore(targetDir = process.cwd()) {
+    let score = 0;
+
+    // 1. Environment variables (Active Codex session) (+1000 points)
     if (
-      process.env.OPENAI_API_KEY ||
-      process.env.CODEX_API_KEY ||
-      process.env.CODEX ||
       process.env.CODEX_AGENT ||
       process.env.CODEX_SESSION ||
       process.env.CODEX_WORKSPACE ||
-      process.env.CODEX_APP_DIR
+      process.env.CODEX_APP_DIR ||
+      process.env.OPENAI_CODEX
     ) {
-      return true;
+      score += 1000;
     }
 
-    // 2. Workspace indicators (.codex/, .codexrules, codex.json, .codex.json)
+    // 2. Workspace indicators (.codex/, .codexrules, codex.json, .codex.json) (+200 points)
     const indicators = ['.codex', '.codexrules', 'codex.json', '.codex.json'];
     for (const item of indicators) {
       try {
         await fs.access(path.join(targetDir, item));
-        return true;
+        score += 200;
+        break;
       } catch {}
     }
 
-    // 3. User home directory (~/.codex, ~/.openai)
+    // 3. User home directory (~/.codex, ~/.openai) (+50 points)
     try {
       const home = os.homedir();
       if (home) {
         try {
           await fs.access(path.join(home, '.codex'));
-          return true;
+          score += 50;
         } catch {}
         try {
           await fs.access(path.join(home, '.openai'));
-          return true;
+          score += 50;
         } catch {}
       }
     } catch {}
 
-    // 4. macOS Application bundle detection
+    // 4. macOS Application bundle detection (+30 points)
     if (process.platform === 'darwin') {
       const macApps = [
         '/Applications/Codex.app',
@@ -73,12 +75,13 @@ export class CodexAdapter extends AgentAdapter {
       for (const appPath of macApps) {
         try {
           await fs.access(appPath);
-          return true;
+          score += 30;
+          break;
         } catch {}
       }
     }
 
-    // 5. Binary CLI in PATH (codex, codex-cli, codex-agent, openai)
+    // 5. Binary CLI in PATH (codex, codex-cli, codex-agent, openai) (+30 points)
     const binaries = ['codex', 'codex-cli', 'codex-agent', 'openai'];
     for (const bin of binaries) {
       const isFound = await new Promise((resolve) => {
@@ -91,10 +94,18 @@ export class CodexAdapter extends AgentAdapter {
           resolve(false);
         }
       });
-      if (isFound) return true;
+      if (isFound) {
+        score += 30;
+        break;
+      }
     }
 
-    return false;
+    return score;
+  }
+
+  async detect(targetDir = process.cwd()) {
+    const score = await this.detectScore(targetDir);
+    return score > 0;
   }
 
   async execute(task, context = {}) {

@@ -175,13 +175,21 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     }
   }
 
-  // 1. Install skills to active IDE project directory if distinct from pixel-crew
-  if (installScope !== 'global' && activeIDE.id !== 'pixel-crew') {
-    const idePathFn = PROVIDER_PATHS[activeIDE.id];
-    if (idePathFn) {
-      const canonicalSkills = getAllCanonicalSkillIds();
+  // 1. Install skills to IDE project directories (.agents for Antigravity, .kiro, .cursor, etc.)
+  if (installScope !== 'global') {
+    const targetIdes = new Set(['antigravity']);
+    if (activeIDE.id !== 'pixel-crew') {
+      targetIdes.add(activeIDE.id);
+    }
+
+    const canonicalSkills = getAllCanonicalSkillIds();
+    for (const ideId of targetIdes) {
+      const idePathFn = PROVIDER_PATHS[ideId];
+      if (!idePathFn) continue;
+
       for (const sName of canonicalSkills) {
         const bundle = await getSkillBundle(sName);
+        if (!bundle) continue;
         const ideSkillFile = idePathFn(targetDir, sName);
         await safeWriteFile(ideSkillFile, bundle.content.trim() + '\n', { dryRun, reporter, targetDir });
 

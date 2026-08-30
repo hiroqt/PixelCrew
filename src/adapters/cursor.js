@@ -13,6 +13,7 @@ import { AgentAdapter } from './adapter.interface.js';
 export class CursorAdapter extends AgentAdapter {
   constructor(options = {}) {
     super('cursor', 'Cursor IDE', {
+      icon: '⚡',
       description: 'Cursor AI editor environment & Composer agent integration',
       capabilities: {
         fileAccess: true,
@@ -26,8 +27,10 @@ export class CursorAdapter extends AgentAdapter {
     });
   }
 
-  async detect(targetDir = process.cwd()) {
-    // 1. Environment variables
+  async detectScore(targetDir = process.cwd()) {
+    let score = 0;
+
+    // 1. Environment variables (Active Cursor session) (+1000 points)
     if (
       process.env.CURSOR ||
       process.env.CURSOR_AGENT ||
@@ -37,34 +40,35 @@ export class CursorAdapter extends AgentAdapter {
       process.env.CURSOR_CONFIG_DIR ||
       process.env.CURSOR_PATH
     ) {
-      return true;
+      score += 1000;
     }
 
-    // 2. Workspace indicators (.cursorrules, .cursor/, .cursor/rules, cursor.json)
+    // 2. Workspace indicators (.cursorrules, .cursor/, .cursor/rules, cursor.json) (+200 points)
     const indicators = ['.cursorrules', '.cursor', 'cursor.json', '.cursor.json'];
     for (const item of indicators) {
       try {
         await fs.access(path.join(targetDir, item));
-        return true;
+        score += 200;
+        break;
       } catch {}
     }
 
-    // 3. User home directory
+    // 3. User home directory (~/.cursor, ~/.cursorrules) (+50 points)
     try {
       const home = os.homedir();
       if (home) {
         try {
           await fs.access(path.join(home, '.cursor'));
-          return true;
+          score += 50;
         } catch {}
         try {
           await fs.access(path.join(home, '.cursorrules'));
-          return true;
+          score += 50;
         } catch {}
       }
     } catch {}
 
-    // 4. macOS Application bundle detection
+    // 4. macOS Application bundle detection (+30 points)
     if (process.platform === 'darwin') {
       const macApps = [
         '/Applications/Cursor.app',
@@ -73,12 +77,13 @@ export class CursorAdapter extends AgentAdapter {
       for (const appPath of macApps) {
         try {
           await fs.access(appPath);
-          return true;
+          score += 30;
+          break;
         } catch {}
       }
     }
 
-    // 5. Binary CLI in PATH (cursor, cursor-cli, cursor-agent)
+    // 5. Binary CLI in PATH (cursor, cursor-cli, cursor-agent) (+30 points)
     const binaries = ['cursor', 'cursor-cli', 'cursor-agent'];
     for (const bin of binaries) {
       const isFound = await new Promise((resolve) => {
@@ -91,10 +96,18 @@ export class CursorAdapter extends AgentAdapter {
           resolve(false);
         }
       });
-      if (isFound) return true;
+      if (isFound) {
+        score += 30;
+        break;
+      }
     }
 
-    return false;
+    return score;
+  }
+
+  async detect(targetDir = process.cwd()) {
+    const score = await this.detectScore(targetDir);
+    return score > 0;
   }
 
   async execute(task, context = {}) {

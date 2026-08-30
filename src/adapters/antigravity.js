@@ -13,6 +13,7 @@ import { AgentAdapter } from './adapter.interface.js';
 export class AntigravityAdapter extends AgentAdapter {
   constructor(options = {}) {
     super('antigravity', 'Google Antigravity', {
+      icon: '🪐',
       description: 'Google Antigravity SDK & Advanced Agentic Coding environment',
       capabilities: {
         fileAccess: true,
@@ -26,49 +27,52 @@ export class AntigravityAdapter extends AgentAdapter {
     });
   }
 
-  async detect(targetDir = process.cwd()) {
-    // 1. Environment variables
+  async detectScore(targetDir = process.cwd()) {
+    let score = 0;
+
+    // 1. Active Antigravity session / IDE environment variables (+1000 points)
     if (
+      process.env.ANTIGRAVITY_AGENT ||
+      process.env.ANTIGRAVITY_CONVERSATION_ID ||
+      process.env.ANTIGRAVITY_EDITOR_APP_ROOT ||
       process.env.ANTIGRAVITY_APP_DIR ||
+      process.env.ANTIGRAVITY_TRAJECTORY_ID ||
+      process.env.ANTIGRAVITY_LS_ADDRESS ||
       process.env.AGY_SESSION ||
-      process.env.GEMINI_API_KEY ||
       process.env.ANTIGRAVITY ||
       process.env.AGY ||
       process.env.AGY_WORKSPACE ||
-      process.env.GOOGLE_API_KEY
+      process.env.GEMINI_CLI
     ) {
-      return true;
+      score += 1000;
     }
 
-    // 2. Workspace indicators (.agents/, .agent/, .gemini/, GEMINI.md, AGENTS.md)
-    const indicators = ['.agents', '.agent', '.gemini', 'GEMINI.md', 'AGENTS.md', 'mcp_config.json'];
+    // 2. Workspace indicators (.agents/, .agent/, .gemini/, GEMINI.md, AGENTS.md) (+200 points)
+    const indicators = ['.agents', '.agent', '.gemini', 'GEMINI.md', 'AGENTS.md'];
     for (const item of indicators) {
       try {
         await fs.access(path.join(targetDir, item));
-        return true;
+        score += 200;
+        break;
       } catch {}
     }
 
-    // 3. User home directory (~/.gemini, ~/.agents, ~/.config/antigravity)
+    // 3. User home directory (~/.gemini, ~/.agents, ~/.config/antigravity) (+50 points)
     try {
       const home = os.homedir();
       if (home) {
         try {
           await fs.access(path.join(home, '.gemini'));
-          return true;
+          score += 50;
         } catch {}
         try {
           await fs.access(path.join(home, '.agents'));
-          return true;
-        } catch {}
-        try {
-          await fs.access(path.join(home, '.config', 'antigravity'));
-          return true;
+          score += 50;
         } catch {}
       }
     } catch {}
 
-    // 4. macOS Application bundle detection
+    // 4. macOS Application bundle (+30 points)
     if (process.platform === 'darwin') {
       const macApps = [
         '/Applications/Antigravity.app',
@@ -78,12 +82,13 @@ export class AntigravityAdapter extends AgentAdapter {
       for (const appPath of macApps) {
         try {
           await fs.access(appPath);
-          return true;
+          score += 30;
+          break;
         } catch {}
       }
     }
 
-    // 5. Binary CLI in PATH (agy, antigravity, gemini, google-antigravity)
+    // 5. Binary CLI in PATH (+30 points)
     const binaries = ['agy', 'antigravity', 'gemini', 'google-antigravity'];
     for (const bin of binaries) {
       const isFound = await new Promise((resolve) => {
@@ -96,10 +101,18 @@ export class AntigravityAdapter extends AgentAdapter {
           resolve(false);
         }
       });
-      if (isFound) return true;
+      if (isFound) {
+        score += 30;
+        break;
+      }
     }
 
-    return false;
+    return score;
+  }
+
+  async detect(targetDir = process.cwd()) {
+    const score = await this.detectScore(targetDir);
+    return score > 0;
   }
 
   async execute(task, context = {}) {

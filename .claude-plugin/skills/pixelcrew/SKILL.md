@@ -71,3 +71,19 @@ PixelCrew enforces strict visual standards to guarantee human-grade aesthetics:
 - ❌ **Banned**: Purple/blue mesh gradient blobs, repeating uniform 3-card grids, fake AI sparkles, nested cards-in-cards.
 - ❌ **Banned**: Cliché marketing copy (*"Unlock the power of next-gen AI", "Elevate your productivity"*).
 - ✅ **Required**: Intentional asymmetry, Bento topologies, mathematical typography pairings, and grounded technical metrics.
+
+---
+
+## 🕹️ Live Floor 42 Dashboard Telemetry
+
+Whenever you execute ANY `/pixelcrew` command in chat (e.g. `/assemble`, `/blueprint`, `/render`, `/bolder`, `/quieter`, `/8bit`, `/warp`, `/sentinel`, `/audit`, `/polish`):
+1. **Emit Telemetry Events**:
+   - Write directly to `.pixel-crew/events.jsonl` or run:
+     `npx pixelcrew emit --agent <role> --type <type> --message "<action description>"`
+   - Examples:
+     - `npx pixelcrew emit --agent creativeDirector --type tool --message "Reviewing design against 6-dimension Anti-AI rubric"`
+     - `npx pixelcrew emit --agent frontend --type tool --message "Refactoring components with fluid clamp typography"`
+     - `npx pixelcrew emit --agent qa --type tool --message "Running Playwright E2E verification"`
+2. **Real-Time Live Mirroring**:
+   - The Floor 42 visual dashboard at `http://localhost:4747` automatically mirrors every tool execution, file edit, and reasoning step to the `#AI-SIDECHAT` feed and animates the corresponding squad workstation sprite.
+
