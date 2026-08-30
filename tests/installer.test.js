@@ -225,3 +225,137 @@ test('AddCommand and SyncCommand CLI interfaces execute with dry-run and live mo
     await cleanupTestWorkspace(tmpDir);
   }
 });
+
+test('detectActiveIDE detects active terminal environment and maps global paths', async () => {
+  const { detectActiveIDE } = await import('../src/scaffold/installer.js');
+  const originalEnv = { ...process.env };
+
+  try {
+    // 1. Kiro
+    process.env.KIRO_SESSION = 'kiro_sess_1';
+    const kiro = detectActiveIDE();
+    assert.equal(kiro.id, 'kiro');
+    assert.ok(kiro.globalPath.includes('.kiro'));
+    delete process.env.KIRO_SESSION;
+
+    // 2. Cursor
+    process.env.CURSOR_SESSION = 'cursor_sess_1';
+    const cursor = detectActiveIDE();
+    assert.equal(cursor.id, 'cursor');
+    assert.ok(cursor.globalPath.includes('.cursor'));
+    delete process.env.CURSOR_SESSION;
+
+    // 3. Antigravity
+    process.env.ANTIGRAVITY_APP_DIR = '/Applications/Antigravity.app';
+    const agy = detectActiveIDE();
+    assert.equal(agy.id, 'antigravity');
+    delete process.env.ANTIGRAVITY_APP_DIR;
+
+    // 4. Claude Code
+    process.env.CLAUDE_CODE = '1';
+    const claude = detectActiveIDE();
+    assert.equal(claude.id, 'claude-code');
+    delete process.env.CLAUDE_CODE;
+  } finally {
+    process.env = originalEnv;
+  }
+});
+
+test('installSkill with scope: "global" and AddCommand with --global target global user IDE directory', async () => {
+  const tmpDir = await createTestWorkspace('global-skill-test');
+  const originalEnv = { ...process.env };
+  process.env.KIRO_SESSION = 'active_kiro_test';
+
+  try {
+    const res = await installSkill(tmpDir, 'design/ui-design', {
+      dryRun: true,
+      scope: 'global'
+    });
+
+    assert.equal(res.success, true);
+    assert.equal(res.scope, 'global');
+    assert.equal(res.activeIDE.id, 'kiro');
+    assert.ok(res.writtenPaths.some(w => w.scope === 'global' && w.path.includes('.kiro')));
+
+    // Test AddCommand with --global
+    const addCmd = new AddCommand();
+    const addRes = await addCmd.execute({ targetDir: tmpDir }, ['design/ui-design', '--global', '--dry-run']);
+    assert.equal(addRes.success, true);
+    assert.equal(addRes.data.scope, 'global');
+  } finally {
+    process.env = originalEnv;
+    await cleanupTestWorkspace(tmpDir);
+  }
+});
+
+test('scanAllWorkstations and InstallCommand interactive dispatcher deploy across workstations', async () => {
+  const tmpDir = await createTestWorkspace('workstation-test');
+  const { scanAllWorkstations, deployToWorkstations } = await import('../src/scaffold/workstations.js');
+  const { InstallCommand } = await import('../src/commands/install.js');
+
+  try {
+    // Create local .kiro directory
+    await fs.mkdir(path.join(tmpDir, '.kiro'), { recursive: true });
+
+    const workstations = await scanAllWorkstations(tmpDir);
+    assert.ok(workstations.some(w => w.id === 'kiro' && w.scope === 'workspace'));
+    assert.ok(workstations.some(w => w.id === 'pixel-crew'));
+
+    // Test deployToWorkstations dry run
+    const plan = {
+      plan: 'detected',
+      workstations: workstations.filter(w => w.scope === 'workspace'),
+      activeIDE: { id: 'kiro', name: 'Kiro AI' }
+    };
+    const deployRes = await deployToWorkstations(tmpDir, plan, { dryRun: true });
+    assert.equal(deployRes.success, true);
+    assert.ok(deployRes.deployedCount > 0);
+
+    // Test InstallCommand with --dry-run
+    const installCmd = new InstallCommand();
+    const cmdRes = await installCmd.execute({ targetDir: tmpDir, options: { yes: true } }, ['--dry-run']);
+    assert.equal(cmdRes.success, true);
+    assert.ok(cmdRes.output.includes('DRY RUN PREVIEW'));
+  } finally {
+    await cleanupTestWorkspace(tmpDir);
+  }
+});
+
+test('getSkillBundle and installSkill replicate full-fidelity skills and reference guides across all IDEs', async () => {
+  const tmpDir = await createTestWorkspace('full-skills-test');
+  const { getSkillBundle } = await import('../src/scaffold/skills-bundle.js');
+
+  try {
+    // Verify anti-ai-patterns bundle
+    const bundle = await getSkillBundle('anti-ai-patterns');
+    assert.ok(bundle.content.includes('name: anti-ai-patterns'));
+    assert.ok(bundle.content.includes('FORBIDDEN PATTERNS'));
+    assert.ok(bundle.content.includes('ENFORCED PRINCIPLES'));
+    assert.ok(bundle.content.includes('Rubric Evaluation'));
+
+    // Install to all providers
+    const res = await installSkill(tmpDir, 'anti-ai-patterns', {
+      allProviders: true
+    });
+    assert.equal(res.success, true);
+
+    // Verify .kiro/skills/anti-ai-patterns/SKILL.md
+    const kiroSkill = await fs.readFile(path.join(tmpDir, '.kiro', 'skills', 'anti-ai-patterns', 'SKILL.md'), 'utf-8');
+    assert.ok(kiroSkill.includes('FORBIDDEN PATTERNS'));
+    assert.ok(kiroSkill.includes('ENFORCED PRINCIPLES'));
+
+    // Verify .cursor/skills/anti-ai-patterns/SKILL.md
+    const cursorSkill = await fs.readFile(path.join(tmpDir, '.cursor', 'skills', 'anti-ai-patterns', 'SKILL.md'), 'utf-8');
+    assert.ok(cursorSkill.includes('FORBIDDEN PATTERNS'));
+
+    // Verify .claude/skills/anti-ai-patterns/SKILL.md
+    const claudeSkill = await fs.readFile(path.join(tmpDir, '.claude', 'skills', 'anti-ai-patterns', 'SKILL.md'), 'utf-8');
+    assert.ok(claudeSkill.includes('FORBIDDEN PATTERNS'));
+
+    // Verify .agents/skills/anti-ai-patterns/SKILL.md
+    const agentsSkill = await fs.readFile(path.join(tmpDir, '.agents', 'skills', 'anti-ai-patterns', 'SKILL.md'), 'utf-8');
+    assert.ok(agentsSkill.includes('FORBIDDEN PATTERNS'));
+  } finally {
+    await cleanupTestWorkspace(tmpDir);
+  }
+});

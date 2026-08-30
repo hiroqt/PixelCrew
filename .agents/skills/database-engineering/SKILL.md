@@ -1,12 +1,6 @@
 ---
 name: database-engineering
-description: >-
-  Comprehensive guide for database engineering, advanced indexing strategies (B-Tree, GIN, GiST, BRIN,
-  composite indexing column order, covering indexes, partial indexes, EXPLAIN ANALYZE tuning),
-  primary key architecture (UUIDv7 vs UUIDv4 vs ULID vs BIGINT IDENTITY), Row-Level Security (RLS)
-  policy optimization for multi-tenant isolation, database scaling & connection pooling (PgBouncer,
-  Supavisor, RDS Proxy, Neon, read replicas, partitioning, CDC), and modern SQL & NoSQL hosting
-  (Supabase, Neon, CockroachDB, Turso, DynamoDB, MongoDB, Redis, ClickHouse, pgvector).
+description: Comprehensive guide for database engineering, advanced indexing strategies (B-Tree, GIN, GiST, BRIN, composite indexing column order, covering indexes, partial indexes, EXPLAIN ANALYZE tuning), primary key architecture (UUIDv7 vs UUIDv4 vs ULID vs BIGINT IDENTITY), Row-Level Security (RLS) policy optimization for multi-tenant isolation, database scaling & connection pooling, and modern SQL & NoSQL hosting.
 ---
 
 # Database Engineering & Storage Architecture

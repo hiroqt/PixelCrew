@@ -1,9 +1,6 @@
 ---
 name: token-efficiency
-description: >-
-  Universal token optimization and context conservation engine across AI coding agents and IDEs
-  (Claude, Google Antigravity, Cursor, Kiro, Windsurf, GitHub Copilot). Slashes token usage by 50% to 75%
-  through AST symbol-graph extraction, multi-turn context pruning, prompt caching, compact diffs, and structured JSON schemas.
+description: Universal token optimization and context conservation engine across AI coding agents and IDEs (Claude, Google Antigravity, Cursor, Kiro, Windsurf, GitHub Copilot). Slashes token usage by 50% to 75% through AST symbol-graph extraction, multi-turn context pruning, prompt caching, compact diffs, and structured JSON schemas.
 ---
 
 # Universal Token Efficiency & Context Optimization

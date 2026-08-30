@@ -1,9 +1,6 @@
 ---
 name: anti-ai-patterns
-description: >-
-  Strict Anti-AI-Generated Design Critic and Quality Guardian for Pixel Crew. Automatically detects
-  monotonous card grids, purple gradient blobs, fake AI sparkles, and cliché copywriting.
-  Enforces intentional asymmetry, expressive typography, dynamic section rhythm, and bespoke brand language.
+description: Strict Anti-AI-Generated Design Critic and Quality Guardian for Pixel Crew. Automatically detects monotonous card grids, purple gradient blobs, fake AI sparkles, and cliché copywriting. Enforces intentional asymmetry, expressive typography, dynamic section rhythm, and bespoke brand language.
 ---
 
 # Anti-AI-Generated Design Skill

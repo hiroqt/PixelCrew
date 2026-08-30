@@ -1,7 +1,6 @@
 ---
 name: codebase-intelligence
-description: |
-  Static codebase analysis and context adaptation engine for multi-agent swarms. Automatically inspects repository dependencies, directory structures, ORMs (Prisma, Drizzle), API routes (Next.js, Express, FastAPI), UI frameworks (React, Vue, Tailwind), and testing runners (Vitest, Playwright) to tailor agent skills and file permissions.
+description: Static codebase analysis and context adaptation engine for multi-agent swarms. Automatically inspects repository dependencies, directory structures, ORMs (Prisma, Drizzle), API routes (Next.js, Express, FastAPI), UI frameworks (React, Vue, Tailwind), and testing runners (Vitest, Playwright) to tailor agent skills and file permissions.
 ---
 
 # Codebase Intelligence & Context Adaptation Skill

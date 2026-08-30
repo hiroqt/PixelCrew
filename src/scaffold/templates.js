@@ -444,5 +444,58 @@ Strict aesthetic critic rejecting generic templates, purple mesh blobs, and repe
 
   "token-efficiency.md": `# Token Efficiency Skill
 Context conservation across Claude, Antigravity, Cursor, Kiro, Windsurf, and Copilot through AST symbol extraction.
+`,
+
+  "pixelcrew.md": `---
+name: pixelcrew
+description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office. Orchestrates 23 specialized commands across Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, and QA Automation personas.
+version: 0.2.4
+author: Arnel (@hiroqt)
+---
+
+# 🏢 PixelCrew — Autonomous Multi-Agent Engineering Swarm
+
+> **Floor 42, Pixel Corps HQ**: Transform any codebase into an observable, choreographed engineering workspace with anti-AI design synthesis, mathematical fluid typography, and automated E2E testing.
+
+---
+
+## ⚡ Floor 42 Swarm Command Suite
+
+All commands can be invoked via \`/pixelcrew <command>\`, direct slash commands (e.g. \`/<command>\`), or the CLI (\`npx pixelcrew <command>\`):
+
+### 1. 🚀 Creation & Architecture
+- \`/pixelcrew assemble [prompt]\` (aliases: \`/assemble\`, \`/craft\`, \`/sprint\`): Full shape-then-build multi-agent sprint pipeline from brief to production code.
+- \`/pixelcrew blueprint [prompt]\` (aliases: \`/blueprint\`, \`/shape\`, \`/spec\`): Plans UX section topologies, wireframes, and compiles dynamic DAG task graphs *before* writing code.
+- \`/pixelcrew boss-fight <issue>\` (aliases: \`/boss-fight\`, \`/fix\`, \`/debug\`): Targeted swarm bug blitz to isolate, repair, and verify breaking issues.
+- \`/pixelcrew manifest\`: Reverse-engineers active project code into comprehensive \`DESIGN.md\` and \`PRODUCT.md\` architectural specifications.
+- \`/pixelcrew retrofit\`: Extracts reusable UI primitives, Tailwind tokens, and CSS variables into the centralized design system.
+
+### 2. 🎨 Pixel Aesthetic & Anti-AI Direction
+- \`/pixelcrew render\`: 6-dimension Anti-AI design & UX review (Originality, Hierarchy, Typography, Layout, Brand, Slop Penalty).
+- \`/pixelcrew 8bit\`: Adds retro arcade delight: procedural Web Audio chimes, CRT phosphor scanlines, and tactile feedback.
+- \`/pixelcrew overdrive\`: Injects high-end technical effects: WebGL/Canvas shaders, interactive terminal console, reactive backgrounds.
+- \`/pixelcrew chromatic [palette]\`: Injects curated HSL color tokens, dark mode elevation surfaces, and atmospheric accent tiers.
+- \`/pixelcrew typeset [preset]\`: Fixes font pairings, applies mathematical fluid \`clamp()\` type scales, and establishes expressive typography.
+- \`/pixelcrew bento [section]\`: Reorganizes sections into asymmetric Bento grids, dynamic viewport flow, and zero horizontal overflow.
+- \`/pixelcrew de-slop [section]\`: Strips AI cliché copywriting with grounded technical value propositions.
+
+### 3. 🛡️ Production Hardening & SRE
+- \`/pixelcrew sentinel\`: Security & resilience pass: OWASP checks, SQL injection prevention, RFC 7807 error envelopes, and rate limiting.
+- \`/pixelcrew audit\`: Runs technical quality checks: a11y WCAG AA/AAA, Core Web Vitals (LCP < 0.6s), and Playwright E2E journeys.
+- \`/pixelcrew warp\`: Full-stack performance tuning: streaming SSR, bundle minification, and AST prompt caching.
+- \`/pixelcrew polish\`: Final shipping readiness pass: design system token alignment, type checks, and aesthetic cleanup.
+
+---
+
+## 👥 Floor 42 Personas & Squad Roles
+1. **Lead Orchestrator (\`orchestrator\`)**: DAG task decomposition, context extraction, and subagent synthesis.
+2. **Creative Director (\`creativeDirector\`)**: Aesthetic strategy, brand soul, and strict anti-AI constraints.
+3. **UX Planner (\`uxPlanner\`)**: Asymmetric section layouts, user flow, and interaction specs.
+4. **Design System Architect (\`designSystem\`)**: HSL tokens, mathematical \`clamp()\` typography, and surface tiers.
+5. **Frontend Engineer (\`frontend\`)**: Next.js 14/15 App Router, React 19, TypeScript, and Tailwind CSS.
+6. **Backend & Database Engineer (\`backend\`, \`database\`)**: Type-safe route handlers, RFC 7807 envelopes, Prisma/Postgres schemas.
+7. **Performance & Security SRE (\`performance\`, \`security\`)**: Core Web Vitals, CSP headers, OWASP audit, and token pruning.
+8. **QA Automation Engineer (\`qa\`)**: Playwright E2E user journeys, visual regression, and audit reports.
 `
 };
+

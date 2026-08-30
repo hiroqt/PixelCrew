@@ -1,12 +1,6 @@
 ---
 name: backend-engineering
-description: >-
-  Comprehensive guide for modern backend engineering across enterprise architectures (Clean
-  Architecture, Hexagonal/Ports & Adapters, Modular Monoliths, Event-Driven Microservices).
-  Covers API standards (REST with OpenAPI 3.1 & RFC 7807, GraphQL with DataLoader, gRPC,
-  tRPC, WebSockets, SSE, Webhooks), enterprise rate limiting (Token Bucket, Sliding Window,
-  Redis Lua scripts, tier-based limits), resilience (Idempotency keys, Circuit Breakers,
-  Exponential Backoff with Jitter), OAuth 2.1 / OIDC / PASETO security, and OpenTelemetry observability.
+description: Comprehensive guide for modern backend engineering across enterprise architectures (Clean Architecture, Hexagonal/Ports & Adapters, Modular Monoliths, Event-Driven Microservices). Covers API standards (REST with OpenAPI 3.1 & RFC 7807, GraphQL with DataLoader, gRPC, tRPC, WebSockets, SSE, Webhooks), enterprise rate limiting, resilience, OAuth 2.1 / OIDC / PASETO security, and OpenTelemetry observability.
 ---
 
 # Backend Engineering & Modern API Architecture

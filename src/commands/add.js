@@ -34,12 +34,17 @@ export class AddCommand extends PixelCommand {
     const providerArgIdx = args.findIndex(a => a === '--provider' || a === '-p');
     const provider = providerArgIdx !== -1 && args[providerArgIdx + 1] ? args[providerArgIdx + 1] : (options.provider || null);
 
+    const isGlobal = args.includes('--global') || args.includes('-g') || Boolean(options.global);
+    const scopeArgIdx = args.findIndex(a => a === '--scope');
+    const scope = scopeArgIdx !== -1 && args[scopeArgIdx + 1] ? args[scopeArgIdx + 1] : (isGlobal ? 'global' : (options.scope || 'project'));
+
     const targetDir = context.targetDir || process.cwd();
     const reporter = new DryRunReporter(targetDir);
 
     const result = await installSkill(targetDir, rawSkill, {
       dryRun,
       provider,
+      scope,
       reporter
     });
 

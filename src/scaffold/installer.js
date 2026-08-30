@@ -11,8 +11,10 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import { SKILL_DEFINITIONS } from '../orchestrator/skills-registry.js';
 import { SKILL_MARKDOWNS } from './templates.js';
+import { getSkillBundle, sanitizeFrontmatter } from './skills-bundle.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 export const PROVIDER_PATHS = {
@@ -20,8 +22,102 @@ export const PROVIDER_PATHS = {
   'cursor': (targetDir, skillName) => path.join(targetDir, '.cursor', 'skills', skillName, 'SKILL.md'),
   'kiro': (targetDir, skillName) => path.join(targetDir, '.kiro', 'skills', skillName, 'SKILL.md'),
   'antigravity': (targetDir, skillName) => path.join(targetDir, '.agents', 'skills', skillName, 'SKILL.md'),
+  'codex': (targetDir, skillName) => path.join(targetDir, '.codex', 'skills', skillName, 'SKILL.md'),
   'pixel-crew': (targetDir, skillName) => path.join(targetDir, '.pixel-crew', 'skills', `${skillName}.md`)
 };
+
+export const GLOBAL_PROVIDER_PATHS = {
+  'claude-code': (skillName) => path.join(os.homedir(), '.claude', 'skills', skillName, 'SKILL.md'),
+  'cursor': (skillName) => path.join(os.homedir(), '.cursor', 'skills', skillName, 'SKILL.md'),
+  'kiro': (skillName) => path.join(os.homedir(), '.kiro', 'skills', skillName, 'SKILL.md'),
+  'antigravity': (skillName) => path.join(os.homedir(), '.gemini', 'config', 'skills', skillName, 'SKILL.md'),
+  'codex': (skillName) => path.join(os.homedir(), '.codex', 'skills', skillName, 'SKILL.md'),
+  'pixel-crew': (skillName) => path.join(os.homedir(), '.pixel-crew', 'skills', `${skillName}.md`)
+};
+
+/**
+ * Detects which IDE / Coding Agent environment the current terminal shell is executing inside
+ */
+export function detectActiveIDE() {
+  const env = process.env;
+
+  // 1. Kiro AI
+  if (
+    env.KIRO === '1' ||
+    env.KIRO_AGENT ||
+    env.KIRO_SESSION ||
+    env.KIRO_APP_DIR ||
+    env.TERM_PROGRAM === 'kiro' ||
+    env.VSCODE_GIT_ASKPASS_NODE?.toLowerCase().includes('kiro')
+  ) {
+    return {
+      id: 'kiro',
+      name: 'Kiro AI',
+      globalPath: path.join(os.homedir(), '.kiro', 'skills'),
+      detectedVia: 'env'
+    };
+  }
+
+  // 2. Cursor AI
+  if (
+    env.CURSOR === '1' ||
+    env.CURSOR_AGENT ||
+    env.CURSOR_SESSION ||
+    env.CURSOR_APP_DIR ||
+    env.TERM_PROGRAM === 'cursor' ||
+    env.VSCODE_GIT_ASKPASS_NODE?.toLowerCase().includes('cursor')
+  ) {
+    return {
+      id: 'cursor',
+      name: 'Cursor IDE',
+      globalPath: path.join(os.homedir(), '.cursor', 'skills'),
+      detectedVia: 'env'
+    };
+  }
+
+  // 3. Google Antigravity
+  if (
+    env.ANTIGRAVITY_APP_DIR ||
+    env.AGY_SESSION ||
+    env.ANTIGRAVITY ||
+    env.AGY ||
+    env.TERM_PROGRAM === 'antigravity'
+  ) {
+    return {
+      id: 'antigravity',
+      name: 'Google Antigravity',
+      globalPath: path.join(os.homedir(), '.gemini', 'config', 'skills'),
+      detectedVia: 'env'
+    };
+  }
+
+  // 4. Claude Code
+  if (env.CLAUDE_CODE || env.CLAUDE_SESSION || env.CLAUDE_AGENT) {
+    return {
+      id: 'claude-code',
+      name: 'Claude Code',
+      globalPath: path.join(os.homedir(), '.claude', 'skills'),
+      detectedVia: 'env'
+    };
+  }
+
+  // 5. Codex
+  if (env.CODEX_SESSION || env.CODEX_AGENT || env.CODEX) {
+    return {
+      id: 'codex',
+      name: 'OpenAI Codex',
+      globalPath: path.join(os.homedir(), '.codex', 'skills'),
+      detectedVia: 'env'
+    };
+  }
+
+  return {
+    id: 'pixel-crew',
+    name: 'Pixel Crew',
+    globalPath: path.join(os.homedir(), '.pixel-crew', 'skills'),
+    detectedVia: 'default'
+  };
+}
 
 /**
  * Detects which agent environments exist in the target directory
@@ -100,19 +196,19 @@ export function generateSkillMarkdown(skillMeta) {
   if (SKILL_MARKDOWNS[markdownKey]) {
     const raw = SKILL_MARKDOWNS[markdownKey].trim();
     if (raw.startsWith('---')) {
-      return raw + '\n';
+      return sanitizeFrontmatter(raw + '\n');
     }
-    return `---
+    return sanitizeFrontmatter(`---
 name: ${name}
 description: ${definition.description || 'Pixel Crew Agent Skill'}
 category: ${definition.category || 'general'}
 ---
 
 ${raw}
-`;
+`);
   }
 
-  return `---
+  return sanitizeFrontmatter(`---
 name: ${name}
 description: ${definition.description || 'Pixel Crew Agent Skill'}
 category: ${definition.category || 'general'}
@@ -128,21 +224,24 @@ ${(definition.targetAgents || ['all']).map(a => `- ${a}`).join('\n')}
 ## Usage & Guidelines
 - Follow domain-specific best practices and avoid generic anti-patterns.
 - Enforce strict typing, comprehensive testing, and modular architecture.
-`;
+`);
 }
 
 /**
- * Installs a skill across detected or specified agent providers
+ * Installs a skill across detected or specified agent providers (project or global scope)
  */
 export async function installSkill(targetDir = process.cwd(), rawSkillInput, options = {}) {
   const {
     dryRun = false,
     provider = null,
+    scope = (options.global ? 'global' : (options.scope || 'project')),
     reporter = new DryRunReporter(targetDir)
   } = options;
 
   const skillMeta = normalizeSkillId(rawSkillInput);
-  const content = generateSkillMarkdown(skillMeta);
+  const bundle = await getSkillBundle(rawSkillInput);
+  const content = (bundle && bundle.content) ? bundle.content : generateSkillMarkdown(skillMeta);
+  const activeIDE = detectActiveIDE();
 
   // Determine target providers
   let targetProviders = [];
@@ -156,67 +255,116 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
       else if (p === 'agents') targetProviders.push('antigravity');
     }
   } else {
-    // Auto-detect environments
-    targetProviders = await detectInstalledProviders(targetDir);
-    // If only pixel-crew is detected, also install to claude and cursor by default if requested
-    if (options.allProviders) {
-      targetProviders = Object.keys(PROVIDER_PATHS);
+    if (scope === 'global') {
+      targetProviders = [activeIDE.id];
+    } else {
+      // Auto-detect environments
+      targetProviders = await detectInstalledProviders(targetDir);
+      if (activeIDE.id !== 'pixel-crew' && !targetProviders.includes(activeIDE.id)) {
+        targetProviders.push(activeIDE.id);
+      }
+      if (options.allProviders || scope === 'all') {
+        targetProviders = Object.keys(PROVIDER_PATHS);
+      }
     }
   }
 
-  // Ensure pixel-crew is always included
-  if (!targetProviders.includes('pixel-crew')) {
+  // Ensure pixel-crew is included for project-level manifests
+  if (scope !== 'global' && !targetProviders.includes('pixel-crew')) {
     targetProviders.push('pixel-crew');
   }
 
   const writtenPaths = [];
 
-  for (const p of targetProviders) {
-    const pathFn = PROVIDER_PATHS[p];
-    if (!pathFn) continue;
+  // 1. Write Project-Level skills if scope is 'project', 'both', or 'all'
+  if (scope !== 'global') {
+    for (const p of targetProviders) {
+      const pathFn = PROVIDER_PATHS[p];
+      if (!pathFn) continue;
 
-    const fullPath = pathFn(targetDir, skillMeta.name);
-    const res = await safeWriteFile(fullPath, content, {
+      const fullPath = pathFn(targetDir, skillMeta.name);
+      const res = await safeWriteFile(fullPath, content, {
+        dryRun,
+        reporter,
+        targetDir
+      });
+      writtenPaths.push({ provider: p, scope: 'project', path: fullPath, ...res });
+
+      // Write attached reference documents for directory-based providers
+      if (p !== 'pixel-crew' && bundle?.references && Object.keys(bundle.references).length > 0) {
+        const skillDir = path.dirname(fullPath);
+        for (const [refName, refContent] of Object.entries(bundle.references)) {
+          const refFullPath = path.join(skillDir, 'references', refName);
+          await safeWriteFile(refFullPath, refContent, { dryRun, reporter, targetDir });
+        }
+      }
+    }
+
+    // Update .pixel-crew/pixel.json manifest
+    const manifestPath = path.join(targetDir, '.pixel-crew', 'pixel.json');
+    let manifest = {
+      name: path.basename(targetDir),
+      version: '0.2.4',
+      skills: {},
+      installedAt: new Date().toISOString()
+    };
+
+    try {
+      const raw = await fs.readFile(manifestPath, 'utf-8');
+      manifest = JSON.parse(raw);
+    } catch {}
+
+    if (!manifest.skills) manifest.skills = {};
+    manifest.skills[skillMeta.id] = {
+      name: skillMeta.name,
+      category: skillMeta.definition.category || 'general',
+      providers: targetProviders,
+      installedAt: new Date().toISOString()
+    };
+
+    await safeWriteFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', {
       dryRun,
       reporter,
       targetDir
     });
-    writtenPaths.push({ provider: p, path: fullPath, ...res });
   }
 
-  // Update .pixel-crew/pixel.json manifest
-  const manifestPath = path.join(targetDir, '.pixel-crew', 'pixel.json');
-  let manifest = {
-    name: path.basename(targetDir),
-    version: '0.2.4',
-    skills: {},
-    installedAt: new Date().toISOString()
-  };
+  // 2. Write Global skills if scope is 'global' or 'both'
+  if (scope === 'global' || scope === 'both') {
+    const globalProviders = provider && provider !== 'auto'
+      ? (provider === 'all' ? Object.keys(GLOBAL_PROVIDER_PATHS) : [provider.toLowerCase() === 'claude' ? 'claude-code' : (provider.toLowerCase() === 'agents' ? 'antigravity' : provider.toLowerCase())])
+      : [activeIDE.id];
 
-  try {
-    const raw = await fs.readFile(manifestPath, 'utf-8');
-    manifest = JSON.parse(raw);
-  } catch {}
+    for (const gp of globalProviders) {
+      const globalPathFn = GLOBAL_PROVIDER_PATHS[gp];
+      if (!globalPathFn) continue;
 
-  if (!manifest.skills) manifest.skills = {};
-  manifest.skills[skillMeta.id] = {
-    name: skillMeta.name,
-    category: skillMeta.definition.category || 'general',
-    providers: targetProviders,
-    installedAt: new Date().toISOString()
-  };
+      const fullGlobalPath = globalPathFn(skillMeta.name);
+      const res = await safeWriteFile(fullGlobalPath, content, {
+        dryRun,
+        reporter,
+        targetDir: os.homedir()
+      });
+      writtenPaths.push({ provider: gp, scope: 'global', path: fullGlobalPath, ...res });
 
-  await safeWriteFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', {
-    dryRun,
-    reporter,
-    targetDir
-  });
+      // Write attached reference documents globally
+      if (gp !== 'pixel-crew' && bundle?.references && Object.keys(bundle.references).length > 0) {
+        const skillDir = path.dirname(fullGlobalPath);
+        for (const [refName, refContent] of Object.entries(bundle.references)) {
+          const refFullPath = path.join(skillDir, 'references', refName);
+          await safeWriteFile(refFullPath, refContent, { dryRun, reporter, targetDir: os.homedir() });
+        }
+      }
+    }
+  }
 
   return {
     success: true,
     skillId: skillMeta.id,
     skillName: skillMeta.name,
     providers: targetProviders,
+    scope,
+    activeIDE,
     writtenPaths,
     dryRun,
     reporter
@@ -230,6 +378,7 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
   const {
     dryRun = false,
     provider = null,
+    scope = (options.global ? 'global' : (options.scope || 'project')),
     reporter = new DryRunReporter(targetDir)
   } = options;
 
@@ -261,12 +410,24 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
     }
   } catch {}
 
-  // If no skills found, fallback to core default skills
-  if (skillsToSync.size === 0) {
-    skillsToSync.add('frontend/nextjs');
-    skillsToSync.add('design/ui-design');
-    skillsToSync.add('design/typography');
-    skillsToSync.add('anti-ai/slop-guardian');
+  // Always ensure all canonical core production skills and domain aliases are synced
+  const canonicalSkills = [
+    'pixelcrew',
+    'anti-ai-patterns',
+    'design-director',
+    'frontend-engineering',
+    'backend-engineering',
+    'database-engineering',
+    'performance-engineering',
+    'codebase-intelligence',
+    'token-efficiency',
+    'design/ui-design',
+    'design/typography',
+    'frontend/nextjs',
+    'anti-ai/slop-guardian'
+  ];
+  for (const s of canonicalSkills) {
+    skillsToSync.add(s);
   }
 
   const results = [];
@@ -274,14 +435,76 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
     const res = await installSkill(targetDir, sId, {
       dryRun,
       provider,
+      scope,
       reporter
     });
     results.push(res);
   }
 
+  // Generate IDE-specific workflow definitions and steering rules
+  const detected = await detectInstalledProviders(targetDir);
+  const activeIDE = detectActiveIDE();
+
+  // 1. Kiro Workflows & Rules
+  if (detected.includes('kiro') || activeIDE.id === 'kiro' || provider === 'kiro' || provider === 'all') {
+    const kiroWorkflowContent = `---
+name: pixelcrew
+description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office
+---
+
+# PixelCrew Swarm Workflow
+
+When this workflow is active, execute tasks using PixelCrew's 8 specialized personas (Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, QA Automation).
+
+## Commands available:
+- \`/pixelcrew init\` (or \`init\`) — Initialize and adapt PixelCrew to current workspace
+- \`/pixelcrew assemble [prompt]\` — Full shape-then-build multi-agent sprint pipeline from brief to production code
+- \`/pixelcrew blueprint [prompt]\` — Plans UX section topologies, wireframes, and compiles dynamic DAG task graphs
+- \`/pixelcrew boss-fight <issue>\` — Targeted swarm bug blitz to isolate, repair, and verify breaking issues
+- \`/pixelcrew render\` — 6-dimension Anti-AI design & UX review
+- \`/pixelcrew sentinel\` — Security & resilience pass
+- \`/pixelcrew audit\` — SRE and technical quality checks
+- \`/pixelcrew warp\` — Full-stack performance tuning
+- \`/pixelcrew polish\` — Final shipping readiness pass
+`;
+    const kiroRulesContent = `# PixelCrew Swarm Rules for Kiro
+
+You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
+When the user prompts "init", "/init", "/pixelcrew init", or mentions "pixelcrew":
+1. Initialize/adapt workspace context and orchestrate tasks with Creative Director, Frontend, Backend, Security, and QA roles.
+2. Enforce Anti-AI design patterns: intentional asymmetry, mathematical fluid clamp() typography, high-contrast visual hierarchy.
+3. Reject cliché copy (*"Elevate your workflow"*) and uniform 3-card grids.
+`;
+
+    if (scope !== 'global') {
+      await safeWriteFile(path.join(targetDir, '.kiro', 'workflows', 'pixelcrew.md'), kiroWorkflowContent, { dryRun, reporter, targetDir });
+      await safeWriteFile(path.join(targetDir, '.kirorules'), kiroRulesContent, { dryRun, reporter, targetDir });
+    }
+    if (scope === 'global' || scope === 'both') {
+      await safeWriteFile(path.join(os.homedir(), '.kiro', 'workflows', 'pixelcrew.md'), kiroWorkflowContent, { dryRun, reporter, targetDir: os.homedir() });
+    }
+  }
+
+  // 2. Cursor Rules
+  if (detected.includes('cursor') || activeIDE.id === 'cursor' || provider === 'cursor' || provider === 'all') {
+    const cursorRulesContent = `# PixelCrew Swarm Rules for Cursor
+
+You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
+Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
+- \`/pixelcrew assemble [prompt]\` — Full-stack multi-agent sprint
+- \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning & wireframes
+- \`/pixelcrew boss-fight <issue>\` — Bug blitz
+- \`/pixelcrew render\` — Anti-AI visual review
+`;
+    if (scope !== 'global') {
+      await safeWriteFile(path.join(targetDir, '.cursorrules'), cursorRulesContent, { dryRun, reporter, targetDir });
+    }
+  }
+
   return {
     success: true,
     skillsSynced: Array.from(skillsToSync),
+    scope,
     results,
     dryRun,
     reporter

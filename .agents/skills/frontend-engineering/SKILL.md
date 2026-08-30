@@ -1,11 +1,6 @@
 ---
 name: frontend-engineering
-description: >-
-  Comprehensive guide for modern front-end engineering across all major modern tech stacks
-  (React 19/Next.js App Router, Vue 3/Nuxt 3, Svelte 5 Runes, SolidJS, Astro, Modern Vanilla CSS,
-  TypeScript). Enforces strict UI/UX standards, anti-AI-slop design rules (no generic purple/blue
-  mesh gradient blobs, no unnecessary pill eyebrows, no nested cards-in-cards), dynamic user-preference
-  typography systems, and WCAG 2.1/2.2 AA/AAA accessibility compliance.
+description: Comprehensive guide for modern front-end engineering across all major modern tech stacks (React 19/Next.js App Router, Vue 3/Nuxt 3, Svelte 5 Runes, SolidJS, Astro, Modern Vanilla CSS, TypeScript). Enforces strict UI/UX standards, anti-AI-slop design rules, dynamic typography systems, and WCAG 2.1/2.2 AA/AAA accessibility compliance.
 ---
 
 # Frontend Engineering & UI/UX Standards

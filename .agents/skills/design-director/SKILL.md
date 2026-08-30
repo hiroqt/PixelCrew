@@ -1,9 +1,6 @@
 ---
 name: design-director
-description: >-
-  Lead Creative Direction and Aesthetic Strategy skill for Pixel Crew. Defines the authentic
-  visual personality, architectural concept, typography strategy, asymmetric layout rules,
-  and strict anti-AI constraints before any code is generated. Answers: "What should this website actually feel like?"
+description: Lead Creative Direction and Aesthetic Strategy skill for Pixel Crew. Defines the authentic visual personality, architectural concept, typography strategy, asymmetric layout rules, and strict anti-AI constraints before any code is generated. Answers "What should this website actually feel like?"
 ---
 
 # Design Director Skill

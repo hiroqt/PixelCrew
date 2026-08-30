@@ -177,6 +177,8 @@ async function main() {
     else if (args[i] === '--agent' && args[i + 1]) options.agent = args[++i];
     else if (args[i] === '--type' && args[i + 1]) options.type = args[++i];
     else if (args[i] === '--message' && args[i + 1]) options.message = args[++i];
+    else if (args[i] === '--global' || args[i] === '-g') options.global = true;
+    else if (args[i] === '--scope' && args[i + 1]) options.scope = args[++i];
     else if (args[i] === '--skill' && args[i + 1]) options.skill = args[++i];
     else if (!args[i].startsWith('-') && !options.taskPrompt) {
       options.taskPrompt = args[i];
@@ -187,6 +189,15 @@ async function main() {
   const rootDir = process.cwd();
 
   switch (command) {
+    case 'install':
+    case 'setup': {
+      const { InstallCommand } = await import('../src/commands/install.js');
+      const cmd = new InstallCommand();
+      const res = await cmd.execute({ targetDir: rootDir, options }, args.slice(1));
+      if (res.output) console.log(res.output);
+      break;
+    }
+
     case 'init': {
       await initializeProject(rootDir, options);
       break;

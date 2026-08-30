@@ -56,6 +56,7 @@ import { StopCommand, ResumeCommand } from './stop.js';
 import { DeployCommand } from './deploy.js';
 import { AddCommand } from './add.js';
 import { SyncCommand } from './sync.js';
+import { InstallCommand } from './install.js';
 
 export class CommandRegistry {
   constructor() {
@@ -104,6 +105,7 @@ export class CommandRegistry {
     this.register(new DeployCommand());
     this.register(new AddCommand());
     this.register(new SyncCommand());
+    this.register(new InstallCommand());
   }
 
 

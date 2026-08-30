@@ -1,13 +1,6 @@
 ---
 name: performance-engineering
-description: >-
-  Comprehensive guide for full-stack performance engineering across frontend Core Web Vitals
-  (LCP, INP, CLS, TTFB, streaming SSR, priority hints, main thread yielding), backend runtime profiling
-  (event loop lag, memory leaks, heap snapshots, GC tuning, goroutine/async optimization),
-  multi-tier caching (L1 in-memory, L2 Redis, L3 CDN Edge, XFetch stampede prevention), database query
-  tuning (N+1 elimination, connection pool sizing, pg_stat_statements), network transport (HTTP/3 QUIC,
-  Brotli, Zstandard), automated k6 load & stress testing, SLA/SLO/SLI error budgets, and pre-production
-  go-live verification checklists.
+description: Comprehensive guide for full-stack performance engineering across frontend Core Web Vitals (LCP, INP, CLS, TTFB, streaming SSR, priority hints, main thread yielding), backend runtime profiling, multi-tier caching (L1 in-memory, L2 Redis, L3 CDN Edge, XFetch stampede prevention), database query tuning, network transport, automated k6 load & stress testing, and SLA/SLO/SLI error budgets.
 ---
 
 # Performance Engineering & Production Readiness
