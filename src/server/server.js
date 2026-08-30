@@ -126,6 +126,45 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
       return;
     }
 
+    if (pathname === '/api/command' && req.method === 'POST') {
+      const body = await readBody();
+      const input = body.input || body.command || body.prompt || '';
+      try {
+        const result = await engine.executeCommand(input, body.options || {});
+        return sendJson(200, result);
+      } catch (err) {
+        return sendJson(500, { success: false, error: err.message });
+      }
+    }
+
+    if (pathname === '/api/commands/autocomplete' && req.method === 'GET') {
+      const query = url.searchParams.get('q') || '';
+      const suggestions = engine.commandRegistry ? engine.commandRegistry.getAutocompleteSuggestions(query) : [];
+      return sendJson(200, { suggestions });
+    }
+
+    if (pathname === '/api/providers' && req.method === 'GET') {
+      if (engine.providerRegistry) {
+        const { available, missing } = await engine.providerRegistry.scanEnvironment();
+        return sendJson(200, {
+          available: available.map(a => ({ id: a.id, name: a.name, description: a.description, capabilities: a.capabilities })),
+          missing: missing.map(a => ({ id: a.id, name: a.name }))
+        });
+      }
+      return sendJson(200, { available: [{ id: 'generic', name: 'Generic CLI Runner' }], missing: [] });
+    }
+
+    if (pathname === '/api/plan' && req.method === 'POST') {
+      const body = await readBody();
+      const prompt = body.prompt || 'Synthesize responsive web architecture';
+      try {
+        const result = await engine.executeCommand(`/plan ${prompt}`, body.options || {});
+        return sendJson(200, result);
+      } catch (err) {
+        return sendJson(500, { success: false, error: err.message });
+      }
+    }
+
     if (pathname === '/api/task' && req.method === 'POST') {
       const body = await readBody();
       const prompt = body.prompt || body.task || 'Optimize application workflow';

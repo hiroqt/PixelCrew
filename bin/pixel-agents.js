@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process';
 import { initializeProject } from '../src/scaffold/init.js';
 import { OrchestratorEngine } from '../src/orchestrator/engine.js';
 import { createServer } from '../src/server/server.js';
+import { defaultCommandRegistry } from '../src/commands/index.js';
 
 const BANNER = `\x1b[36m
  ╔═══════════════════════════════════════════════════════════╗
@@ -18,39 +19,64 @@ function printHelp() {
   console.log(BANNER);
   console.log(`
 \x1b[1mUSAGE:\x1b[0m
-  npx pixel-agents <command> [options]
+  npx pixel-crew <command> [options]
+  npx pixel-crew /<slash-command> [args]
+  npx pixel-crew /pixelcrew <subcommand> [args]
 
-\x1b[1mCOMMANDS:\x1b[0m
-  \x1b[32mtask\x1b[0m "<description>"     Dispatch an objective or website creation goal to the swarm
-  \x1b[32mgoal\x1b[0m "<objective>"       Execute full-stack goal from design to automated E2E testing
-  \x1b[32mstart\x1b[0m                    Start multi-agent orchestrator & live pixel dashboard
-  \x1b[32mdashboard\x1b[0m                Launch the visual pixel dashboard UI
-  \x1b[32mdemo\x1b[0m                     Launch server and run an interactive multi-agent demo
-  \x1b[32manalyze\x1b[0m                  Inspect and display detected frameworks, ORMs, and architecture
-  \x1b[32minit\x1b[0m                     Initialize .pixel-agents/ workspace in current project
-  \x1b[32memit\x1b[0m [options]           Emit an event to the stream (e.g. from external hooks)
-  \x1b[32mstatus\x1b[0m                   Display active swarm state and agent roster
-  \x1b[32mhelp\x1b[0m                     Show this help reference
+\x1b[1m🚀 FLOOR 42 CREATION & ARCHITECTURE:\x1b[0m
+  \x1b[32massemble\x1b[0m "<prompt>"    Full shape-then-build multi-agent sprint pipeline
+  \x1b[32mblueprint\x1b[0m "<prompt>"   Plan UX section topologies & dynamic DAG graph
+  \x1b[32mboss-fight\x1b[0m "<issue>"   Targeted swarm bug blitz to isolate and conquer errors
+  \x1b[32mmanifest\x1b[0m               Generate root DESIGN.md & PRODUCT.md blueprints
+  \x1b[32mretrofit\x1b[0m               Harvest UI components & tokens into design system
+  \x1b[32minit\x1b[0m                   Initialize .pixel-crew/ workspace in current project
+
+\x1b[1m🎨 RETRO AESTHETIC & ANTI-AI DIRECTION:\x1b[0m
+  \x1b[32mrender\x1b[0m                 6-dimension Anti-AI design & UX review (>= 8.5/10)
+  \x1b[32m8bit\x1b[0m                   Inject 8-bit Web Audio chimes, CRT scanlines & tactile joy
+  \x1b[32moverdrive\x1b[0m              Engage GPU WebGL shaders & interactive terminal shell
+  \x1b[32mchromatic\x1b[0m [palette]    Strategic HSL color token calibration & dark mode
+  \x1b[32mtypeset\x1b[0m [preset]       Apply mathematical fluid clamp() typography scales
+  \x1b[32mbento\x1b[0m [section]        Reorganize sections into asymmetric Bento grids
+  \x1b[32mde-slop\x1b[0m [section]      Strip AI cliché copy with grounded technical specs
+  \x1b[32mbolder\x1b[0m / \x1b[32mquieter\x1b[0m        Amplify visual punch or restore calm minimalist balance
+
+\x1b[1m🛡️ PRODUCTION HARDENING & SRE:\x1b[0m
+  \x1b[32msentinel\x1b[0m               Defensive security: OWASP audit, RFC 7807 envelopes
+  \x1b[32maudit\x1b[0m                  Run technical quality checks (a11y, CWV, Playwright)
+  \x1b[32mwarp\x1b[0m                   Full-stack performance tuning & AST token caching (72% savings)
+  \x1b[32mpolish\x1b[0m                 Final shipping readiness pass & strict type check
+  \x1b[32mcalibrate\x1b[0m [viewport]   Optimize viewports from 360px mobile to 4K desktop
+  \x1b[32monboard\x1b[0m                Synthesize first-run onboarding & empty states
+
+\x1b[1m🏢 FLOOR 42 OPERATIONS:\x1b[0m
+  \x1b[32moffice\x1b[0m [--port 4747]    Launch Floor 42 live startup office dashboard & preview
+  \x1b[32mroster\x1b[0m [list|spawn]    Inspect active agent workstations and task telemetry
+  \x1b[32mstart\x1b[0m                  Start multi-agent orchestrator & live pixel dashboard
+  \x1b[32msync\x1b[0m                   Synchronize workspace skills across detected agent IDEs
+  \x1b[32mdoctor\x1b[0m                 Diagnose environment, LLM keys & provider runtimes
+  \x1b[32mhelp\x1b[0m                   Show this help reference
+
 
 \x1b[1mOPTIONS:\x1b[0m
+  --dry-run              Preview file creations and updates without modifying disk
+  --provider <name>      Select agent provider (auto, claude-code, cursor, kiro, antigravity, generic, all)
   --target <nextjs|vanilla> Set output target framework (default: nextjs)
-  --out <dir>              Set custom output directory
-  --port <number>          Set dashboard port (default: 4747)
-  --no-open                Do not automatically open the browser
-  --yes, -y                Skip prompts and use defaults during init
-  --name <name>            Set project name during init
-  --agent <name>           Specify agent for emit (e.g. frontend, backend, qa)
-  --type <type>            Event type for emit (spawn, thinking, tool, skill, complete, error)
-  --message <msg>          Event message for emit
-  --skill <skill>          Associated skill for emit
+  --out <dir>            Set custom output directory
+  --port <number>        Set dashboard port (default: 4747)
+  --no-open              Do not automatically open the browser
+  --yes, -y              Skip prompts and use defaults during init
+  --name <name>          Set project name during init
 
 \x1b[1mEXAMPLES:\x1b[0m
-  npx pixel-crew task "Build a modern portfolio for an AI engineer with Next.js and E2E tests"
-  npx pixel-crew goal "Refactor database indexing & verify Core Web Vitals"
+  npx pixel-crew craft "Build a modern SaaS analytics platform"
+  npx pixel-crew /pixelcrew bolder
+  npx pixel-crew /pixelcrew critique
+  npx pixel-crew sync --dry-run
   npx pixel-crew start
-  npx pixel-crew demo
 `);
 }
+
 
 function openBrowser(url) {
   const platform = process.platform;
@@ -141,8 +167,10 @@ async function main() {
   const options = {};
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--yes' || args[i] === '-y') options.yes = true;
+    else if (args[i] === '--dry-run') options.dryRun = true;
     else if (args[i] === '--no-open') options.noOpen = true;
     else if (args[i] === '--port' && args[i + 1]) options.port = parseInt(args[++i], 10);
+    else if (args[i] === '--provider' && args[i + 1]) options.provider = args[++i];
     else if (args[i] === '--target' && args[i + 1]) options.targetFramework = args[++i];
     else if (args[i] === '--out' && args[i + 1]) options.outputDir = args[++i];
     else if (args[i] === '--name' && args[i + 1]) options.name = args[++i];
@@ -154,6 +182,7 @@ async function main() {
       options.taskPrompt = args[i];
     }
   }
+
 
   const rootDir = process.cwd();
 
@@ -358,6 +387,127 @@ async function main() {
       break;
     }
 
+    case 'doctor':
+    case 'diagnose': {
+      const { DoctorCommand } = await import('../src/commands/doctor.js');
+      const { defaultProviderRegistry } = await import('../src/adapters/index.js');
+      const cmd = new DoctorCommand();
+      const res = await cmd.execute({ providerRegistry: defaultProviderRegistry }, args.slice(1));
+      console.log(BANNER);
+      console.log('\n' + res.output + '\n');
+      break;
+    }
+
+    case 'assemble':
+    case 'craft': {
+      const prompt = options.taskPrompt || args.slice(1).join(' ');
+      if (!prompt) {
+        console.error('\x1b[31mError: Please provide a prompt for /assemble.\x1b[0m');
+        console.log('Example: npx pixel-crew assemble "Build modern portfolio with Next.js"');
+        process.exit(1);
+      }
+      const engine = new OrchestratorEngine(rootDir);
+      await engine.initialize();
+      console.log(BANNER);
+      console.log(`\x1b[33m[SWARM SPRINT ASSEMBLY]\x1b[0m Generating project: "${prompt}"\n`);
+      const { AssembleCommand } = await import('../src/commands/assemble.js');
+      const cmd = new AssembleCommand();
+      const result = await cmd.execute({ engine, options }, [prompt]);
+      if (result.output) {
+        console.log('\n' + result.output + '\n');
+      }
+      break;
+    }
+
+    case 'plan': {
+      const prompt = options.taskPrompt || args.slice(1).join(' ');
+      if (!prompt) {
+        console.error('\x1b[31mError: Please provide a prompt for /plan.\x1b[0m');
+        console.log('Example: npx pixel-crew plan "Saas pricing calculator"');
+        process.exit(1);
+      }
+      const { PlanCommand } = await import('../src/commands/plan.js');
+      const cmd = new PlanCommand();
+      const res = await cmd.execute({ options }, [prompt]);
+      console.log(BANNER);
+      console.log('\n' + res.output + '\n');
+      break;
+    }
+
+    case 'build': {
+      const prompt = args.slice(1).join(' ');
+      const engine = new OrchestratorEngine(rootDir);
+      await engine.initialize();
+      const res = await engine.executeCommand(`/build ${prompt}`, options);
+      if (res.output) console.log(res.output);
+      break;
+    }
+
+    case 'crew':
+    case 'agents': {
+      const engine = new OrchestratorEngine(rootDir);
+      await engine.initialize();
+      const res = await engine.executeCommand(`/crew ${args.slice(1).join(' ')}`, options);
+      console.log(BANNER);
+      console.log('\n' + res.output + '\n');
+      break;
+    }
+
+    case 'skills': {
+      const { SkillsCommand } = await import('../src/commands/skills.js');
+      const cmd = new SkillsCommand();
+      const res = await cmd.execute({}, args.slice(1));
+      console.log(BANNER);
+      console.log('\n' + res.output + '\n');
+      break;
+    }
+
+    case 'add':
+    case 'install': {
+      const { AddCommand } = await import('../src/commands/add.js');
+      const cmd = new AddCommand();
+      const res = await cmd.execute({ targetDir: rootDir, options }, args.slice(1));
+      console.log(BANNER);
+      console.log('\n' + res.output + '\n');
+      break;
+    }
+
+    case 'sync': {
+      const { SyncCommand } = await import('../src/commands/sync.js');
+      const cmd = new SyncCommand();
+      const res = await cmd.execute({ targetDir: rootDir, options }, args.slice(1));
+      console.log(BANNER);
+      console.log('\n' + res.output + '\n');
+      break;
+    }
+
+
+    case 'review': {
+      const { ReviewCommand } = await import('../src/commands/review.js');
+      const cmd = new ReviewCommand();
+      const res = await cmd.execute({ engine: new OrchestratorEngine(rootDir) }, args.slice(1));
+      console.log(BANNER);
+      console.log('\n' + res.output + '\n');
+      break;
+    }
+
+    case 'fix': {
+      const issue = args.slice(1).join(' ');
+      const engine = new OrchestratorEngine(rootDir);
+      await engine.initialize();
+      const res = await engine.executeCommand(`/fix ${issue}`, options);
+      if (res.output) console.log(res.output);
+      break;
+    }
+
+    case 'stop': {
+      const engine = new OrchestratorEngine(rootDir);
+      await engine.initialize();
+      engine.cancelActiveExecution();
+      console.log('\x1b[33m✓ Swarm stopped.\x1b[0m\n');
+      break;
+    }
+
     case 'status': {
       const engine = new OrchestratorEngine(rootDir);
       await engine.initialize();
@@ -382,10 +532,42 @@ async function main() {
     case 'help':
     case '--help':
     case '-h':
+      printHelp();
+      break;
+
     default: {
+      const cleanCmd = command.replace(/^\//, '').toLowerCase();
+      const matched = defaultCommandRegistry.getCommand(cleanCmd);
+
+      if (matched) {
+        const engine = new OrchestratorEngine(rootDir);
+        await engine.initialize();
+        const fullInput = command.startsWith('/') ? `${command} ${args.slice(1).join(' ')}`.trim() : `/${command} ${args.slice(1).join(' ')}`.trim();
+        const res = await defaultCommandRegistry.execute(fullInput, { targetDir: rootDir, options, engine });
+        if (res.output) {
+          console.log('\n' + res.output + '\n');
+        } else if (res.message) {
+          console.log('\n\x1b[32m' + res.message + '\x1b[0m\n');
+        }
+        break;
+      }
+
+      if (command.startsWith('/')) {
+        const engine = new OrchestratorEngine(rootDir);
+        await engine.initialize();
+        const fullInput = `${command} ${args.slice(1).join(' ')}`.trim();
+        const res = await engine.executeCommand(fullInput, options);
+        if (res.output) {
+          console.log('\n' + res.output + '\n');
+        } else if (res.message) {
+          console.log('\n\x1b[32m' + res.message + '\x1b[0m\n');
+        }
+        break;
+      }
       printHelp();
       break;
     }
+
   }
 }
 

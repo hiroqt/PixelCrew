@@ -560,9 +560,10 @@ async function initApp() {
 
   // Instant initial fetch before SSE stream connects
   try {
-    const [cfgRes, stRes] = await Promise.all([
+    const [cfgRes, stRes, provRes] = await Promise.all([
       fetch('/api/config').then(r => r.ok ? r.json() : null),
-      fetch('/api/state').then(r => r.ok ? r.json() : null)
+      fetch('/api/state').then(r => r.ok ? r.json() : null),
+      fetch('/api/providers').then(r => r.ok ? r.json() : null)
     ]);
     if (cfgRes) {
       appState.config = cfgRes;
@@ -574,6 +575,14 @@ async function initApp() {
       appState.state = stRes;
       renderState();
     }
+    if (provRes && provRes.available && provRes.available.length > 0) {
+      const provEl = document.getElementById('providerName');
+      if (provEl) {
+        const top = provRes.available.find(p => p.id !== 'generic') || provRes.available[0];
+        provEl.textContent = top.id.toUpperCase();
+        provEl.title = `Active: ${top.name} (${top.description || ''})`;
+      }
+    }
     await fetchReports();
   } catch (e) {
     // Handled by SSE
@@ -582,13 +591,102 @@ async function initApp() {
   connectSSE();
 }
 
+let selectedAutocompleteIndex = -1;
+let currentSuggestions = [];
+
 // Setup DOM Event Listeners
 function setupEventListeners() {
   // Task form submission
   const taskForm = document.getElementById('taskForm');
   const taskInput = document.getElementById('taskInput');
+  const autocompletePopup = document.getElementById('commandAutocomplete');
+  const autocompleteList = document.getElementById('autocompleteList');
+
+  // Handle Autocomplete popup
+  async function updateAutocomplete() {
+    const val = taskInput.value.trim();
+    if (!val.startsWith('/')) {
+      autocompletePopup.style.display = 'none';
+      selectedAutocompleteIndex = -1;
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/commands/autocomplete?q=${encodeURIComponent(val)}`);
+      if (res.ok) {
+        const data = await res.json();
+        currentSuggestions = data.suggestions || [];
+        if (currentSuggestions.length > 0) {
+          renderAutocomplete(currentSuggestions);
+          autocompletePopup.style.display = 'block';
+        } else {
+          autocompletePopup.style.display = 'none';
+        }
+      }
+    } catch {
+      autocompletePopup.style.display = 'none';
+    }
+  }
+
+  function renderAutocomplete(suggestions) {
+    autocompleteList.innerHTML = suggestions.map((s, idx) => `
+      <div class="autocomplete-item ${idx === selectedAutocompleteIndex ? 'selected' : ''}" data-index="${idx}">
+        <span class="autocomplete-name">${escapeHtml(s.name)}</span>
+        <span class="autocomplete-desc">${escapeHtml(s.description)}</span>
+        <span class="autocomplete-usage">${escapeHtml(s.usage)}</span>
+      </div>
+    `).join('');
+
+    autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const idx = parseInt(item.getAttribute('data-index'), 10);
+        selectSuggestion(idx);
+      });
+    });
+  }
+
+  function selectSuggestion(idx) {
+    if (idx >= 0 && idx < currentSuggestions.length) {
+      const s = currentSuggestions[idx];
+      taskInput.value = `${s.name} `;
+      autocompletePopup.style.display = 'none';
+      taskInput.focus();
+    }
+  }
+
+  taskInput.addEventListener('input', () => {
+    selectedAutocompleteIndex = 0;
+    updateAutocomplete();
+  });
+
+  taskInput.addEventListener('keydown', (e) => {
+    if (autocompletePopup.style.display === 'block' && currentSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedAutocompleteIndex = (selectedAutocompleteIndex + 1) % currentSuggestions.length;
+        renderAutocomplete(currentSuggestions);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedAutocompleteIndex = (selectedAutocompleteIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+        renderAutocomplete(currentSuggestions);
+      } else if (e.key === 'Tab' || (e.key === 'Enter' && selectedAutocompleteIndex >= 0 && taskInput.value.trim().split(' ').length === 1)) {
+        e.preventDefault();
+        selectSuggestion(selectedAutocompleteIndex);
+      } else if (e.key === 'Escape') {
+        autocompletePopup.style.display = 'none';
+      }
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!taskInput.contains(e.target) && !autocompletePopup.contains(e.target)) {
+      autocompletePopup.style.display = 'none';
+    }
+  });
+
   taskForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    autocompletePopup.style.display = 'none';
     const prompt = taskInput.value.trim();
     if (!prompt) return;
     synth.playClick();
@@ -1113,16 +1211,24 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// Submit Task to Server
+// Submit Task or Slash Command to Server
 async function submitTask(prompt) {
   try {
-    await fetch('/api/task', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
+    if (prompt.startsWith('/')) {
+      await fetch('/api/command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: prompt })
+      });
+    } else {
+      await fetch('/api/task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+    }
   } catch (err) {
-    console.error('Failed to submit task:', err);
+    console.error('Failed to submit task or command:', err);
   }
 }
 

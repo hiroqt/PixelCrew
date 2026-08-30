@@ -3,6 +3,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { auditCodebaseForTask } from '../scaffold/analyzer.js';
 import { OneShotEngine } from './oneshot.js';
+import { CoreOrchestrator } from '../core/orchestrator.js';
+import { defaultProviderRegistry, ProviderRegistry } from '../adapters/index.js';
+import { defaultCommandRegistry, CommandRegistry } from '../commands/index.js';
 
 export const AGENT_STATES = {
   IDLE: 'IDLE',
@@ -39,10 +42,18 @@ export class OrchestratorEngine extends EventEmitter {
     super();
     this.rootDir = rootDir;
     this.options = options;
+
+    this.pixelCrewDir = path.join(rootDir, '.pixel-crew');
     this.pixelAgentsDir = path.join(rootDir, '.pixel-agents');
-    this.configPath = path.join(this.pixelAgentsDir, 'config.json');
-    this.statePath = path.join(this.pixelAgentsDir, 'state.json');
-    this.eventsPath = path.join(this.pixelAgentsDir, 'events.jsonl');
+    this.activeDir = this.pixelAgentsDir;
+
+    this.configPath = path.join(this.activeDir, 'config.json');
+    this.statePath = path.join(this.activeDir, 'state.json');
+    this.eventsPath = path.join(this.activeDir, 'events.jsonl');
+
+    this.providerRegistry = options.providerRegistry || defaultProviderRegistry;
+    this.commandRegistry = options.commandRegistry || defaultCommandRegistry;
+    this.coreOrchestrator = new CoreOrchestrator(rootDir, options);
 
     this.config = null;
     this.state = null;
@@ -52,13 +63,33 @@ export class OrchestratorEngine extends EventEmitter {
   }
 
   async initialize() {
+    // Check if .pixel-crew or .pixel-agents exists
+    try {
+      await fs.access(this.pixelCrewDir);
+      this.activeDir = this.pixelCrewDir;
+    } catch {
+      try {
+        await fs.access(this.pixelAgentsDir);
+        this.activeDir = this.pixelAgentsDir;
+      } catch {
+        this.activeDir = this.pixelAgentsDir;
+      }
+    }
+
+    this.configPath = path.join(this.activeDir, 'config.json');
+    this.statePath = path.join(this.activeDir, 'state.json');
+    this.eventsPath = path.join(this.activeDir, 'events.jsonl');
+
+    await this.coreOrchestrator.initialize();
+
     try {
       const configRaw = await fs.readFile(this.configPath, 'utf-8');
       this.config = JSON.parse(configRaw);
     } catch {
       // Fallback default config
       this.config = {
-        orchestrator: { enabled: true, maxConcurrentAgents: 4 },
+        project: path.basename(this.rootDir),
+        orchestrator: { enabled: true, maxConcurrentAgents: 4, runtimeStrategy: 'auto' },
         agents: {},
         dashboard: { enabled: true, port: 4747 }
       };
@@ -235,8 +266,22 @@ export class OrchestratorEngine extends EventEmitter {
     }
   }
 
-  async saveState() {
-    return this.persistState();
+  async executeCommand(input, options = {}) {
+    return await this.commandRegistry.execute(input, {
+      engine: this,
+      providerRegistry: this.providerRegistry,
+      options: { ...this.options, ...options },
+      rootDir: this.rootDir
+    });
+  }
+
+  cancelActiveExecution() {
+    if (this.activeTaskAbortController) {
+      this.activeTaskAbortController.abort();
+      this.activeTaskAbortController = null;
+    }
+    this.coreOrchestrator.cancelActiveExecution();
+    this.resetSwarm().catch(() => {});
   }
 
   async resetSwarm() {

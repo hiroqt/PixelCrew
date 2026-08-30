@@ -306,6 +306,105 @@ body:not(.crt-active) .crt-vignette {
   border: 2px solid var(--border-light);
   padding: 4px 8px;
   gap: 8px;
+  position: relative;
+}
+
+.command-autocomplete-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #0d111d;
+  border: 2px solid var(--color-cyan);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), 0 0 12px rgba(0, 240, 255, 0.2);
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.autocomplete-header {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--color-cyan);
+  background: #151b2e;
+  padding: 6px 10px;
+  border-bottom: 1px solid #232b45;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.autocomplete-hint {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: #7b88a8;
+}
+
+.autocomplete-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #171d30;
+  gap: 12px;
+  transition: background 0.1s;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+  background: rgba(0, 240, 255, 0.12);
+}
+
+.autocomplete-name {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--color-gold);
+  min-width: 100px;
+}
+
+.autocomplete-desc {
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: #d1d5db;
+  flex: 1;
+}
+
+.autocomplete-usage {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: #6b7280;
+  background: #080a12;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid #222a40;
+}
+
+.provider-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #111524;
+  border: 1px solid #2a3350;
+  padding: 4px 8px;
+}
+
+.provider-label {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: #7b88a8;
+}
+
+.provider-name {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--color-cyan);
+  font-weight: bold;
 }
 
 .prompt-prefix {

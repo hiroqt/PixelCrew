@@ -47,6 +47,10 @@
           <span class="status-dot" id="statusDot"></span>
           <span class="status-text" id="swarmStatusText">STANDBY</span>
         </div>
+        <div class="provider-indicator" id="providerBadge" title="Active Execution Provider">
+          <span class="provider-label">PROVIDER:</span>
+          <span class="provider-name" id="providerName">AUTO</span>
+        </div>
       </div>
 
       <div class="header-right">
@@ -78,26 +82,33 @@
     <section class="task-dispatch-section">
       <form class="task-form" id="taskForm">
         <div class="prompt-input-wrapper">
-          <span class="prompt-prefix">SPRINT GOAL &gt;</span>
+          <span class="prompt-prefix">SPRINT &gt;</span>
           <input 
             type="text" 
             class="pixel-input" 
             id="taskInput" 
-            placeholder="Assign product milestone to the engineering team (e.g. 'Optimize Prisma queries & deploy CRM search bar')..." 
+            placeholder="Type / for slash commands (/oneshot, /plan, /crew, /review...) or assign any product goal..." 
             autocomplete="off"
           />
           <button type="submit" class="pixel-btn btn-primary" id="btnSubmitTask">
-            <span>💻</span> ASSIGN SPRINT
+            <span>💻</span> RUN / DISPATCH
           </button>
+          
+          <!-- SLASH COMMAND AUTOCOMPLETE POPUP -->
+          <div class="command-autocomplete-popup" id="commandAutocomplete" style="display: none;">
+            <div class="autocomplete-header">COMMANDS &nbsp;<span class="autocomplete-hint">Tab or Enter to select • Esc to dismiss</span></div>
+            <div class="autocomplete-list" id="autocompleteList"></div>
+          </div>
         </div>
       </form>
       <div class="quick-prompts">
         <span class="quick-title">QUICK TICKETS:</span>
-        <button class="quick-tag" data-prompt="Build a modern website for a design agency specializing in AI products. Dark, editorial, premium.">✦ OneShot: AI Agency</button>
-        <button class="quick-tag" data-prompt="Build a modern portfolio for an AI engineer inspired by editorial design and developer tools.">✦ OneShot: AI Portfolio</button>
+        <button class="quick-tag" data-prompt="/oneshot Build a modern website for a design agency specializing in AI products. Dark, editorial, premium.">✦ /oneshot AI Agency</button>
+        <button class="quick-tag" data-prompt="/oneshot Build a modern portfolio for an AI engineer inspired by editorial design and developer tools.">✦ /oneshot AI Portfolio</button>
+        <button class="quick-tag" data-prompt="/plan Build high-performance real-time SaaS vector query engine">⚡ /plan SaaS Infra</button>
+        <button class="quick-tag" data-prompt="/review">🔍 /review Quality</button>
+        <button class="quick-tag" data-prompt="/doctor">🩺 /doctor Providers</button>
         <button class="quick-tag" data-prompt="Find slow Prisma queries and create optimized database index">☕ DB: Optimize Indexes</button>
-        <button class="quick-tag" data-prompt="Build customer CRM dashboard with React and API endpoints">🎨 FE/BE: Build CRM Module</button>
-        <button class="quick-tag" data-prompt="Audit security authentication and profile Core Web Vitals">🛡️ SEC/PERF: Audit & Speed</button>
       </div>
     </section>
 

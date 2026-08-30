@@ -20,8 +20,10 @@
     "init": "node bin/pixel-agents.js init",
     "dashboard": "node bin/pixel-agents.js dashboard",
     "demo": "node bin/pixel-agents.js demo",
+    "sync:providers": "node scripts/sync-providers.js",
     "test": "node --test tests/**/*.test.js"
   },
+
   "keywords": [
     "agents",
     "multi-agent",
