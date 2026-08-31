@@ -67,19 +67,37 @@ PixelCrew delegates tasks across 8 specialized agent personas:
 
 ## 🛡️ Anti-AI Design Philosophy & Anti-Slop Directives
 
-PixelCrew enforces uncompromising visual standards to guarantee human-grade software craftsmanship:
+### ⚡ AUTOMATIC ZERO-PROMPT ANTI-SLOP POLICY (Applies to ALL Prompts)
+Even if the user's prompt is simple or generic (e.g. `"/pixelcrew create me a portfolio for this PDF"`, `"build a landing page"`, `"create a dashboard"`), you MUST AUTOMATICALLY apply human-grade craftsmanship and enforce these rules without requiring the user to specify design details:
 
 ### ❌ The 10 Strictly Banned AI Slop Tropes:
-1. ❌ **Monotonous 4-Column Metric Rows**: Never put 3 or 4 isolated stat cards (`486+ Hours`, `4+ Platforms`, `3+ Credentials`, `100% Ownership`) across the bottom. Embed metrics inline within case studies, timeline milestones, or asymmetric telemetry rails.
-2. ❌ **Hashtag & Pill Badge Spam**: Never output a cloud of 6+ rounded tags (`#React #Nextjs #Tailwind #Groq #Vue`). Group capabilities into structured architectural layers (*01. GenAI / 02. Full-Stack / 03. Cloud*).
-3. ❌ **Card-in-a-Card Syndrome**: Never nest smaller rounded dark boxes inside larger rounded dark boxes with glowing cyan borders. Use subtle 1px divider lines, surface tier shifts, or tabular lists.
-4. ❌ **Predictable 2-Column Split Hero**: Avoid "Headline on left, dark box on right, 4 stats on bottom". Use an **Asymmetric Bento Grid** (`8-col` flagship case study + `4-col` live capabilities rail) or full-width editorial hero.
-5. ❌ **Cyan-on-Black Monoculture**: Never default to glowing `#00f0ff` text and cyan buttons on flat `#0a0a0c`. Pick an authentic archetype (*Swiss Technical*, *Editorial High-Contrast*, *Kinetic Command*, *Warm Studio*).
-6. ❌ **Cliché AI Copywriting**: Banned: *"Unlock next-gen AI"*, *"Seamlessly innovate"*, *"Available for work"*. Lead with concrete engineering thesis and flagship architectural outcomes.
-7. ❌ **Fake AI Sparkles & Emojis**: Banned: Floating `✨`, `🪄`, `🚀` on section headings. Use clean semantic `<h1>`/`<h2>` typography hierarchy.
-8. ❌ **Monotonous 16px Rounded Cards**: Never repeat identical rounded rectangles across every section. Vary visual rhythm between expansive display breaks, dense specs, and interactive widgets.
-9. ❌ **Fake Dashboard Screenshots with Pastel Bars**: Use real interactive UI state, live terminal shells, or functional filter matrices.
-10. ❌ **Meaningless Floating Icons**: No random icons atop every paragraph. Use purposeful visuals or clean icon-free typography.
+1. ❌ **Monotonous 4-Column Metric Rows**: Never put 3 or 4 isolated stat cards (`486+ Hours`, `4+ Platforms`, `3+ Credentials`, `100% Delivery`) across the bottom of a hero or section. Embed metrics inline within case studies, timeline milestones, or asymmetric telemetry rails.
+2. ❌ **Hashtag & Pill Badge Spam**: Never output clouds of rounded tags (`#React #Nextjs #Tailwind #Groq #Vue`) or pill eyebrows (`• Location: Cavite, PH`, `Open to Work`). Group capabilities into structured architectural layers (*01. GenAI / 02. Full-Stack / 03. Cloud*).
+3. ❌ **Fake macOS Windows with 🔴 🟡 🟢 Dots**: Never put a fake terminal window with red/yellow/green macOS dots on the right side of a hero just to fill space. Use real interactive artifacts (system node diagrams, live interactive code tabs, or clean typography).
+4. ❌ **Checkmark Bullet Lists (`✓`) on Projects**: Never generate cards filled with 3–4 generic bullet points starting with green checkmark icons. Write real engineering case narratives with problems, architecture decisions, and measured outcomes.
+5. ❌ **Card-in-a-Card Syndrome**: Never nest smaller rounded dark boxes inside larger rounded dark boxes with glowing borders or side-tab stripes. Use subtle 1px divider lines, surface tier shifts, or tabular lists.
+6. ❌ **Predictable 2-Column Split Hero**: Avoid "Headline on left, dark fake-window box on right, 4 stats on bottom". Use an **Asymmetric Bento Grid** (`8-col` flagship case study + `4-col` live capabilities rail) or full-width editorial hero.
+7. ❌ **Cyan/Emerald Neon on Flat Black Monoculture**: Never default to glowing `#10B981` / `#00F0FF` text and green pill buttons on flat `#0a0a0c`. Pick an authentic palette (*Swiss Technical*, *Editorial High-Contrast*, *Kinetic Command*, *Warm Studio*).
+8. ❌ **Cliché AI Copywriting**: Banned: *"Unlock next-gen AI"*, *"Seamlessly innovate"*, *"Available for work"*. Lead with concrete engineering thesis and flagship architectural outcomes.
+9. ❌ **Monotonous 16px Rounded Cards**: Never repeat identical rounded rectangles across every section. Vary visual rhythm between expansive display breaks, dense specs, and interactive widgets.
+10. ❌ **Meaningless Floating Icons & Fake Carets**: No random icons atop every paragraph, no fake blinking carets on static text. Use purposeful visuals or clean icon-free typography.
+
+---
+
+### 🏛️ Mandatory Human-Grade Component Layouts
+
+#### 1. Hero Section:
+- Massive, high-impact display typography (`clamp(2.5rem, 6vw, 5.5rem)`) with high contrast.
+- Asymmetric layout with zero fake macOS windows, zero pill clouds, and zero 4-box stat rows.
+- Clean text actions (`View Case Studies ↓`, `Email`, `GitHub`) with subtle hover transitions.
+
+#### 2. Flagship Projects Section:
+- **Asymmetric Narrative Showcase**: One full-width flagship case study with deep architectural breakdown, before/after metrics, and interactive preview + staggered secondary projects.
+- Real architectural diagrams, interactive code/tab viewers, or horizontal project rows with hover reveal drawers. Zero checkmark bullet clones.
+
+#### 3. Career & Experience Section:
+- Clean editorial timeline table or ledger with dates, role, company, and concrete engineering contributions aligned to a typographic grid. Zero nested "INTERNSHIP DOSSIER" cards or gold badge boxes.
+
 
 ---
 

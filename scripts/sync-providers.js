@@ -21,6 +21,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -100,6 +101,29 @@ export async function syncAllProviders() {
   );
   await copyDir(SOURCE_SKILL_DIR, path.join(claudePluginDir, 'skills', 'pixelcrew'));
   console.log(`  \x1b[32m✓\x1b[0m Synced -> \x1b[36m.claude-plugin/\x1b[0m`);
+
+  // 3. Global Antigravity & User IDE Skills Sync
+  const globalGeminiSkills = path.join(os.homedir(), '.gemini', 'config', 'skills');
+  const workspaceSkillsDir = path.join(ROOT_DIR, '.agents', 'skills');
+
+  try {
+    const globalExists = await fs.access(globalGeminiSkills).then(() => true).catch(() => false);
+    if (globalExists) {
+      // Sync canonical pixelcrew skill
+      await copyDir(SOURCE_SKILL_DIR, path.join(globalGeminiSkills, 'pixelcrew'));
+      
+      // Sync all companion skills (anti-ai-patterns, design-director, frontend-engineering, etc.)
+      const skills = await fs.readdir(workspaceSkillsDir, { withFileTypes: true });
+      for (const s of skills) {
+        if (s.isDirectory()) {
+          const srcSkill = path.join(workspaceSkillsDir, s.name);
+          const destSkill = path.join(globalGeminiSkills, s.name);
+          await copyDir(srcSkill, destSkill);
+          console.log(`  \x1b[32m✓\x1b[0m Synced Global Antigravity Skill -> \x1b[36m~/.gemini/config/skills/${s.name}/\x1b[0m`);
+        }
+      }
+    }
+  } catch {}
 
   console.log('\n\x1b[32m\x1b[1m✨ All provider directories synchronized successfully!\x1b[0m\n');
 }
