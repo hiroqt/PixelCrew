@@ -1,18 +1,26 @@
 /**
  * PIXEL CREW — Requirement Contract & Quality Auditor
  * 
- * Establishes an explicit Requirements Contract (REQ-001..N) extracted from
+ * Establishes an explicit Requirements Contract (REQ-001..N) compiled from
  * the Semantic AST, tracks agent fulfillment, validates output files against
  * acceptance criteria, and compiles repair tasks when criteria fail.
  */
 
+import { REQUIREMENT_CATEGORIES } from './ontology.js';
+
 export class RequirementContract {
-  constructor(ast) {
+  constructor(ast = {}) {
     this.ast = ast;
     this.requirements = (ast.requirements || []).map(r => ({
-      ...r,
+      id: r.id,
+      category: r.category || REQUIREMENT_CATEGORIES.WORKFLOW,
+      target: r.target || 'system',
+      description: r.description || `Requirement ${r.id}`,
+      acceptanceCriteria: Array.isArray(r.acceptanceCriteria) ? r.acceptanceCriteria : ['Verified'],
+      priority: r.priority || 'high',
       status: 'PENDING',
       assignedAgent: this.resolveAgentForCategory(r.category),
+      evidence: [],
       verifiedAt: null,
       verificationNotes: null
     }));
@@ -20,14 +28,18 @@ export class RequirementContract {
 
   resolveAgentForCategory(category) {
     switch (category) {
-      case 'UI_COMPONENT':
+      case REQUIREMENT_CATEGORIES.UI_COMPONENT:
         return 'frontend';
-      case 'API_ENDPOINT':
+      case REQUIREMENT_CATEGORIES.API_ENDPOINT:
         return 'backend';
-      case 'DATA_MODEL':
+      case REQUIREMENT_CATEGORIES.DATA_MODEL:
         return 'database';
-      case 'DESIGN_QUALITY':
+      case REQUIREMENT_CATEGORIES.DESIGN_QUALITY:
         return 'designSystem';
+      case REQUIREMENT_CATEGORIES.SECURITY:
+        return 'security';
+      case REQUIREMENT_CATEGORIES.PERFORMANCE:
+        return 'performance';
       default:
         return 'frontend';
     }
@@ -40,116 +52,125 @@ export class RequirementContract {
     const fileKeys = Object.keys(files);
     let passedCount = 0;
     let failedCount = 0;
+    let partialCount = 0;
     const auditReport = [];
 
     for (const req of this.requirements) {
-      let passed = false;
+      let status = 'FAIL';
       let reason = "";
+      const evidence = [];
 
-      if (req.category === 'UI_COMPONENT') {
+      if (req.category === REQUIREMENT_CATEGORIES.UI_COMPONENT || req.category === 'UI_COMPONENT') {
         const matchingComponentKey = fileKeys.find(k => k.includes(req.target));
         if (matchingComponentKey) {
           const content = files[matchingComponentKey];
           if (content && content.length > 100 && (content.includes('export function') || content.includes('export default'))) {
-            passed = true;
+            status = 'PASS';
+            evidence.push(matchingComponentKey);
             reason = `Component '${req.target}' successfully synthesized at '${matchingComponentKey}' with valid JSX exports and state.`;
           } else {
+            status = 'PARTIAL';
+            evidence.push(matchingComponentKey);
             reason = `Component file '${matchingComponentKey}' exists but is incomplete or lacks proper exports.`;
           }
         } else {
           reason = `Missing required UI component file for '${req.target}'.`;
         }
-      } else if (req.category === 'API_ENDPOINT') {
+      } else if (req.category === REQUIREMENT_CATEGORIES.API_ENDPOINT || req.category === 'API_ENDPOINT') {
         const routePath = req.target.replace(/^\/api\//, '');
-        const matchingRouteKey = fileKeys.find(k => k.includes(`src/app/api/${routePath}/route.ts`));
+        const matchingRouteKey = fileKeys.find(k => k.includes(`src/app/api/${routePath}/route.ts`) || k.includes(`src/app/api/${routePath}/`));
         if (matchingRouteKey) {
           const content = files[matchingRouteKey];
           if (content && (content.includes('export async function GET') || content.includes('export async function POST'))) {
-            passed = true;
+            status = 'PASS';
+            evidence.push(matchingRouteKey);
             reason = `API Route '${req.target}' successfully synthesized at '${matchingRouteKey}' with Next.js App Router handlers.`;
           } else {
+            status = 'PARTIAL';
+            evidence.push(matchingRouteKey);
             reason = `API Route file '${matchingRouteKey}' lacks valid GET/POST handler exports.`;
           }
         } else {
           reason = `Missing required API route file for '${req.target}'.`;
         }
-      } else if (req.category === 'DESIGN_QUALITY') {
+      } else if (req.category === REQUIREMENT_CATEGORIES.DESIGN_QUALITY || req.category === 'DESIGN_QUALITY') {
         const globalsCss = files['src/app/globals.css'];
         const layoutTsx = files['src/app/layout.tsx'];
         if (globalsCss && layoutTsx) {
-          passed = true;
+          status = 'PASS';
+          evidence.push('src/app/globals.css', 'src/app/layout.tsx');
           reason = `Design tokens, fluid typography, and bespoke aesthetic variables fully verified in globals.css and layout.tsx.`;
         } else {
           reason = `Missing core styling or layout foundations.`;
         }
+      } else if (req.category === REQUIREMENT_CATEGORIES.DATA_MODEL || req.category === 'DATA_MODEL') {
+        const typesTs = files['src/types/index.ts'];
+        const dataTs = files['src/lib/data.ts'];
+        if (typesTs && dataTs) {
+          status = 'PASS';
+          evidence.push('src/types/index.ts', 'src/lib/data.ts');
+          reason = `TypeScript types and domain seed data models verified.`;
+        } else {
+          reason = `Missing domain type definitions or data models.`;
+        }
       } else {
-        passed = true;
+        status = 'PASS';
         reason = `Requirement '${req.id}' satisfied.`;
       }
 
-      req.status = passed ? 'VERIFIED' : 'FAILED';
+      req.status = status;
+      req.evidence = evidence;
       req.verifiedAt = new Date().toISOString();
       req.verificationNotes = reason;
 
-      if (passed) {
-        passedCount++;
-      } else {
-        failedCount++;
-      }
+      if (status === 'PASS') passedCount++;
+      else if (status === 'PARTIAL') partialCount++;
+      else failedCount++;
 
       auditReport.push({
         id: req.id,
         category: req.category,
         target: req.target,
-        status: req.status,
-        notes: reason
+        status,
+        reason,
+        evidence
       });
     }
 
-    const numericPassRate = this.requirements.length > 0
-      ? Math.round((passedCount / this.requirements.length) * 100)
-      : 100;
-
-    const passRateFormatted = this.requirements.length > 0
-      ? `${((passedCount / this.requirements.length) * 100).toFixed(1)}%`
-      : '100.0%';
-
-    const unmetRequirements = auditReport.filter(r => r.status === 'FAILED');
+    const total = this.requirements.length;
+    const score = total > 0 ? (passedCount / total) * 100 : 100;
+    const passed = failedCount === 0;
 
     return {
-      isValid: failedCount === 0,
-      total: this.requirements.length,
-      passed: passedCount,
-      failed: failedCount,
-      unmetCount: failedCount,
-      unmetRequirements,
-      passRate: numericPassRate,
-      passRateFormatted,
-      overallScore: failedCount === 0 ? 9.6 : parseFloat((Math.max(6.0, 9.6 - (failedCount * 0.5))).toFixed(2)),
-      auditReport,
-      requirements: this.requirements
+      passed,
+      score: Math.round(score * 10) / 10,
+      total,
+      passedCount,
+      partialCount,
+      failedCount,
+      auditReport
     };
   }
 
   /**
-   * Generates dynamic repair tasks for any failed requirements
+   * Compile targeted repair tasks for failed requirements
    */
-  createRepairPlan(validationResult) {
-    if (validationResult.isValid) return [];
-
+  compileRepairTasks(auditResults) {
     const repairTasks = [];
-    validationResult.auditReport
-      .filter(r => r.status === 'FAILED')
-      .forEach((r, idx) => {
-        repairTasks.push({
-          id: `REPAIR-${r.id}`,
-          target: r.target,
-          category: r.category,
-          agent: this.resolveAgentForCategory(r.category),
-          action: `Synthesize missing or repair damaged artifact for '${r.target}' (${r.notes})`,
-          priority: 'CRITICAL'
-        });
+    const failedOrPartial = auditResults.auditReport.filter(r => r.status === 'FAIL' || r.status === 'PARTIAL');
+
+    for (const item of failedOrPartial) {
+      const originalReq = this.requirements.find(r => r.id === item.id);
+      repairTasks.push({
+        taskId: `REPAIR-${item.id}`,
+        role: originalReq ? originalReq.assignedAgent : 'frontend',
+        goal: `Repair and satisfy requirement ${item.id} (${item.target})`,
+        requirementId: item.id,
+        target: item.target,
+        issue: item.reason,
+        acceptanceCriteria: originalReq ? originalReq.acceptanceCriteria : ['Verify requirement is satisfied']
       });
+    }
 
     return repairTasks;
   }

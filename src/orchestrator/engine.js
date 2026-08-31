@@ -964,7 +964,7 @@ export class OrchestratorEngine extends EventEmitter {
         uxPlan,
         designSystem,
         buildResult: {
-          fileCount: buildResult.fileCount,
+          fileCount: buildResult.fileCount || Object.keys(buildResult.files || {}).length,
           entrypoint: buildResult.entrypoint,
           files: Object.keys(buildResult.files || {})
         },
