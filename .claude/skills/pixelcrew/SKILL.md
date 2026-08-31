@@ -47,7 +47,6 @@ All commands can be invoked via `/pixelcrew <command>`, direct slash commands (e
 - **`/sync [--dry-run]`**: Synchronizes modular skills across all detected IDEs (`.claude`, `.cursor`, `.agents`, `.kiro`, etc.).
 - **`/doctor`**: Diagnoses local environment, LLM keys, and available coding agent runtimes.
 
-
 ---
 
 ## 👥 Floor 42 Personas & Squad Roles
@@ -65,40 +64,112 @@ PixelCrew delegates tasks across 8 specialized agent personas:
 
 ---
 
-## 🛡️ Anti-AI Design Philosophy & Dynamic Domain Synthesis
+## 🛡️ The Impeccable 64-Pattern Anti-AI Slop Enforcement Matrix
 
-### ⚡ DYNAMIC ZERO-PROMPT ANTI-SLOP ENGINE (Adapts to Any User Prompt & Content)
+Whenever you generate ANY interface, portfolio, dashboard, or landing page (regardless of whether the user prompt is brief or complex), you MUST strictly avoid these 64 banned patterns and apply human-crafted craftsmanship:
 
-When processing ANY user prompt or attached reference (PDF resume, API schema, product brief, or creative concept):
-1. **Dynamic Semantic Extraction**:
-   - Extract the real nouns, domain entities, operational workflows, and verified technical outcomes directly from the user's input/documents.
-   - Never inject hardcoded placeholder copy or generic marketing templates. Ground every heading, label, and spec in the user's actual domain.
-
-2. **Domain-Adaptive Archetype Mapping**:
-   - Dynamically select the optimal visual personality for the specific domain:
-     - **Developer Tools, Infrastructure, AI & Systems**: *Swiss International Technical* or *Kinetic Command Center*.
-     - **Executive Portfolios, Thought Leadership & Architecture**: *Editorial High-Contrast* (Serif display + geometric metadata).
-     - **Creative Agencies, Consumer Products & Studios**: *Warm Organic Studio* (Humanist sans, terracotta/stone palette).
-     - **Fintech, Healthcare & Data Platforms**: *Precision Slate & Amber* with structured data tables.
-
-3. **Universal Anti-Slop Guardrails (Enforced across ALL Domains)**:
-   - ❌ **No 4-Box Metric Strips**: Never line up 3–4 identical stat boxes. Embed numbers inline within real narrative context or asymmetric telemetry rails.
-   - ❌ **No Hashtag & Pill Badge Clouds**: Never dump tags (`#React #Nextjs`). Group capabilities into structured domain layers (*01. Core Engine / 02. Infrastructure / 03. Client Layer*).
-   - ❌ **No Fake macOS Terminal Windows with 🔴 🟡 🟢 Dots**: Never use decorative fake terminal boxes. Use real interactive artifacts (system node diagrams, live interactive playgrounds, or clean typography).
-   - ❌ **No Checkmark Bullet Lists (`✓`)**: Never generate cards filled with 3–4 checkmark bullet clones. Write structured architectural case narratives.
-   - ❌ **No Card-in-a-Card Syndrome**: Never nest dark rounded cards inside other dark rounded cards with glowing borders. Use subtle 1px dividers or surface tier shifts.
-   - ❌ **No Monoculture Palettes**: Reject generic glowing `#10B981` / `#00F0FF` text on flat black. Build with calibrated semantic HSL design tokens.
-   - ❌ **No Cliché Copywriting**: Banned: *"Unlock next-gen AI"*, *"Seamlessly innovate"*, *"Available for work"*. State the exact technical value proposition.
+```
+🛡️ IMPECCABLE 64-PATTERN ANTI-AI CHECKLIST
+├── 1. VISUAL DETAILS (8 Rules)
+│   ├── ❌ 1. Decorative Grid-Line Background: No faint graph-paper grid lines (bg-grid) covering the page. Use solid surface tiers.
+│   ├── ❌ 2. Border Accent on Rounded Element: No thick colored border clashing with rounded corners.
+│   ├── ❌ 3. Glassmorphism Everywhere: No muddy backdrop-blur glass cards as decorative crutches.
+│   ├── ❌ 4. Side-Tab Accent Border: No thick colored stripe on one side of a card.
+│   ├── ❌ 5. Hairline Border with Wide Shadow: Never pair 1px border with wide diffuse shadow.
+│   ├── ❌ 6. Repeating-Gradient Stripes: No diagonal gradient stripes for surface decoration.
+│   ├── ❌ 7. Extreme Border-Radius (>24px): Small cards top out at 8–14px; reserve full-pill for buttons only.
+│   └── ❌ 8. Amateurish Hand-Drawn SVG: No hand-coded clip-art scene doodles or cartoon mascots.
+│
+├── 2. TYPOGRAPHY (11 Rules)
+│   ├── ❌ 9. Kicker / Eyebrow Label Above Headings: No tracked uppercase pill/label (✨ INTRODUCING) above headlines.
+│   ├── ❌ 10. Undersized Functional Text (<11px): Keep all functional text, labels, and table cells >= 12px.
+│   ├── ❌ 11. Flat Type Hierarchy (< 1.25x Ratio): Use dramatic modular scale (>= 1.33x or 1.414x) with clamp().
+│   ├── ❌ 12. Icon Tile Stacked Above Heading: No small rounded-square icon floating centered above every feature card.
+│   ├── ❌ 13. Italic Serif Startup Reflex: Don't default to oversized italic serif as an automatic landing page reflex.
+│   ├── ❌ 14. Hero Eyebrow Pill Chip: No floating pill badges (• Location: Cavite, Open to Engagements) in hero.
+│   ├── ❌ 15. Oversized 15-Word Headline: Tighten headlines to punchy 2–6 word value propositions.
+│   ├── ❌ 16. Crushed Letter-Spacing: Never use destructive tracking-tighter that character-collides.
+│   ├── ❌ 17. Overused Font Monoculture: Do not default to un-styled Inter for everything. Pair a distinctive display face with a readable body face.
+│   ├── ❌ 18. Single Font for Everything: Pair display headings with a monospace face for specs and code.
+│   └── ❌ 19. All-Caps Body Text: Never set running body sentences in uppercase.
+│
+├── 3. COLOR & CONTRAST (7 Rules)
+│   ├── ❌ 20. Radial-Gradient Background Halo: No fuzzy purple/cyan gradient blobs floating in hero center.
+│   ├── ❌ 21. Decorative Radial Spotlight Glow: Light compositions with physical surface tiers, not decorative hazes.
+│   ├── ❌ 22. AI Color Palette (Purple & Cyan-on-Black): Reject generic #10B981 / #00F0FF neon glow on flat black.
+│   ├── ❌ 23. Dark Mode with Colored Box-Shadows: Use subtle 1px borders and natural ambient lighting.
+│   ├── ❌ 24. Gradient Text on Headings/Metrics: Use solid high-contrast text (#FFFFFF, #0F172A).
+│   ├── ❌ 25. Gray Text on Colored Background: Never wash out light gray text over saturated containers.
+│   └── ❌ 26. Cream / Beige Reflex: Choose intentional, domain-grounded palettes, not safe cream defaults.
+│
+├── 4. LAYOUT & SPACE (12 Rules)
+│   ├── ❌ 27. Hero Metric Layout (4-Box Stat Strip): Never place 4 identical metric boxes (486h | 4+ | 3+ | 8+) across hero.
+│   ├── ❌ 28. Identical Card Grids: Never repeat identical tall cards across sections. Use Asymmetric Bento flow.
+│   ├── ❌ 29. Monotonous Spacing: Use tight groupings for related items (gap-2) and generous section padding (py-24).
+│   ├── ❌ 30. Nested Cards (Cardocalypse): Never put cards inside cards with identical borders and shadows.
+│   ├── ❌ 31. Tiny Numbered Section Labels: Let natural typography hierarchy sequence the page.
+│   ├── ❌ 32. Hashtag Pill Clouds: Never dump clouds of tags (#React #Nextjs). Group into architectural layers.
+│   ├── ❌ 33. Line Length Too Long (>80ch): Constrain running text containers with max-w-[65ch].
+│   ├── ❌ 34. Content Overflowing Container: Always wrap in responsive containers with px-6 mx-auto.
+│   ├── ❌ 35. Positioned Child Clipped by Overflow: Never cut off tooltips and dropdowns with overflow-hidden.
+│   ├── ❌ 36. Cards Flush Against Scroller Edge: Ensure consistent horizontal scroll padding and insets.
+│   ├── ❌ 37. Text Occluded by Overlapping Elements: Keep opaque layers decoupled from readable copy.
+│   └── ❌ 38. Modal Abuse: Complex multi-column workflows deserve dedicated pages or split-views, not cramped modals.
+│
+├── 5. MOTION (6 Rules)
+│   ├── ❌ 39. Decorative Pulsing Status Dot: Never animate pulsing dots on static, non-updating data.
+│   ├── ❌ 40. Decorative Blinking Caret in Hero: Fake typing carets in static copy are banned.
+│   ├── ❌ 41. Auto-Scrolling Infinite Marquee: Let people read at their own pace with clean static grids.
+│   ├── ❌ 42. Bounce / Elastic Easing: Use smooth, high-performance deceleration curves (ease-out).
+│   ├── ❌ 43. Layout Property Animation (width/height): Animate strictly transform and opacity to prevent layout jank.
+│   └── ❌ 44. Image Hover Scale-Up Reflex: Imagery should sit still; use purposeful subtle border brightness transitions.
+│
+├── 6. COPYWRITING (5 Rules)
+│   ├── ❌ 45. Marketing Buzzwords: Banned: streamline, empower, supercharge, world-class, enterprise-grade.
+│   ├── ❌ 46. Em-Dash Overuse (—): No more than 1 em-dash per section. Use periods, colons, or clean specs.
+│   ├── ❌ 47. Aphoristic Cadence: Banned: "Not a feature. A platform." / "Not just fast. Instant."
+│   ├── ❌ 48. Theater Framing Copy: Banned: Dismissing workflows as "growth theater".
+│   └── ❌ 49. Same Text Repeated Inside One Card: Say it once, say it well.
+│
+├── 7. IMAGERY & ASSETS (2 Rules)
+│   ├── ❌ 50. Shape-Assembled SVG Illustrations: No abstract floating geometric shapes pretending to be product art.
+│   └── ❌ 51. Broken / Missing Image Tags: Never ship img tags with empty or placeholder src.
+│
+└── 8. GENERAL QUALITY & ACCESSIBILITY (10 Rules)
+    ├── ❌ 52. Uncaught Script Errors: Zero null reference runtime errors.
+    ├── ❌ 53. Content Invisible at Rest: Never leave sections stuck at opacity: 0 due to failed scroll listeners.
+    ├── ❌ 54. Cramped Padding: Keep at least 12–16px padding inside containers.
+    ├── ❌ 55. Body Text Touching Viewport Edge: Ensure mobile container gutters (px-4 to px-6).
+    ├── ❌ 56. Justified Text on Screens: Use text-align: left to prevent whitespace rivers.
+    ├── ❌ 57. Low Contrast Text (<4.5:1): Verify WCAG AA compliance across all surfaces.
+    ├── ❌ 58. Skipped Heading Levels: Never jump from h1 directly to h3.
+    ├── ❌ 59. Tight Line Height (<1.3x): Use 1.5–1.7 leading on multi-line body text.
+    ├── ❌ 60. Tiny Body Text (<12px): Use 14–16px for body content.
+    ├── ❌ 61. Wide Tracking on Body (>0.05em): Reserve wide tracking strictly for short uppercase labels.
+    ├── ❌ 62. Missing :focus-visible Outline: Ensure full keyboard navigation compliance.
+    ├── ❌ 63. Non-Semantic Interactive Elements: Use real <button> and <a> tags, never un-focusable <div>.
+    └── ❌ 64. Layout Shifts on Load (CLS > 0.05): Set explicit dimensions or aspect ratios on media.
+```
 
 ---
 
-### 🏛️ Dynamic Human-Grade Layout Patterns (For Any Domain)
+## 🏛️ Concrete Human-Grade Component Blueprints (DO THIS, NOT THAT)
 
-- **Hero Sections**: High-impact fluid typography (`clamp(2.5rem, 6vw, 5.5rem)`) with domain-grounded value proposition, asymmetric layout, and direct interactive action links.
-- **Showcase / Feature Sections**: Asymmetric Bento layouts or deep narrative case studies with real architectural decisions, before/after metrics, and interactive previews.
-- **Data & History Sections**: Clean editorial timeline tables, ledgers, or data grids aligned to a typographic grid—never nested dossier boxes or gold ribbon cards.
+### 1. HERO SECTION:
+- ❌ **NEVER GENERATE**: Faint gridlines background + fake macOS `🔴 🟡 🟢` terminal window + 4-box stat row + floating pill chips (`• Location: Cavite`).
+- ✅ **ALWAYS GENERATE**: Solid structured surface tier (`#090A0D`), massive typographic masthead (`clamp(2.5rem, 6vw, 5.5rem)`), concrete value proposition, and clean inline text links (`Flagship Deployments ↓`, `Email Directly →`).
 
+### 2. FLAGSHIP PROJECTS:
+- ❌ **NEVER GENERATE**: 2 identical tall cards side-by-side with 3 green checkmark bullets (`✓`) and pill tag rows.
+- ✅ **ALWAYS GENERATE**: Asymmetric narrative case study (8-column deep dive + 4-column live architecture specs) with real problems, technical decisions, and benchmark latency numbers.
 
+### 3. CAREER & EXPERIENCE:
+- ❌ **NEVER GENERATE**: Cloned cards with `Internship` pill badges and nested `INTERNSHIP DOSSIER` boxes with gold ribbons.
+- ✅ **ALWAYS GENERATE**: Clean editorial timeline table or ledger aligned to a typographic grid with dates, role, company, and engineering impact.
+
+### 4. TECHNICAL CAPABILITIES:
+- ❌ **NEVER GENERATE**: 4 identical cards with fake progress bars and `Expert`/`Advanced` pill badges, or a cloud of `#React #Nextjs` pills.
+- ✅ **ALWAYS GENERATE**: Structured domain architecture matrix grouped into functional layers (*01. GenAI & LPU Triage / 02. Full-Stack Systems / 03. Cloud & Security*).
 
 ---
 
@@ -108,11 +179,5 @@ Whenever you execute ANY `/pixelcrew` command in chat (e.g. `/assemble`, `/bluep
 1. **Emit Telemetry Events**:
    - Write directly to `.pixel-crew/events.jsonl` or run:
      `npx pixelcrew emit --agent <role> --type <type> --message "<action description>"`
-   - Examples:
-     - `npx pixelcrew emit --agent creativeDirector --type tool --message "Reviewing design against 6-dimension Anti-AI rubric"`
-     - `npx pixelcrew emit --agent frontend --type tool --message "Refactoring components with fluid clamp typography and Bento layout"`
-     - `npx pixelcrew emit --agent qa --type tool --message "Running Playwright E2E verification"`
 2. **Real-Time Live Mirroring**:
    - The Floor 42 visual dashboard at `http://localhost:4747` automatically mirrors every tool execution, file edit, and reasoning step to the `#AI-SIDECHAT` feed and animates the corresponding squad workstation sprite.
-
-

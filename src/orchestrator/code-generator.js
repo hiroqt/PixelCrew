@@ -445,16 +445,13 @@ export { PortalHeader as Navbar, PortalHeader as AcademyHeader, PortalHeader as 
   createHeroComponent(spec) {
     return `'use client';
 import React from 'react';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export function Hero() {
   return (
-    <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-2 mb-6">
-        <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono tracking-wider uppercase bg-white/5 border border-white/10 text-neutral-300 rounded-full">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          ${(spec.projectName || spec.domain || 'SYSTEM ARCHITECTURE').toUpperCase()}
-        </span>
+    <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto border-b border-white/10">
+      <div className="text-xs font-mono text-neutral-400 uppercase tracking-widest mb-4">
+        ${(spec.projectName || spec.domain || 'SYSTEM ARCHITECTURE').toUpperCase()}
       </div>
       <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal tracking-tight text-white max-w-4xl leading-[1.08] mb-8">
         ${spec.headline}
@@ -462,6 +459,14 @@ export function Hero() {
       <p className="text-lg md:text-xl text-neutral-400 font-light max-w-2xl leading-relaxed mb-10">
         ${spec.summary}
       </p>
+      <div className="flex items-center gap-6 text-sm font-mono">
+        <a href="#workflow" className="text-white hover:text-neutral-300 underline underline-offset-4 transition-colors">
+          Explore System Overview ↓
+        </a>
+        <a href="#action" className="text-neutral-400 hover:text-white transition-colors">
+          Access Console →
+        </a>
+      </div>
     </section>
   );
 }
