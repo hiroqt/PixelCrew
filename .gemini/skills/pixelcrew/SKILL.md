@@ -65,12 +65,21 @@ PixelCrew delegates tasks across 8 specialized agent personas:
 
 ---
 
-## 🛡️ Anti-AI Design Philosophy
+## 🛡️ Anti-AI Design Philosophy & Anti-Slop Directives
 
-PixelCrew enforces strict visual standards to guarantee human-grade aesthetics:
-- ❌ **Banned**: Purple/blue mesh gradient blobs, repeating uniform 3-card grids, fake AI sparkles, nested cards-in-cards.
-- ❌ **Banned**: Cliché marketing copy (*"Unlock the power of next-gen AI", "Elevate your productivity"*).
-- ✅ **Required**: Intentional asymmetry, Bento topologies, mathematical typography pairings, and grounded technical metrics.
+PixelCrew enforces uncompromising visual standards to guarantee human-grade software craftsmanship:
+
+### ❌ The 10 Strictly Banned AI Slop Tropes:
+1. ❌ **Monotonous 4-Column Metric Rows**: Never put 3 or 4 isolated stat cards (`486+ Hours`, `4+ Platforms`, `3+ Credentials`, `100% Ownership`) across the bottom. Embed metrics inline within case studies, timeline milestones, or asymmetric telemetry rails.
+2. ❌ **Hashtag & Pill Badge Spam**: Never output a cloud of 6+ rounded tags (`#React #Nextjs #Tailwind #Groq #Vue`). Group capabilities into structured architectural layers (*01. GenAI / 02. Full-Stack / 03. Cloud*).
+3. ❌ **Card-in-a-Card Syndrome**: Never nest smaller rounded dark boxes inside larger rounded dark boxes with glowing cyan borders. Use subtle 1px divider lines, surface tier shifts, or tabular lists.
+4. ❌ **Predictable 2-Column Split Hero**: Avoid "Headline on left, dark box on right, 4 stats on bottom". Use an **Asymmetric Bento Grid** (`8-col` flagship case study + `4-col` live capabilities rail) or full-width editorial hero.
+5. ❌ **Cyan-on-Black Monoculture**: Never default to glowing `#00f0ff` text and cyan buttons on flat `#0a0a0c`. Pick an authentic archetype (*Swiss Technical*, *Editorial High-Contrast*, *Kinetic Command*, *Warm Studio*).
+6. ❌ **Cliché AI Copywriting**: Banned: *"Unlock next-gen AI"*, *"Seamlessly innovate"*, *"Available for work"*. Lead with concrete engineering thesis and flagship architectural outcomes.
+7. ❌ **Fake AI Sparkles & Emojis**: Banned: Floating `✨`, `🪄`, `🚀` on section headings. Use clean semantic `<h1>`/`<h2>` typography hierarchy.
+8. ❌ **Monotonous 16px Rounded Cards**: Never repeat identical rounded rectangles across every section. Vary visual rhythm between expansive display breaks, dense specs, and interactive widgets.
+9. ❌ **Fake Dashboard Screenshots with Pastel Bars**: Use real interactive UI state, live terminal shells, or functional filter matrices.
+10. ❌ **Meaningless Floating Icons**: No random icons atop every paragraph. Use purposeful visuals or clean icon-free typography.
 
 ---
 
@@ -82,8 +91,9 @@ Whenever you execute ANY `/pixelcrew` command in chat (e.g. `/assemble`, `/bluep
      `npx pixelcrew emit --agent <role> --type <type> --message "<action description>"`
    - Examples:
      - `npx pixelcrew emit --agent creativeDirector --type tool --message "Reviewing design against 6-dimension Anti-AI rubric"`
-     - `npx pixelcrew emit --agent frontend --type tool --message "Refactoring components with fluid clamp typography"`
+     - `npx pixelcrew emit --agent frontend --type tool --message "Refactoring components with fluid clamp typography and Bento layout"`
      - `npx pixelcrew emit --agent qa --type tool --message "Running Playwright E2E verification"`
 2. **Real-Time Live Mirroring**:
    - The Floor 42 visual dashboard at `http://localhost:4747` automatically mirrors every tool execution, file edit, and reasoning step to the `#AI-SIDECHAT` feed and animates the corresponding squad workstation sprite.
+
 
