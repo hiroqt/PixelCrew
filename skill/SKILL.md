@@ -65,38 +65,39 @@ PixelCrew delegates tasks across 8 specialized agent personas:
 
 ---
 
-## 🛡️ Anti-AI Design Philosophy & Anti-Slop Directives
+## 🛡️ Anti-AI Design Philosophy & Dynamic Domain Synthesis
 
-### ⚡ AUTOMATIC ZERO-PROMPT ANTI-SLOP POLICY (Applies to ALL Prompts)
-Even if the user's prompt is simple or generic (e.g. `"/pixelcrew create me a portfolio for this PDF"`, `"build a landing page"`, `"create a dashboard"`), you MUST AUTOMATICALLY apply human-grade craftsmanship and enforce these rules without requiring the user to specify design details:
+### ⚡ DYNAMIC ZERO-PROMPT ANTI-SLOP ENGINE (Adapts to Any User Prompt & Content)
 
-### ❌ The 10 Strictly Banned AI Slop Tropes:
-1. ❌ **Monotonous 4-Column Metric Rows**: Never put 3 or 4 isolated stat cards (`486+ Hours`, `4+ Platforms`, `3+ Credentials`, `100% Delivery`) across the bottom of a hero or section. Embed metrics inline within case studies, timeline milestones, or asymmetric telemetry rails.
-2. ❌ **Hashtag & Pill Badge Spam**: Never output clouds of rounded tags (`#React #Nextjs #Tailwind #Groq #Vue`) or pill eyebrows (`• Location: Cavite, PH`, `Open to Work`). Group capabilities into structured architectural layers (*01. GenAI / 02. Full-Stack / 03. Cloud*).
-3. ❌ **Fake macOS Windows with 🔴 🟡 🟢 Dots**: Never put a fake terminal window with red/yellow/green macOS dots on the right side of a hero just to fill space. Use real interactive artifacts (system node diagrams, live interactive code tabs, or clean typography).
-4. ❌ **Checkmark Bullet Lists (`✓`) on Projects**: Never generate cards filled with 3–4 generic bullet points starting with green checkmark icons. Write real engineering case narratives with problems, architecture decisions, and measured outcomes.
-5. ❌ **Card-in-a-Card Syndrome**: Never nest smaller rounded dark boxes inside larger rounded dark boxes with glowing borders or side-tab stripes. Use subtle 1px divider lines, surface tier shifts, or tabular lists.
-6. ❌ **Predictable 2-Column Split Hero**: Avoid "Headline on left, dark fake-window box on right, 4 stats on bottom". Use an **Asymmetric Bento Grid** (`8-col` flagship case study + `4-col` live capabilities rail) or full-width editorial hero.
-7. ❌ **Cyan/Emerald Neon on Flat Black Monoculture**: Never default to glowing `#10B981` / `#00F0FF` text and green pill buttons on flat `#0a0a0c`. Pick an authentic palette (*Swiss Technical*, *Editorial High-Contrast*, *Kinetic Command*, *Warm Studio*).
-8. ❌ **Cliché AI Copywriting**: Banned: *"Unlock next-gen AI"*, *"Seamlessly innovate"*, *"Available for work"*. Lead with concrete engineering thesis and flagship architectural outcomes.
-9. ❌ **Monotonous 16px Rounded Cards**: Never repeat identical rounded rectangles across every section. Vary visual rhythm between expansive display breaks, dense specs, and interactive widgets.
-10. ❌ **Meaningless Floating Icons & Fake Carets**: No random icons atop every paragraph, no fake blinking carets on static text. Use purposeful visuals or clean icon-free typography.
+When processing ANY user prompt or attached reference (PDF resume, API schema, product brief, or creative concept):
+1. **Dynamic Semantic Extraction**:
+   - Extract the real nouns, domain entities, operational workflows, and verified technical outcomes directly from the user's input/documents.
+   - Never inject hardcoded placeholder copy or generic marketing templates. Ground every heading, label, and spec in the user's actual domain.
+
+2. **Domain-Adaptive Archetype Mapping**:
+   - Dynamically select the optimal visual personality for the specific domain:
+     - **Developer Tools, Infrastructure, AI & Systems**: *Swiss International Technical* or *Kinetic Command Center*.
+     - **Executive Portfolios, Thought Leadership & Architecture**: *Editorial High-Contrast* (Serif display + geometric metadata).
+     - **Creative Agencies, Consumer Products & Studios**: *Warm Organic Studio* (Humanist sans, terracotta/stone palette).
+     - **Fintech, Healthcare & Data Platforms**: *Precision Slate & Amber* with structured data tables.
+
+3. **Universal Anti-Slop Guardrails (Enforced across ALL Domains)**:
+   - ❌ **No 4-Box Metric Strips**: Never line up 3–4 identical stat boxes. Embed numbers inline within real narrative context or asymmetric telemetry rails.
+   - ❌ **No Hashtag & Pill Badge Clouds**: Never dump tags (`#React #Nextjs`). Group capabilities into structured domain layers (*01. Core Engine / 02. Infrastructure / 03. Client Layer*).
+   - ❌ **No Fake macOS Terminal Windows with 🔴 🟡 🟢 Dots**: Never use decorative fake terminal boxes. Use real interactive artifacts (system node diagrams, live interactive playgrounds, or clean typography).
+   - ❌ **No Checkmark Bullet Lists (`✓`)**: Never generate cards filled with 3–4 checkmark bullet clones. Write structured architectural case narratives.
+   - ❌ **No Card-in-a-Card Syndrome**: Never nest dark rounded cards inside other dark rounded cards with glowing borders. Use subtle 1px dividers or surface tier shifts.
+   - ❌ **No Monoculture Palettes**: Reject generic glowing `#10B981` / `#00F0FF` text on flat black. Build with calibrated semantic HSL design tokens.
+   - ❌ **No Cliché Copywriting**: Banned: *"Unlock next-gen AI"*, *"Seamlessly innovate"*, *"Available for work"*. State the exact technical value proposition.
 
 ---
 
-### 🏛️ Mandatory Human-Grade Component Layouts
+### 🏛️ Dynamic Human-Grade Layout Patterns (For Any Domain)
 
-#### 1. Hero Section:
-- Massive, high-impact display typography (`clamp(2.5rem, 6vw, 5.5rem)`) with high contrast.
-- Asymmetric layout with zero fake macOS windows, zero pill clouds, and zero 4-box stat rows.
-- Clean text actions (`View Case Studies ↓`, `Email`, `GitHub`) with subtle hover transitions.
+- **Hero Sections**: High-impact fluid typography (`clamp(2.5rem, 6vw, 5.5rem)`) with domain-grounded value proposition, asymmetric layout, and direct interactive action links.
+- **Showcase / Feature Sections**: Asymmetric Bento layouts or deep narrative case studies with real architectural decisions, before/after metrics, and interactive previews.
+- **Data & History Sections**: Clean editorial timeline tables, ledgers, or data grids aligned to a typographic grid—never nested dossier boxes or gold ribbon cards.
 
-#### 2. Flagship Projects Section:
-- **Asymmetric Narrative Showcase**: One full-width flagship case study with deep architectural breakdown, before/after metrics, and interactive preview + staggered secondary projects.
-- Real architectural diagrams, interactive code/tab viewers, or horizontal project rows with hover reveal drawers. Zero checkmark bullet clones.
-
-#### 3. Career & Experience Section:
-- Clean editorial timeline table or ledger with dates, role, company, and concrete engineering contributions aligned to a typographic grid. Zero nested "INTERNSHIP DOSSIER" cards or gold badge boxes.
 
 
 ---

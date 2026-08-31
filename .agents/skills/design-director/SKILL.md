@@ -3,35 +3,44 @@ name: design-director
 description: Lead Creative Direction and Aesthetic Strategy skill for Pixel Crew. Defines the authentic visual personality, architectural concept, typography strategy, asymmetric layout rules, and strict anti-AI constraints before any code is generated. Answers "What should this website actually feel like?"
 ---
 
-# 🎨 Design Director & Aesthetic Strategy Skill
+# 🎨 Design Director & Dynamic Aesthetic Strategy Skill
 
-The **Design Director** is the creative soul of Pixel Crew. Its primary directive is to **strictly decouple visual and architectural strategy from code generation** and eliminate generic "AI Slop".
+The **Design Director** is the creative soul of Pixel Crew. Its primary directive is to **dynamically extract the soul of the user's prompt or reference content** and formulate a bespoke visual personality rather than generating generic "AI Slop".
 
 ---
 
-## 1. The 4 Authentic Visual Archetypes (Choose 1 for Every Project)
+## 1. Dynamic Extraction from User Prompts & Reference Materials
 
-Every project synthesized by Pixel Crew must commit to one explicit visual archetype rather than defaulting to generic "cyberpunk cyan on black":
+Whenever the user provides any prompt, document, or uploaded PDF:
+1. **Analyze True Domain Context**:
+   - Extract real project names, concrete systems built, measurable KPIs, and specific operational responsibilities.
+   - Never replace the user's specific context with generic marketing placeholders.
+2. **Commit to a Grounded Visual Archetype**:
+   - Match the domain directly to one of the 4 authentic archetypes below.
 
-### 🏛️ Archetype 1: Swiss International Technical (Precision & System Architecture)
+---
+
+## 2. The 4 Authentic Visual Archetypes (Dynamically Selected by Domain)
+
+### 🏛️ Archetype 1: Swiss International Technical (Developer Platforms, AI & Cloud Infrastructure)
 - **Vibe**: Clean, authoritative, dense, engineered, highly readable.
 - **Typography**: Neo-Grotesque Display (*Space Grotesk* or *Plus Jakarta Sans*) + *JetBrains Mono* for tabular specs.
 - **Color Palette**: Deep Zinc Base (`#090A0D`), Subtle Border Grid (`rgba(255,255,255,0.08)`), High-Contrast White, Signal Cobalt or Amber accents ($\le 8\%$).
 - **Hero Topology**: Large asymmetric editorial typography with live interactive system pipeline diagram or interactive terminal.
 
-### 📰 Archetype 2: Editorial High-Contrast (Executive & Thought Leadership)
+### 📰 Archetype 2: Editorial High-Contrast (Executive Leadership, Portfolios & Architecture)
 - **Vibe**: Sophisticated, bespoke, editorial, timeless, premium.
 - **Typography**: High-Contrast Display Serif (*Instrument Serif*, *Playfair Display*, or *Fraunces*) + Crisp Geometric Sans (*Inter* / *DM Sans*).
 - **Color Palette**: Warm Obsidian (`#0A0A0B`) or Warm Alabaster (`#FBFBFA`), Stone/Oatmeal elevated surfaces, crisp ink borders.
-- **Hero Topology**: Massive headline with inline typography shifts (e.g. italicized key phrases), structured milestone timeline ribbon, and full-bleed case study showcase.
+- **Hero Topology**: Massive headline with inline typography shifts, structured milestone timeline ribbon, and full-bleed case study showcase.
 
-### ⚡ Archetype 3: Kinetic Command Center (Developer Platform & High-Throughput SaaS)
+### ⚡ Archetype 3: Kinetic Command Center (High-Throughput SaaS, Observability & Analytics)
 - **Vibe**: High-octane, observable, data-dense, dark mode telemetry.
 - **Typography**: Monospace Primary (*JetBrains Mono* or *Fira Code*) + Technical Sans.
 - **Color Palette**: Pitch Black (`#050507`), Muted Slate Surfaces (`#101216`), Emerald (`#10B981`) and Amber (`#F59E0B`) telemetry LEDs.
 - **Hero Topology**: Live interactive ASCII / Canvas architecture visualizer on left, live telemetry event stream on right.
 
-### 🌿 Archetype 4: Warm Organic Studio (Design Studio & Consumer Product)
+### 🌿 Archetype 4: Warm Organic Studio (Design Agencies, Craft Studios & Consumer Products)
 - **Vibe**: Tactile, human, warm, crafted, approachable.
 - **Typography**: Humanist Sans (*Outfit* or *Cabinet Grotesk*) + Editorial Accents.
 - **Color Palette**: Charcoal & Terracotta / Ochre, soft paper backgrounds, warm gradient illumination.
@@ -39,7 +48,7 @@ Every project synthesized by Pixel Crew must commit to one explicit visual arche
 
 ---
 
-## 2. Strict Layout & Composition Rules
+## 3. Strict Layout & Composition Rules
 
 1. **🚫 Absolute Ban on 4-Box Metric Strips**:
    - Never place a row of 3 or 4 identical metric cards across the bottom of a hero or section.
@@ -47,45 +56,16 @@ Every project synthesized by Pixel Crew must commit to one explicit visual arche
 
 2. **🚫 Absolute Ban on Hashtag Pill Clouds**:
    - Never dump a list of tech tags as rounded pills (`#React #Nextjs #Tailwind #Groq`).
-   - Group tech stacks into clear architectural layers: *01. GenAI & Triage*, *02. Full-Stack Systems*, *03. Cloud & Security*.
+   - Group tech stacks into clear architectural layers: *01. Core Architecture*, *02. Infrastructure & Data*, *03. Client Systems*.
 
-3. **🚫 Absolute Ban on Nested "Card-in-Card" Containers**:
+3. **🚫 Absolute Ban on Fake macOS Terminal Windows in Hero**:
+   - Never put a fake terminal window with red/yellow/green macOS dots on the right side of a hero just to fill space.
+   - Use real interactive artifacts (system node diagrams, live interactive code tabs, or clean typography).
+
+4. **🚫 Absolute Ban on Nested "Card-in-Card" Containers**:
    - Never put a rounded dark card inside another rounded dark card with glowing borders.
    - Use clean 1px divider lines, subtle surface tier shifts (`#0D0F12` $\to$ `#14171E`), or tabular layouts.
 
-4. **✅ Mandatory Asymmetric Bento Grid Flow**:
+5. **✅ Mandatory Asymmetric Bento Grid Flow**:
    - Use dynamic column spans (e.g. `col-span-8` + `col-span-4`, or `col-span-7` + `col-span-5`).
    - Alternate visual density: High-density technical specs next to an airy typographic case study.
-
----
-
-## 3. Creative Direction Blueprint (Output Before Writing Code)
-
-Before writing any frontend code, the AI agent must formulate the creative strategy:
-
-```json
-{
-  "selected_archetype": "Swiss International Technical",
-  "mood_and_tone": "Authoritative, engineered, high-throughput, architectural",
-  "typography": {
-    "display": "Space Grotesk (clamp(2.5rem, 5vw, 4.5rem))",
-    "body": "Inter (text-sm, text-zinc-400)",
-    "metadata": "JetBrains Mono (text-xs tracking-wider uppercase)"
-  },
-  "palette": {
-    "background": "#090A0D",
-    "surface": "#101218",
-    "border": "rgba(255, 255, 255, 0.08)",
-    "accent_primary": "#F59E0B",
-    "accent_secondary": "#10B981"
-  },
-  "layout_rhythm": "Asymmetric Bento hero (8-col flagship case study + 4-col live capabilities matrix)",
-  "banned_tropes_checked": [
-    "No 4-card metric strip",
-    "No hashtag pill clouds",
-    "No card-in-card syndrome",
-    "No cyan-on-black monoculture",
-    "No generic 'Available for work' cliché pills"
-  ]
-}
-```
