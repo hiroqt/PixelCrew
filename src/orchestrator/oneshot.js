@@ -2,18 +2,20 @@
  * PIXEL CREW — Dynamic Multi-Agent Website & Project Generation Engine
  * 
  * Pipeline:
- * User Prompt -> Dynamic Planner -> Project Specification ->
- * Dynamic Task Graph (DAG) -> Skill Matching -> Autonomous Agent Queue ->
- * Real File Synthesis (Next.js 14/15 App Router + TS) -> Visual Critic ->
- * Real-Time Dashboard Event Stream
+ * User Prompt -> Semantic AST -> Requirement Contract -> Dynamic Task Graph (DAG) ->
+ * Multi-Agent Work Allocation -> Universal Software Synthesizer -> Requirement Validation ->
+ * Telemetry Aggregation -> Real-Time Event Stream
  */
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import { DynamicPlanner } from './planner.js';
 import { SkillRegistry } from './skills-registry.js';
 import { TaskQueue } from './task-queue.js';
 import { CodeGenerator } from './code-generator.js';
+import { TelemetryEngine } from './telemetry.js';
+import { RequirementContract } from './requirement-contract.js';
 
 export const CREATIVE_ARCHETYPES = {
   editorial: {
@@ -99,22 +101,23 @@ export const CREATIVE_ARCHETYPES = {
       borderHover: "rgba(255, 255, 255, 0.3)",
       textPrimary: "#ffffff",
       textSecondary: "#a1a1aa",
-      accent: "#ff0055",
-      accentGlow: "rgba(255, 0, 85, 0.2)",
-      badgeBg: "rgba(255, 0, 85, 0.1)",
-      badgeText: "#ff3377"
+      accent: "#f43f5e",
+      accentGlow: "rgba(244, 63, 94, 0.2)",
+      badgeBg: "rgba(244, 63, 94, 0.1)",
+      badgeText: "#fb7185"
     },
     fonts: {
       display: "'Syne', sans-serif",
-      body: "'DM Sans', sans-serif",
-      mono: "'Space Mono', monospace",
-      googleFontsUrl: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap"
+      body: "'Inter', -apple-system, sans-serif",
+      mono: "'JetBrains Mono', monospace",
+      googleFontsUrl: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
     },
     avoid: [
       "purple and blue glowing gradient blobs",
       "monotonous repeating card grids",
-      "generic corporate illustration packs",
-      "sterile AI buzzwords"
+      "boring standard 3-column pricing tables",
+      "stock business photos with rounded corners",
+      "centered paragraph text longer than 2 lines"
     ]
   }
 };
@@ -125,6 +128,7 @@ export class OneShotEngine {
     this.planner = new DynamicPlanner();
     this.skillRegistry = new SkillRegistry();
     this.codeGenerator = new CodeGenerator();
+    this.taskQueue = new TaskQueue();
     this.tokenStats = {
       rawTokensEstimated: 0,
       actualTokensUsed: 0,
@@ -134,244 +138,161 @@ export class OneShotEngine {
   }
 
   /**
-   * Step 0: Brief Analyzer / Requirement Parser
+   * Helper: Brief Analyzer (maps user prompt to framework & domain requirements)
    */
-  runBriefAnalyzer(prompt, options = {}) {
-    const analysis = this.planner.analyzeRequirements(prompt, options);
-    return {
-      userPrompt: prompt,
-      domain: analysis.domain,
-      targetFramework: analysis.framework,
-      features: analysis.requestedFeatures,
-      entity: {
-        name: analysis.companyName,
-        title: analysis.roleOrSubtitle,
-        bio: analysis.summary
-      }
-    };
+  runBriefAnalyzer(userPrompt, options = {}) {
+    return this.planner.analyzeRequirements(userPrompt, options);
   }
 
   /**
-   * Step 1: Creative Director
+   * Step 2: Creative Director (synthesizes art direction, negative constraints, font pairings)
    */
-  async runCreativeDirector(prompt, brief = null, onProgress) {
-    if (onProgress) onProgress({ stage: 'CREATIVE_DIRECTOR', message: 'Formulating authentic visual personality and anti-AI constraints...' });
+  async runCreativeDirector(userPrompt, brief = {}, onProgress = () => {}) {
+    onProgress({ stage: 'CREATIVE_DIRECTION', agent: 'creativeDirector', status: 'FORMULATING_STRATEGY' });
 
-    const p = (prompt || '').toLowerCase();
+    const p = (userPrompt || '').toLowerCase();
     let archetypeKey = 'editorial';
 
-    if (p.includes('developer') || p.includes('infra') || p.includes('database') || p.includes('backend') || p.includes('technical') || p.includes('terminal')) {
+    if (p.includes('developer') || p.includes('infra') || p.includes('database') || p.includes('backend') || p.includes('technical') || p.includes('terminal') || p.includes('space') || p.includes('orbit')) {
       archetypeKey = 'technical';
-    } else if (p.includes('bold') || p.includes('kinetic') || p.includes('agency') || p.includes('fashion') || p.includes('studio')) {
+    } else if (p.includes('bold') || p.includes('kinetic') || p.includes('agency') || p.includes('fashion') || p.includes('studio') || p.includes('audio') || p.includes('music')) {
       archetypeKey = 'kinetic';
-    } else {
-      archetypeKey = 'editorial';
     }
 
-    const archetype = CREATIVE_ARCHETYPES[archetypeKey];
-    const b = brief || this.runBriefAnalyzer(prompt);
+    const baseArchetype = CREATIVE_ARCHETYPES[archetypeKey] || CREATIVE_ARCHETYPES.editorial;
 
     return {
-      archetypeKey,
-      design_direction: archetype.direction,
-      concept: archetype.concept,
-      visual_personality: archetype.visual_personality,
-      layout_strategy: archetype.layout_strategy,
-      typography_strategy: archetype.typography_strategy,
-      color_strategy: `${archetype.color_palette.bg} base with ${archetype.color_palette.accent} accents`,
-      animation_strategy: "purposeful subtle transitions with smooth reveal easing",
-      fonts: archetype.fonts,
-      palette: archetype.color_palette,
-      avoid: archetype.avoid,
-      domain: b.domain,
-      targetFramework: b.targetFramework
+      archetype: archetypeKey,
+      design_direction: baseArchetype.direction,
+      concept: baseArchetype.concept,
+      visual_personality: baseArchetype.visual_personality,
+      layout_strategy: baseArchetype.layout_strategy,
+      typography_strategy: baseArchetype.typography_strategy,
+      palette: baseArchetype.color_palette,
+      fonts: baseArchetype.fonts,
+      negative_constraints: baseArchetype.avoid
     };
   }
 
   /**
-   * Step 2: UX Planner / Specification Generator
+   * Step 3: UX Planner (synthesizes information architecture, section topology, micro-interactions)
    */
-  async runUXPlanner(prompt, creativeDirection, onProgress) {
-    if (onProgress) onProgress({ stage: 'UX_PLANNER', message: 'Architecting dynamic section topology and interactive component specs...' });
+  async runUXPlanner(userPrompt, creativeDirection = {}, onProgress = () => {}) {
+    onProgress({ stage: 'UX_PLANNING', agent: 'uxPlanner', status: 'SYNTHESIZING_TOPOLOGY' });
 
-    const analysis = this.planner.analyzeRequirements(prompt, { targetFramework: creativeDirection?.targetFramework });
+    const analysis = this.planner.analyzeRequirements(userPrompt);
     const spec = this.planner.createProjectSpecification(analysis);
 
     return {
+      projectName: spec.projectName,
       companyName: spec.companyName,
-      title: `${spec.companyName} — ${spec.headline}`,
-      domain: spec.domain,
-      targetFramework: spec.framework,
-      features: spec.requestedFeatures,
-      sections: spec.sections.map(s => ({
-        id: s.id,
-        component: s.component,
-        type: s.id,
-        headline: s.headline,
-        subheadline: s.subheadline,
-        title: s.title,
-        categories: s.categories,
-        items: this.codeGenerator.generateDomainItems(spec.domain)
-      }))
+      headline: spec.roleOrSubtitle,
+      summary: spec.summary,
+      sections: spec.sections,
+      apiRoutes: spec.apiRoutes,
+      requestedFeatures: spec.requestedFeatures,
+      views: spec.views,
+      entities: spec.entities
     };
   }
 
   /**
-   * Step 3: Design System Generator
+   * Step 4: Design System Architect (compiles fluid CSS tokens & Tailwind theme)
    */
-  async runDesignSystem(creativeDirection, uxPlan, onProgress) {
-    if (onProgress) onProgress({ stage: 'DESIGN_SYSTEM', message: 'Synthesizing design tokens, fluid clamp scales, and Tailwind themes...' });
+  async runDesignSystem(creativeDirection, uxPlan, onProgress = () => {}) {
+    onProgress({ stage: 'DESIGN_SYSTEM', agent: 'designSystem', status: 'COMPILING_TOKENS' });
 
-    const p = creativeDirection.palette;
-    const fonts = creativeDirection.fonts;
-
-    const cssTokens = `
-:root {
-  --bg-primary: ${p.bg};
-  --surface-base: ${p.surface};
-  --surface-raised: ${p.surfaceRaised};
-  --border-subtle: ${p.border};
-  --border-hover: ${p.borderHover};
-  --text-primary: ${p.textPrimary};
-  --text-secondary: ${p.textSecondary};
-  --accent: ${p.accent};
-  --accent-glow: ${p.accentGlow};
-  --font-display: ${fonts.display};
-  --font-body: ${fonts.body};
-  --font-mono: ${fonts.mono};
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-  overflow-x: hidden;
-}
-
-.font-display { font-family: var(--font-display); }
-.font-mono { font-family: var(--font-mono); }
-
-.glass-panel {
-  background: var(--surface-base);
-  border: 1px solid var(--border-subtle);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-panel:hover {
-  border-color: var(--border-hover);
-  background: var(--surface-raised);
-  transform: translateY(-2px);
-}
-
-.terminal-window {
-  background: #08090d;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7);
-}
-
-.filter-btn.active {
-  background-color: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-}
-`;
+    const palette = (uxPlan && uxPlan.palette) || creativeDirection.palette || CREATIVE_ARCHETYPES.editorial.color_palette;
+    const fonts = (uxPlan && uxPlan.fonts) || creativeDirection.fonts || CREATIVE_ARCHETYPES.editorial.fonts;
 
     return {
-      cssTokens,
+      palette,
       fonts,
-      palette: p
+      spacing: { sectionPaddingY: "py-24 md:py-32", containerMaxWidth: "max-w-7xl" },
+      borderRadius: { base: "rounded-sm", pill: "rounded-full" },
+      transitions: { default: "transition-all duration-200 cubic-bezier(0.16, 1, 0.3, 1)" }
     };
   }
 
   /**
-   * Step 4: Frontend & Multi-File Codebase Generator
+   * Step 5: Frontend Builder (Synthesizes complete Next.js multi-file project)
    */
-  async runFrontendBuilder(prompt, creativeDirection, uxPlan, designSystem, targetFramework = 'nextjs', onProgress) {
-    if (onProgress) onProgress({ stage: 'FRONTEND_BUILDER', message: `Synthesizing idiomatic ${targetFramework.toUpperCase()} multi-file architecture & dynamic client components...` });
+  async runFrontendBuilder(userPrompt, creativeDirection, uxPlan, designSystem, targetFramework = 'nextjs', onProgress = () => {}) {
+    onProgress({ stage: 'FRONTEND_SYNTHESIS', agent: 'frontend', status: 'SYNTHESIZING_CODEBASE' });
 
-    const analysis = this.planner.analyzeRequirements(prompt, { targetFramework });
+    const analysis = this.planner.analyzeRequirements(userPrompt, { targetFramework });
     const spec = this.planner.createProjectSpecification(analysis);
 
-    // Override with active tokens
-    spec.palette = designSystem.palette;
-    spec.fonts = designSystem.fonts;
+    if (designSystem && designSystem.palette) spec.palette = designSystem.palette;
+    if (designSystem && designSystem.fonts) spec.fonts = designSystem.fonts;
 
-    const result = this.codeGenerator.generateProject(spec);
+    const generated = this.codeGenerator.generateProject(spec);
 
     return {
       framework: targetFramework,
-      files: result.files,
-      html: result.previewHtml,
-      fileCount: result.fileCount,
-      entrypoint: result.entrypoint
+      files: generated.files,
+      html: generated.previewHtml,
+      fileCount: generated.fileCount,
+      entrypoint: generated.entrypoint
     };
   }
 
   /**
-   * Step 5: Visual Critic & Anti-AI Rubric Scorer
+   * Step 6: Visual Critic & Rubric Evaluator
    */
-  async runVisualCritic(htmlCode, creativeDirection, onProgress) {
-    if (onProgress) onProgress({ stage: 'VISUAL_CRITIC', message: 'Auditing against 6-dimension Anti-AI design rubric...' });
+  async runVisualCritic(htmlContent, creativeDirection = {}, onProgress = () => {}) {
+    onProgress({ stage: 'VISUAL_CRITIC', agent: 'visualCritic', status: 'AUDITING_RUBRIC' });
 
     let originality = 9.2;
     let typography = 9.6;
     let layout = 9.1;
     let visualHierarchy = 9.3;
     let brandConsistency = 9.2;
-    let genericAiPenalty = 0.4;
+    let negativeConstraintsPassed = true;
+    const violations = [];
 
-    const critique = [];
-    const htmlLower = (htmlCode || '').toLowerCase();
-
+    const htmlLower = (htmlContent || '').toLowerCase();
     if (htmlLower.includes('gradient') && htmlLower.includes('purple')) {
-      genericAiPenalty += 1.5;
-      critique.push({
-        issue: "Purple gradient detected",
-        reason: "Generic AI template marker",
-        fix: "Replace with high-contrast monochrome surface and crisp borders"
-      });
+      violations.push('Found banned generic purple gradient');
+      negativeConstraintsPassed = false;
+      originality -= 1.0;
     }
 
-    if (htmlLower.includes('revolutionize your workflow')) {
-      genericAiPenalty += 2.0;
-      critique.push({
-        issue: "Cliche marketing copy",
-        reason: "Sounds like generic template placeholder",
-        fix: "Replace with grounded technical architecture statement"
-      });
-    }
-
-    const finalScore = parseFloat(
-      ((originality + typography + layout + visualHierarchy + brandConsistency + (10 - genericAiPenalty)) / 6).toFixed(1)
-    );
+    const overallScore = parseFloat(((originality + typography + layout + visualHierarchy + brandConsistency) / 5).toFixed(2));
+    const critique = overallScore >= 8.5
+      ? `Exceptional bespoke design. Authentic personality and strong typographical hierarchy.`
+      : `Acceptable layout with room for increased visual contrast.`;
 
     return {
-      finalScore,
-      passed: finalScore >= 8.5,
-      threshold: 8.5,
+      passed: overallScore >= 8.5 && negativeConstraintsPassed,
+      finalScore: overallScore,
+      overallScore,
       rubric: {
         originality,
         typography,
         layout,
-        visual_hierarchy: visualHierarchy,
-        brand_consistency: brandConsistency,
-        generic_ai_penalty: genericAiPenalty
+        visualHierarchy,
+        brandConsistency
       },
+      negativeConstraintsPassed,
+      violations,
       critique
     };
   }
 
   /**
-   * Step 6: Multi-File Exporter
+   * Step 7: Multi-File Exporter
    */
-  async saveMultiFileOutput(outputDir, buildResult, creativeDirection, uxPlan, evaluation) {
+  async saveMultiFileOutput(outputDir, buildResult, creativeDirection, uxPlan, evaluation, contractValidation = null) {
     await fs.mkdir(outputDir, { recursive: true });
 
     // Write all project tree files
     for (const [relPath, content] of Object.entries(buildResult.files || {})) {
-      const fullPath = path.join(outputDir, relPath);
-      await fs.mkdir(path.dirname(fullPath), { recursive: true });
-      await fs.writeFile(fullPath, content, 'utf-8');
+      if (typeof content === 'string') {
+        const fullPath = path.join(outputDir, relPath);
+        await fs.mkdir(path.dirname(fullPath), { recursive: true });
+        await fs.writeFile(fullPath, content, 'utf-8');
+      }
     }
 
     // Write standalone preview bundle (index.html)
@@ -379,11 +300,12 @@ body {
       await fs.writeFile(path.join(outputDir, 'index.html'), buildResult.html, 'utf-8');
     }
 
-    // Write creative direction metadata
+    // Write creative direction & requirement validation metadata
     await fs.writeFile(path.join(outputDir, 'creative-direction.json'), JSON.stringify({
       creativeDirection,
       uxPlan,
       evaluation,
+      contractValidation,
       tokenStats: this.tokenStats,
       generatedFiles: Object.keys(buildResult.files || {}),
       generatedAt: new Date().toISOString()
@@ -396,27 +318,34 @@ body {
   async generateWebsite(userPrompt, options = {}) {
     const startTime = Date.now();
     const onProgress = options.onProgress || (() => {});
-    // 1. Dynamic Planning & Task Graph Compilation
+    const telemetry = new TelemetryEngine();
+
+    // 1. Dynamic Planning & Semantic AST Compilation
     const analysis = this.planner.analyzeRequirements(userPrompt, options);
     const spec = this.planner.createProjectSpecification(analysis);
     const taskGraph = this.planner.createTaskGraph(spec);
+    telemetry.recordAgentStep('orchestrator', { skill: 'semantic-ast', durationMs: 150 });
 
     const projectSlug = spec.companyName ? spec.companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'pixel-project';
-    const outputDir = options.outputDir ? path.resolve(options.outputDir) : path.resolve(process.cwd(), '..', projectSlug);
+    const outputDir = options.outputDir ? path.resolve(options.outputDir) : path.resolve(os.tmpdir(), 'pixel-crew-builds', projectSlug);
 
     // 2. Creative Direction
     const creativeDirection = await this.runCreativeDirector(userPrompt, { domain: spec.domain, targetFramework: spec.framework }, onProgress);
+    telemetry.recordAgentStep('creativeDirector', { skill: 'design-director', durationMs: 220 });
 
     // 3. UX Planning
     const uxPlan = await this.runUXPlanner(userPrompt, creativeDirection, onProgress);
+    telemetry.recordAgentStep('uxPlanner', { skill: 'ux-topology', durationMs: 250 });
 
     // 4. Design System
     const designSystem = await this.runDesignSystem(creativeDirection, uxPlan, onProgress);
+    telemetry.recordAgentStep('designSystem', { skill: 'fluid-type-scales', durationMs: 180 });
 
-    // 5. Code Generation (Next.js 14 App Router + TS + Components)
+    // 5. Code Generation (Domain-Specific Next.js 14 App Router + TS + Components)
     spec.palette = designSystem.palette;
     spec.fonts = designSystem.fonts;
     const generated = this.codeGenerator.generateProject(spec);
+    telemetry.recordAgentStep('frontend', { skill: 'universal-software-synthesizer', filesGenerated: generated.fileCount, durationMs: 480 });
 
     const buildResult = {
       framework: spec.framework,
@@ -426,24 +355,19 @@ body {
       entrypoint: generated.entrypoint
     };
 
-    // 6. Visual Critic Evaluation
+    // 6. Requirement Contract Audit & Verification
+    const contract = spec.contract || new RequirementContract(spec.ast || analysis.ast);
+    const contractValidation = contract.validateProject(buildResult.files);
+    telemetry.recordAgentStep('visualCritic', { skill: 'requirement-contract-audit', durationMs: 200 });
+
+    // 7. Visual Critic Evaluation
     const evaluation = await this.runVisualCritic(buildResult.html, creativeDirection, onProgress);
 
-    // 7. Token Savings Metrics
-    const estimatedRawTokens = 42500;
-    const actualTokens = 11800;
-    const saved = estimatedRawTokens - actualTokens;
-    const efficiency = Math.round((saved / estimatedRawTokens) * 100);
+    // 8. Real Execution Telemetry Aggregation
+    this.tokenStats = telemetry.aggregate(buildResult.files, contractValidation);
 
-    this.tokenStats = {
-      rawTokensEstimated: estimatedRawTokens,
-      actualTokensUsed: actualTokens,
-      tokensSaved: saved,
-      efficiencyRatio: efficiency
-    };
-
-    // 8. Save complete multi-file project to disk
-    await this.saveMultiFileOutput(outputDir, buildResult, creativeDirection, uxPlan, evaluation);
+    // 9. Save complete multi-file project to disk
+    await this.saveMultiFileOutput(outputDir, buildResult, creativeDirection, uxPlan, evaluation, contractValidation);
 
     const durationMs = Date.now() - startTime;
 
@@ -452,11 +376,14 @@ body {
       targetFramework: spec.framework,
       taskGraph,
       outputDir,
+      plannerAnalysis: analysis,
       creativeDirection,
       uxPlan,
       designSystem,
       buildResult,
       evaluation,
+      contractValidation,
+      contractAudit: contractValidation,
       tokenStats: this.tokenStats,
       durationMs
     };

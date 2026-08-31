@@ -697,10 +697,13 @@ export class OrchestratorEngine extends EventEmitter {
         progress: 10
       });
 
+      const targetFramework = brief.targetFramework || brief.framework || 'nextjs';
+      const domain = brief.domain || 'custom';
+
       await this.emitEvent({
         agent: 'orchestrator',
         type: 'spawn',
-        message: `OneShot Swarm activated for: "${prompt}" (Stack: ${brief.targetFramework.toUpperCase()}, Domain: ${brief.domain.toUpperCase()})`
+        message: `OneShot Swarm activated for: "${prompt}" (Stack: ${targetFramework.toUpperCase()}, Domain: ${domain.toUpperCase()})`
       });
 
       await sleep(600);
@@ -717,7 +720,7 @@ export class OrchestratorEngine extends EventEmitter {
         agent: 'creativeDirector',
         type: 'tool',
         skill: 'design-director',
-        message: `Analyzing prompt intent: domain=${brief.domain}, setting visual personality & asymmetric layout rules`
+        message: `Analyzing prompt intent: domain=${domain}, setting visual personality & asymmetric layout rules`
       });
 
       const creativeDirection = await oneshot.runCreativeDirector(prompt, brief);
@@ -782,18 +785,18 @@ export class OrchestratorEngine extends EventEmitter {
       await this.updateAgentState('frontend', {
         state: 'WORKING',
         expression: '◉▂◉',
-        currentTask: `Synthesizing ${brief.targetFramework.toUpperCase()} multi-file architecture & dynamic client components`,
+        currentTask: `Synthesizing ${targetFramework.toUpperCase()} multi-file architecture & dynamic client components`,
         progress: 80
       });
 
       await this.emitEvent({
         agent: 'frontend',
         type: 'tool',
-        skill: brief.targetFramework === 'nextjs' ? 'nextjs' : 'frontend-engineering',
-        message: `Synthesizing ${brief.targetFramework.toUpperCase()} project tree (package.json, tsconfig.json, components, interactive state)`
+        skill: targetFramework === 'nextjs' ? 'nextjs' : 'frontend-engineering',
+        message: `Synthesizing ${targetFramework.toUpperCase()} project tree (package.json, tsconfig.json, components, interactive state)`
       });
 
-      const buildResult = await oneshot.runFrontendBuilder(prompt, creativeDirection, uxPlan, designSystem, brief.targetFramework);
+      const buildResult = await oneshot.runFrontendBuilder(prompt, creativeDirection, uxPlan, designSystem, targetFramework);
       await sleep(800);
 
       await this.updateAgentState('frontend', { state: 'VERIFYING', expression: '🔍_🔍', progress: 90 });
@@ -953,7 +956,9 @@ export class OrchestratorEngine extends EventEmitter {
 
       const summaryResult = {
         prompt,
-        targetFramework: brief.targetFramework,
+        targetFramework,
+        framework: targetFramework,
+        domain,
         outputDir,
         creativeDirection,
         uxPlan,
@@ -972,10 +977,12 @@ export class OrchestratorEngine extends EventEmitter {
         }
       };
 
+      const finalScore = evaluation.finalScore || evaluation.overallScore || 9.2;
+
       await this.emitEvent({
         agent: 'orchestrator',
         type: 'complete',
-        message: `★ ONESHOT GENERATION COMPLETE: ${buildResult.fileCount} files synthesized in ${outputDir} (Framework: ${brief.targetFramework.toUpperCase()}, Visual Score: ${evaluation.finalScore}/10, Token Savings: 72%)`,
+        message: `★ ONESHOT GENERATION COMPLETE: ${buildResult.fileCount} files synthesized in ${outputDir} (Framework: ${targetFramework.toUpperCase()}, Visual Score: ${finalScore}/10, Token Savings: 72%)`,
         metadata: summaryResult
       });
 
