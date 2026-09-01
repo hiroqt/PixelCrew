@@ -23,7 +23,6 @@
     "sync:providers": "node scripts/sync-providers.js",
     "test": "node --test tests/**/*.test.js"
   },
-
   "keywords": [
     "agents",
     "multi-agent",

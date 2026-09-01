@@ -46,6 +46,7 @@ import { AdaptCommand } from './adapt.js';
 import { OptimizeCommand } from './optimize.js';
 import { LiveCommand } from './live.js';
 import { PlanCommand } from './plan.js';
+import { RecapCommand } from './recap.js';
 
 import { BuildCommand } from './build.js';
 import { CrewCommand } from './crew.js';
@@ -108,6 +109,9 @@ export class CommandRegistry {
     this.register(new AddCommand());
     this.register(new SyncCommand());
     this.register(new InstallCommand());
+
+    // 4. Inspection & Recap
+    this.register(new RecapCommand());
   }
 
 
@@ -217,7 +221,7 @@ export class CommandRegistry {
 
   _inferAgentFromCommand(cmdName) {
     const c = (cmdName || '').toLowerCase();
-    if (['assemble', 'craft', 'oneshot', 'init', 'manifest'].includes(c)) return 'orchestrator';
+    if (['assemble', 'craft', 'oneshot', 'init', 'manifest', 'recap'].includes(c)) return 'orchestrator';
     if (['blueprint', 'shape', 'plan'].includes(c)) return 'uxPlanner';
     if (['render', 'critique', 'review'].includes(c)) return 'creativeDirector';
     if (['typeset', 'bento', 'chromatic', 'colorize', 'retrofit'].includes(c)) return 'designSystem';
