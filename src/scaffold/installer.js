@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { SKILL_DEFINITIONS } from '../orchestrator/skills-registry.js';
 import { SKILL_MARKDOWNS } from './templates.js';
 import { getSkillBundle, sanitizeFrontmatter } from './skills-bundle.js';
+import { generateKiroFiles } from './kiro-generator.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 export const PROVIDER_PATHS = {
@@ -455,41 +456,17 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
 
   // 1. Kiro Workflows & Rules
   if (detected.includes('kiro') || activeIDE.id === 'kiro' || provider === 'kiro' || provider === 'all') {
-    const kiroWorkflowContent = `---
-name: pixelcrew
-description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office
----
-
-# PixelCrew Swarm Workflow
-
-When this workflow is active, execute tasks using PixelCrew's 8 specialized personas (Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, QA Automation).
-
-## Commands available:
-- \`/pixelcrew init\` (or \`init\`) — Initialize and adapt PixelCrew to current workspace
-- \`/pixelcrew assemble [prompt]\` — Full shape-then-build multi-agent sprint pipeline from brief to production code
-- \`/pixelcrew blueprint [prompt]\` — Plans UX section topologies, wireframes, and compiles dynamic DAG task graphs
-- \`/pixelcrew boss-fight <issue>\` — Targeted swarm bug blitz to isolate, repair, and verify breaking issues
-- \`/pixelcrew render\` — 6-dimension Anti-AI design & UX review
-- \`/pixelcrew sentinel\` — Security & resilience pass
-- \`/pixelcrew audit\` — SRE and technical quality checks
-- \`/pixelcrew warp\` — Full-stack performance tuning
-- \`/pixelcrew polish\` — Final shipping readiness pass
-`;
-    const kiroRulesContent = `# PixelCrew Swarm Rules for Kiro
-
-You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
-When the user prompts "init", "/init", "/pixelcrew init", or mentions "pixelcrew":
-1. Initialize/adapt workspace context and orchestrate tasks with Creative Director, Frontend, Backend, Security, and QA roles.
-2. Enforce Anti-AI design patterns: intentional asymmetry, mathematical fluid clamp() typography, high-contrast visual hierarchy.
-3. Reject cliché copy (*"Elevate your workflow"*) and uniform 3-card grids.
-`;
-
     if (scope !== 'global') {
-      await safeWriteFile(path.join(targetDir, '.kiro', 'workflows', 'pixelcrew.md'), kiroWorkflowContent, { dryRun, reporter, targetDir });
-      await safeWriteFile(path.join(targetDir, '.kirorules'), kiroRulesContent, { dryRun, reporter, targetDir });
+      const kiroFiles = generateKiroFiles(targetDir, false);
+      for (const kf of kiroFiles) {
+        await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir });
+      }
     }
     if (scope === 'global' || scope === 'both') {
-      await safeWriteFile(path.join(os.homedir(), '.kiro', 'workflows', 'pixelcrew.md'), kiroWorkflowContent, { dryRun, reporter, targetDir: os.homedir() });
+      const kiroGlobalFiles = generateKiroFiles(os.homedir(), true);
+      for (const kf of kiroGlobalFiles) {
+        await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir: os.homedir() });
+      }
     }
   }
 
@@ -499,6 +476,8 @@ When the user prompts "init", "/init", "/pixelcrew init", or mentions "pixelcrew
 
 You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
 Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
+- \`/pixelcrew init\` (or \`init\`) — Initialize workspace
+- \`/pixelcrew recap\` — Session recap and git changelog
 - \`/pixelcrew assemble [prompt]\` — Full-stack multi-agent sprint
 - \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning & wireframes
 - \`/pixelcrew boss-fight <issue>\` — Bug blitz
@@ -512,8 +491,7 @@ Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
   // 3. Synchronize Dashboard Assets if workspace dashboard directory exists
   const srcDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));
   const dashboardTargets = [
-    path.join(targetDir, '.pixel-crew', 'dashboard'),
-    path.join(targetDir, '.pixel-agents', 'dashboard')
+    path.join(targetDir, '.pixel-crew', 'dashboard')
   ];
 
   for (const dashDir of dashboardTargets) {

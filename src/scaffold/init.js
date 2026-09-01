@@ -7,6 +7,7 @@ import { DEFAULT_CONFIG, INITIAL_STATE, AGENT_MARKDOWNS, SKILL_MARKDOWNS } from 
 import { analyzeCodebase, buildAdaptedConfig } from './analyzer.js';
 import { detectActiveIDE, GLOBAL_PROVIDER_PATHS, PROVIDER_PATHS } from './installer.js';
 import { getSkillBundle, getAllCanonicalSkillIds } from './skills-bundle.js';
+import { generateKiroFiles } from './kiro-generator.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 /**
@@ -88,9 +89,7 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     console.log(`  \x1b[90m• Database:\x1b[0m       ${profile.database.join(', ') || 'SQL / Relational'}`);
   }
   const pixelCrewDir = path.join(targetDir, '.pixel-crew');
-  const pixelAgentsDir = path.join(targetDir, '.pixel-agents');
-
-  const targets = [pixelCrewDir, pixelAgentsDir];
+  const targets = [pixelCrewDir];
 
   // 2. Build Context-Adapted Config
   const adaptedConfig = buildAdaptedConfig(profile, options);
@@ -203,45 +202,20 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
       }
     }
 
-    if (activeIDE.id === 'kiro') {
-      const kiroWorkflowContent = `---
-name: pixelcrew
-description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office
----
-
-# PixelCrew Swarm Workflow
-
-Execute tasks with the PixelCrew 8-agent swarm (Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, QA Automation).
-
-## Commands:
-- \`/pixelcrew init\` (or \`init\`) — Initialize and adapt PixelCrew to current workspace
-- \`/pixelcrew assemble [prompt]\` — Full shape-then-build multi-agent sprint pipeline
-- \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning, wireframes & specifications
-- \`/pixelcrew boss-fight <issue>\` — Targeted swarm bug blitz to isolate and repair issues
-- \`/pixelcrew render\` — 6-dimension Anti-AI design & UX review
-- \`/pixelcrew sentinel\` — Security & resilience pass
-- \`/pixelcrew audit\` — SRE and technical quality checks
-- \`/pixelcrew warp\` — Full-stack performance tuning
-- \`/pixelcrew polish\` — Final shipping readiness pass
-`;
-      const kiroRulesContent = `# PixelCrew Swarm Rules for Kiro
-
-You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
-When the user prompts "init", "/init", "/pixelcrew init", or mentions "pixelcrew":
-1. Initialize/adapt workspace context and orchestrate tasks with Creative Director, Frontend, Backend, Security, and QA roles.
-2. Enforce Anti-AI design patterns: intentional asymmetry, mathematical fluid clamp() typography, high-contrast visual hierarchy.
-3. Reject cliché copy (*"Elevate your workflow"*) and uniform 3-card grids.
-`;
-      await safeWriteFile(path.join(targetDir, '.kiro', 'workflows', 'pixelcrew.md'), kiroWorkflowContent, { dryRun, reporter, targetDir });
-      await safeWriteFile(path.join(targetDir, '.kirorules'), kiroRulesContent, { dryRun, reporter, targetDir });
+    if (activeIDE.id === 'kiro' || targetIdes.has('kiro')) {
+      const kiroFiles = generateKiroFiles(targetDir, false);
+      for (const kf of kiroFiles) {
+        await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir });
+      }
     }
 
-    if (activeIDE.id === 'cursor') {
+    if (activeIDE.id === 'cursor' || targetIdes.has('cursor')) {
       const cursorRulesContent = `# PixelCrew Swarm Rules for Cursor
 
 You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
 Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
 - \`/pixelcrew init\` (or \`init\`) — Initialize workspace
+- \`/pixelcrew recap\` — Session recap and git changelog
 - \`/pixelcrew assemble [prompt]\` — Full-stack multi-agent sprint
 - \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning & wireframes
 - \`/pixelcrew boss-fight <issue>\` — Bug blitz
@@ -272,16 +246,10 @@ Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
     }
 
     if (activeIDE.id === 'kiro') {
-      const kiroGlobalWorkflow = `---
-name: pixelcrew
-description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office
----
-
-# PixelCrew Swarm Workflow
-
-Execute tasks with the PixelCrew 8-agent swarm (Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, QA Automation).
-`;
-      await safeWriteFile(path.join(os.homedir(), '.kiro', 'workflows', 'pixelcrew.md'), kiroGlobalWorkflow, { dryRun, reporter, targetDir: os.homedir() });
+      const kiroGlobalFiles = generateKiroFiles(os.homedir(), true);
+      for (const kf of kiroGlobalFiles) {
+        await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir: os.homedir() });
+      }
     }
   }
 
@@ -295,7 +263,6 @@ Execute tasks with the PixelCrew 8-agent swarm (Creative Director, UX Planner, D
       reporter,
       profile,
       pixelCrewDir,
-      pixelAgentsDir,
       dashboardDir: path.join(pixelCrewDir, 'dashboard'),
       activeIDE,
       installScope,
@@ -303,7 +270,7 @@ Execute tasks with the PixelCrew 8-agent swarm (Creative Director, UX Planner, D
     };
   }
 
-  console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/ & .pixel-agents/ config.json (tailored agent roles & permissions)');
+  console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/ config.json (tailored agent roles & permissions)');
   console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/context.json (grounded codebase context)');
   console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/state.json & pixel.json');
   console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/events.jsonl');
@@ -325,14 +292,16 @@ Execute tasks with the PixelCrew 8-agent swarm (Creative Director, UX Planner, D
   console.log('\n\x1b[32m\x1b[1mPixel Crew initialized & adapted successfully!\x1b[0m\n');
   console.log('Ready in IDE Chatbox:');
   console.log('  • Type \x1b[36minit\x1b[0m or \x1b[36m/pixelcrew init\x1b[0m in chat to adapt current workspace');
+  console.log('  • Type \x1b[36m/recap\x1b[0m in chat to get a token-optimized session changelog');
   console.log('  • Type \x1b[36m/pixelcrew assemble "..."\x1b[0m to run full-stack multi-agent sprint');
   console.log('\nCLI Commands:');
   console.log('  \x1b[36mnpx pixelcrew start\x1b[0m           Launch orchestration server & visual dashboard');
   console.log('  \x1b[36mnpx pixelcrew task "..."\x1b[0m    Dispatch goal or full-stack task to agents');
+  console.log('  \x1b[36mnpx pixelcrew recap\x1b[0m          Generate git activity and session recap');
   console.log('  \x1b[36mnpx pixelcrew doctor\x1b[0m          Check available coding agent providers');
   console.log('  \x1b[36mnpx pixelcrew demo\x1b[0m            Run interactive multi-agent visual demo\n');
 
-  return { pixelCrewDir, pixelAgentsDir, dashboardDir: path.join(pixelCrewDir, 'dashboard'), profile, gitignore: gitignoreResult };
+  return { pixelCrewDir, dashboardDir: path.join(pixelCrewDir, 'dashboard'), profile, gitignore: gitignoreResult };
 }
 
 /**

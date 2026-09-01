@@ -92,21 +92,26 @@ function openBrowser(url) {
 }
 
 async function resolveDaemonUrl(rootDir) {
-  // 1. Check .pixel-agents/daemon.json
-  const daemonPath = path.join(rootDir, '.pixel-agents', 'daemon.json');
-  try {
-    const raw = await fs.readFile(daemonPath, 'utf-8');
-    const info = JSON.parse(raw);
-    if (info?.url) {
-      const res = await fetch(`${info.url}/api/info`, { signal: AbortSignal.timeout(600) });
-      if (res.ok) {
-        const serverInfo = await res.json();
-        if (!serverInfo.rootDir || serverInfo.rootDir === rootDir) {
-          return info.url;
+  // 1. Check .pixel-crew/daemon.json or .pixel-agents/daemon.json
+  const daemonPaths = [
+    path.join(rootDir, '.pixel-crew', 'daemon.json'),
+    path.join(rootDir, '.pixel-agents', 'daemon.json')
+  ];
+  for (const daemonPath of daemonPaths) {
+    try {
+      const raw = await fs.readFile(daemonPath, 'utf-8');
+      const info = JSON.parse(raw);
+      if (info?.url) {
+        const res = await fetch(`${info.url}/api/info`, { signal: AbortSignal.timeout(600) });
+        if (res.ok) {
+          const serverInfo = await res.json();
+          if (!serverInfo.rootDir || serverInfo.rootDir === rootDir) {
+            return info.url;
+          }
         }
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
   // 2. Scan fallback ports 4747..4755 and verify rootDir
   for (let port = 4747; port <= 4755; port++) {
@@ -227,11 +232,21 @@ async function main() {
     case 'dev':
     case 'dashboard':
     case 'demo': {
-      // Check if project is initialized
-      const configPath = path.join(rootDir, '.pixel-agents', 'config.json');
-      try {
-        await fs.access(configPath);
-      } catch {
+      // Check if project is initialized (.pixel-crew or .pixel-agents)
+      const configPaths = [
+        path.join(rootDir, '.pixel-crew', 'config.json'),
+        path.join(rootDir, '.pixel-agents', 'config.json')
+      ];
+      let initialized = false;
+      for (const cp of configPaths) {
+        try {
+          await fs.access(cp);
+          initialized = true;
+          break;
+        } catch {}
+      }
+
+      if (!initialized) {
         console.log('\x1b[33mProject not initialized yet. Running automatic init...\x1b[0m');
         await initializeProject(rootDir, { yes: true });
       }
@@ -246,8 +261,8 @@ async function main() {
         const boundPort = await startServerWithPortFallback(server, requestedPort);
         const url = `http://localhost:${boundPort}`;
 
-        // Persist daemon discovery file
-        const daemonPath = path.join(rootDir, '.pixel-agents', 'daemon.json');
+        // Persist daemon discovery file in active directory (.pixel-crew)
+        const daemonPath = path.join(engine.activeDir || path.join(rootDir, '.pixel-crew'), 'daemon.json');
         try {
           await fs.writeFile(daemonPath, JSON.stringify({
             port: boundPort,
@@ -396,7 +411,7 @@ async function main() {
       const engine = new OrchestratorEngine(rootDir);
       await engine.initialize();
       await engine.emitEvent(eventData);
-      console.log(`\x1b[32m✓ Event recorded to .pixel-agents/events.jsonl:\x1b[0m ${eventData.agent} → ${eventData.message}`);
+      console.log(`\x1b[32m✓ Event recorded to .pixel-crew/events.jsonl:\x1b[0m ${eventData.agent} → ${eventData.message}`);
       break;
     }
 

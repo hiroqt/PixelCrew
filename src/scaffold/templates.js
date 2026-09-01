@@ -35,7 +35,7 @@ export const DEFAULT_CONFIG = {
       skills: ["design-director", "anti-ai-patterns", "typography-strategy"],
       permissions: {
         read: ["**/*"],
-        write: ["design/**", "specs/**", ".pixel-agents/design/**"]
+        write: ["design/**", "specs/**", ".pixel-crew/design/**"]
       }
     },
     uxPlanner: {
@@ -74,7 +74,7 @@ export const DEFAULT_CONFIG = {
       skills: ["anti-ai-patterns", "visual-rubric-scoring", "design-review"],
       permissions: {
         read: ["**/*"],
-        write: ["reports/**", ".pixel-agents/reports/**"]
+        write: ["reports/**", ".pixel-crew/reports/**"]
       }
     },
     backend: {
@@ -381,7 +381,7 @@ export const SKILL_MARKDOWNS = {
   "codebase-intelligence.md": `# Codebase Intelligence & Context Adaptation Skill
 
 ## Directives
-1. **Analyze First**: Inspect \`.pixel-agents/context.json\` and repository AST to understand existing dependencies, directory structure, and coding patterns.
+1. **Analyze First**: Inspect \`.pixel-crew/context.json\` and repository AST to understand existing dependencies, directory structure, and coding patterns.
 2. **Context-Aware Code Generation**: Adhere to existing naming conventions, TypeScript configs, ESLint rules, and import paths (e.g. \`@/components\` vs \`../components\`).
 3. **Cross-Agent Knowledge Sharing**: Share API schemas, database models, and route contracts across Frontend, Backend, and QA subagents.
 `,

@@ -13,7 +13,7 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
     engine = maybeEngine;
   }
 
-  const dashboardDir = path.join(rootDir, '.pixel-agents', 'dashboard');
+  const dashboardDir = path.join(rootDir, '.pixel-crew', 'dashboard');
   const legacyDashboardDir = path.join(rootDir, '.pixel-dashboard');
   const fallbackDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));
 

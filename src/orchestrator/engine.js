@@ -45,7 +45,7 @@ export class OrchestratorEngine extends EventEmitter {
 
     this.pixelCrewDir = path.join(rootDir, '.pixel-crew');
     this.pixelAgentsDir = path.join(rootDir, '.pixel-agents');
-    this.activeDir = this.pixelAgentsDir;
+    this.activeDir = this.pixelCrewDir;
 
     this.configPath = path.join(this.activeDir, 'config.json');
     this.statePath = path.join(this.activeDir, 'state.json');
@@ -72,7 +72,7 @@ export class OrchestratorEngine extends EventEmitter {
         await fs.access(this.pixelAgentsDir);
         this.activeDir = this.pixelAgentsDir;
       } catch {
-        this.activeDir = this.pixelAgentsDir;
+        this.activeDir = this.pixelCrewDir;
       }
     }
 
@@ -1153,7 +1153,7 @@ export class OrchestratorEngine extends EventEmitter {
    * Saves audit report to .pixel-agents/reports/ in both JSON and Markdown format
    */
   async saveAuditReport(reportData) {
-    const reportsDir = path.join(this.pixelAgentsDir, 'reports');
+    const reportsDir = path.join(this.activeDir, 'reports');
     try {
       await fs.mkdir(reportsDir, { recursive: true });
       const baseFilename = reportData.id || `sprint-${Date.now()}`;
@@ -1179,11 +1179,11 @@ export class OrchestratorEngine extends EventEmitter {
   }
 
   /**
-   * Reads and lists all audit reports stored in .pixel-agents/reports/ or reports/
+   * Reads and lists all audit reports stored in active reports directory or reports/
    */
   async getReports() {
     const directories = [
-      path.join(this.pixelAgentsDir, 'reports'),
+      path.join(this.activeDir, 'reports'),
       path.join(this.targetDir || this.rootDir, 'reports')
     ];
 

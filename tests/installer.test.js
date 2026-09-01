@@ -367,3 +367,40 @@ test('getSkillBundle and installSkill replicate full-fidelity skills and referen
     await cleanupTestWorkspace(tmpDir);
   }
 });
+
+test('syncSkills and init generate all Kiro workflows including /recap and full command palette', async () => {
+  const tmpDir = await createTestWorkspace('kiro-workflows-test');
+  const { initializeProject } = await import('../src/scaffold/init.js');
+
+  try {
+    process.env.KIRO_SESSION = 'kiro_test_session';
+    await initializeProject(tmpDir, { name: 'kiro-app', yes: true });
+
+    // Verify .kiro/workflows/
+    const workflows = await fs.readdir(path.join(tmpDir, '.kiro', 'workflows'));
+    assert.ok(workflows.includes('recap.md'), 'Kiro workflows should include recap.md');
+    assert.ok(workflows.includes('assemble.md'), 'Kiro workflows should include assemble.md');
+    assert.ok(workflows.includes('blueprint.md'), 'Kiro workflows should include blueprint.md');
+    assert.ok(workflows.includes('render.md'), 'Kiro workflows should include render.md');
+    assert.ok(workflows.includes('pixelcrew.md'), 'Kiro workflows should include pixelcrew.md');
+
+    // Verify content of recap workflow
+    const recapWf = await fs.readFile(path.join(tmpDir, '.kiro', 'workflows', 'recap.md'), 'utf-8');
+    assert.ok(recapWf.includes('name: recap'));
+    assert.ok(recapWf.includes('Execute a token-optimized session recap'));
+
+    // Verify .kiro/prompts/
+    const prompts = await fs.readdir(path.join(tmpDir, '.kiro', 'prompts'));
+    assert.ok(prompts.includes('recap.md'), 'Kiro prompts should include recap.md');
+    assert.ok(prompts.includes('assemble.md'), 'Kiro prompts should include assemble.md');
+
+    // Verify .kirorules
+    const rules = await fs.readFile(path.join(tmpDir, '.kirorules'), 'utf-8');
+    assert.ok(rules.includes('Slash Commands in Kiro Chat:'));
+    assert.ok(rules.includes('`/recap`'));
+  } finally {
+    delete process.env.KIRO_SESSION;
+    await cleanupTestWorkspace(tmpDir);
+  }
+});
+

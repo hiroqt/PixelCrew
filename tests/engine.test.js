@@ -8,13 +8,13 @@ import { OrchestratorEngine, AGENT_STATES } from '../src/orchestrator/engine.js'
 import { createServer } from '../src/server/server.js';
 
 test('Project initialization scaffolds required structure', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pixel-agents-test-'));
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pixel-crew-test-'));
 
   const result = await initializeProject(tmpDir, { name: 'test-crm', yes: true });
-  assert.ok(result.pixelAgentsDir);
+  assert.ok(result.pixelCrewDir);
 
   // Verify config.json
-  const configRaw = await fs.readFile(path.join(tmpDir, '.pixel-agents', 'config.json'), 'utf-8');
+  const configRaw = await fs.readFile(path.join(tmpDir, '.pixel-crew', 'config.json'), 'utf-8');
   const config = JSON.parse(configRaw);
   assert.equal(config.project, 'test-crm');
   assert.ok(config.agents.frontend);
@@ -22,19 +22,19 @@ test('Project initialization scaffolds required structure', async () => {
   assert.ok(config.agents.database);
 
   // Verify agent markdowns
-  const agents = await fs.readdir(path.join(tmpDir, '.pixel-agents', 'agents'));
+  const agents = await fs.readdir(path.join(tmpDir, '.pixel-crew', 'agents'));
   assert.ok(agents.includes('orchestrator.md'));
   assert.ok(agents.includes('frontend.md'));
   assert.ok(agents.includes('database.md'));
 
   // Verify skills markdowns
-  const skills = await fs.readdir(path.join(tmpDir, '.pixel-agents', 'skills'));
+  const skills = await fs.readdir(path.join(tmpDir, '.pixel-crew', 'skills'));
   assert.ok(skills.includes('react.md'));
   assert.ok(skills.includes('prisma.md'));
   assert.ok(skills.includes('postgresql.md'));
 
-  // Verify dashboard files inside .pixel-agents
-  const dashFiles = await fs.readdir(path.join(tmpDir, '.pixel-agents', 'dashboard'));
+  // Verify dashboard files inside .pixel-crew
+  const dashFiles = await fs.readdir(path.join(tmpDir, '.pixel-crew', 'dashboard'));
   assert.ok(dashFiles.includes('index.html'));
   assert.ok(dashFiles.includes('styles.css'));
   assert.ok(dashFiles.includes('app.js'));

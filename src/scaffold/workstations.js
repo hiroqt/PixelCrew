@@ -11,6 +11,7 @@ import os from 'node:os';
 import readline from 'node:readline/promises';
 import { PROVIDER_PATHS, GLOBAL_PROVIDER_PATHS, detectActiveIDE } from './installer.js';
 import { getSkillBundle, getAllCanonicalSkillIds } from './skills-bundle.js';
+import { generateKiroFiles } from './kiro-generator.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 /**
@@ -278,44 +279,11 @@ export async function deployToWorkstations(targetDir = process.cwd(), deployment
       }
     }
 
-    // 2. Install Kiro Workflow & Rules if targeting Kiro
+    // 2. Install Kiro Workflows, Prompts & Rules if targeting Kiro
     if (w.id === 'kiro') {
-      const kiroWorkflowContent = `---
-name: pixelcrew
-description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office
----
-
-# PixelCrew Swarm Workflow
-
-Execute tasks with the PixelCrew 8-agent swarm (Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, QA Automation).
-
-## Commands available:
-- \`/pixelcrew init\` (or \`init\`) — Initialize and adapt PixelCrew to current workspace
-- \`/pixelcrew assemble [prompt]\` — Full shape-then-build multi-agent sprint pipeline from brief to production code
-- \`/pixelcrew blueprint [prompt]\` — Plans UX section topologies, wireframes, and compiles dynamic DAG task graphs
-- \`/pixelcrew boss-fight <issue>\` — Targeted swarm bug blitz to isolate, repair, and verify breaking issues
-- \`/pixelcrew render\` — 6-dimension Anti-AI design & UX review
-- \`/pixelcrew sentinel\` — Security & resilience pass
-- \`/pixelcrew audit\` — SRE and technical quality checks
-- \`/pixelcrew warp\` — Full-stack performance tuning
-- \`/pixelcrew polish\` — Final shipping readiness pass
-`;
-      const kiroRulesContent = `# PixelCrew Swarm Rules for Kiro
-
-You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
-When the user prompts "init", "/init", "/pixelcrew init", or mentions "pixelcrew":
-1. Initialize/adapt workspace context and orchestrate tasks with Creative Director, Frontend, Backend, Security, and QA roles.
-2. Enforce Anti-AI design patterns: intentional asymmetry, mathematical fluid clamp() typography, high-contrast visual hierarchy.
-3. Reject cliché copy (*"Elevate your workflow"*) and uniform 3-card grids.
-`;
-      const workflowPath = isGlobal
-        ? path.join(os.homedir(), '.kiro', 'workflows', 'pixelcrew.md')
-        : path.join(targetDir, '.kiro', 'workflows', 'pixelcrew.md');
-      const rulesPath = path.join(targetDir, '.kirorules');
-
-      await safeWriteFile(workflowPath, kiroWorkflowContent, { dryRun, reporter, targetDir: baseDir });
-      if (!isGlobal) {
-        await safeWriteFile(rulesPath, kiroRulesContent, { dryRun, reporter, targetDir });
+      const kiroFiles = generateKiroFiles(isGlobal ? os.homedir() : targetDir, isGlobal);
+      for (const kf of kiroFiles) {
+        await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir: baseDir });
       }
     }
 

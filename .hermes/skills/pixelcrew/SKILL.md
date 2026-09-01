@@ -1,6 +1,6 @@
 ---
 name: pixelcrew
-description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office. Orchestrates 23 specialized commands across Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, and QA Automation personas.
+description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office. Orchestrates 24 specialized commands across Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, and QA Automation personas.
 version: 0.2.4
 author: Arnel (@hiroqt)
 ---
@@ -42,8 +42,10 @@ All commands can be invoked via `/pixelcrew <command>`, direct slash commands (e
 - **`/onboard`** *(aliases: `/first-run`)*: Implements first-run onboarding flows, empty state illustrations, and user activation pathways.
 
 ### 4. 🏢 Floor 42 Operations
+- **`/recap [count]`** *(aliases: `/summary`, `/changelog`, `/whatdone`)*: Generates a token-optimized recap of recent git changes, commits, diff stats, and categorized file operations.
 - **`/office`** *(aliases: `/live`, `/dashboard`)*: Launches Floor 42 live startup office dashboard (`http://localhost:4747`) and real-time site preview iframe.
 - **`/roster [spawn|list]`** *(aliases: `/crew`, `/agents`)*: Inspects active agent roster, workstations, and sprite telemetry.
+- **`/status`** *(aliases: `/progress`, `/info`)*: Shows orchestration sprint progress, active tasks, and swarm state.
 - **`/sync [--dry-run]`**: Synchronizes modular skills across all detected IDEs (`.claude`, `.cursor`, `.agents`, `.kiro`, etc.).
 - **`/doctor`**: Diagnoses local environment, LLM keys, and available coding agent runtimes.
 
