@@ -58,6 +58,7 @@ export * from './deploy.js';
 export * from './add.js';
 export * from './sync.js';
 export * from './recap.js';
+export * from './backend.js';
 
 import { CommandRegistry } from './registry.js';
 export const defaultCommandRegistry = new CommandRegistry();
