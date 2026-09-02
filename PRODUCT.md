@@ -18,11 +18,11 @@ Traditional AI coding tools provide either:
 
 ## 2. Target User Personas
 
-| Persona | Needs & Goals | How Pixel Agents Solves It |
+| Persona | Needs & Goals | How Pixel Crew Solves It |
 | :--- | :--- | :--- |
 | **Software Engineers & Founders** | Ship features fast across full-stack repositories without losing track of agent changes. | Visual state machine and live `#engineering-feed` stream shows exactly who is doing what in real-time. |
 | **Tech Leads & Architects** | Enforce permissions, verify architectural compliance, and avoid breaking changes. | Agent filesystem permissions (`read`/`write` globs), skill matrices, and DAG dependency enforcement. |
-| **AI Agents & Autonomous Swarms** | Require structured coordination, codebase grounding, and telemetry emission. | Static codebase analyzer (`.pixel-agents/context.json`) and lightweight CLI/REST event emission (`pixel-agents emit`). |
+| **AI Agents & Autonomous Swarms** | Require structured coordination, codebase grounding, and telemetry emission. | Static codebase analyzer (`.pixel-crew/context.json`) and lightweight CLI/REST event emission (`pixelcrew emit`). |
 
 ---
 
@@ -31,7 +31,7 @@ Traditional AI coding tools provide either:
 ```text
 ┌──────────────────────────────────────────────────────────────┐
 │                       DEVELOPER                              │
-│             npx pixel-agents init / start / task             │
+│              npx pixelcrew init / start / task               │
 └──────────────────────────────┬───────────────────────────────┘
                                │
                                ▼
@@ -68,7 +68,7 @@ Traditional AI coding tools provide either:
 
 ## 4. Key Differentiators
 
-1. **Zero-Installation Friction**: Runs with `npx pixel-agents init` anywhere. No 500MB `node_modules` overhead, no external Docker requirement.
+1. **Zero-Installation Friction**: Runs with `npx pixelcrew init` anywhere. No 500MB `node_modules` overhead, no external Docker requirement.
 2. **Context-Aware Adaptation**: Automatically scans existing codebases (Next.js, Prisma, Django, Go, Vitest) and configures permissions and skills to match the repo.
 3. **Decoupled Skills Architecture**: Agents are not hardcoded personas; their capabilities are dynamically composed from modular markdown skill guides.
 4. **Gamified Engineering Ergonomics**: Procedural pixel characters, interactive office floor plan, audio chimes, and CRT aesthetics make pairing with AI agents fun and engaging.
@@ -79,7 +79,7 @@ Traditional AI coding tools provide either:
 
 ### v0.1 — Foundations
 - Pure Node.js ESM CLI (`pixelcrew init`, `start`, `demo`, `task`, `emit`, `analyze`, `status`).
-- Static codebase analyzer and context generator (`.pixel-agents/context.json`).
+- Static codebase analyzer and context generator (`.pixel-crew/context.json`).
 - Interactive Pixel Startup Office 2D canvas with workstation hover tooltips and inspector modal.
 - Real-time Server-Sent Events (SSE) stream and Web Audio 8-bit chiptune synthesizer.
 - Global Antigravity plugin and skill integration.

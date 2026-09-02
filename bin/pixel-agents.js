@@ -11,7 +11,7 @@ import { defaultCommandRegistry } from '../src/commands/index.js';
 
 const BANNER = `\x1b[36m
  ╔═══════════════════════════════════════════════════════════╗
- ║   PIXEL AGENTS  -  Multi-Agent Orchestration Framework   ║
+ ║   PIXEL CREW   -  Multi-Agent Orchestration Framework    ║
  ║                      [ ◉ _ ◉ ]                            ║
  ╚═══════════════════════════════════════════════════════════╝\x1b[0m`;
 
@@ -19,9 +19,9 @@ function printHelp() {
   console.log(BANNER);
   console.log(`
 \x1b[1mUSAGE:\x1b[0m
-  npx pixel-crew <command> [options]
-  npx pixel-crew /<slash-command> [args]
-  npx pixel-crew /pixelcrew <subcommand> [args]
+  npx pixelcrew <command> [options]
+  npx pixelcrew /<slash-command> [args]
+  npx pixelcrew /pixelcrew <subcommand> [args]
 
 \x1b[1m🚀 FLOOR 42 CREATION & ARCHITECTURE:\x1b[0m
   \x1b[32massemble\x1b[0m "<prompt>"    Full shape-then-build multi-agent sprint pipeline
@@ -69,11 +69,11 @@ function printHelp() {
   --name <name>          Set project name during init
 
 \x1b[1mEXAMPLES:\x1b[0m
-  npx pixel-crew craft "Build a modern SaaS analytics platform"
-  npx pixel-crew /pixelcrew bolder
-  npx pixel-crew /pixelcrew critique
-  npx pixel-crew sync --dry-run
-  npx pixel-crew start
+  npx pixelcrew craft "Build a modern SaaS analytics platform"
+  npx pixelcrew /pixelcrew bolder
+  npx pixelcrew /pixelcrew critique
+  npx pixelcrew sync --dry-run
+  npx pixelcrew start
 `);
 }
 
@@ -326,7 +326,7 @@ async function main() {
       const taskPrompt = options.taskPrompt || args[1];
       if (!taskPrompt) {
         console.error('\x1b[31mError: Please provide a goal or task description.\x1b[0m');
-        console.log('Example: npx pixel-agents task "Build modern portfolio with Next.js and E2E tests"');
+        console.log('Example: npx pixelcrew task "Build modern portfolio with Next.js and E2E tests"');
         process.exit(1);
       }
 
@@ -431,7 +431,7 @@ async function main() {
       const prompt = options.taskPrompt || args.slice(1).join(' ');
       if (!prompt) {
         console.error('\x1b[31mError: Please provide a prompt for /assemble.\x1b[0m');
-        console.log('Example: npx pixel-crew assemble "Build modern portfolio with Next.js"');
+        console.log('Example: npx pixelcrew assemble "Build modern portfolio with Next.js"');
         process.exit(1);
       }
       const engine = new OrchestratorEngine(rootDir);
@@ -451,7 +451,7 @@ async function main() {
       const prompt = options.taskPrompt || args.slice(1).join(' ');
       if (!prompt) {
         console.error('\x1b[31mError: Please provide a prompt for /plan.\x1b[0m');
-        console.log('Example: npx pixel-crew plan "Saas pricing calculator"');
+        console.log('Example: npx pixelcrew plan "Saas pricing calculator"');
         process.exit(1);
       }
       const { PlanCommand } = await import('../src/commands/plan.js');

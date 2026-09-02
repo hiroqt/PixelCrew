@@ -12,6 +12,7 @@ import readline from 'node:readline/promises';
 import { PROVIDER_PATHS, GLOBAL_PROVIDER_PATHS, detectActiveIDE } from './installer.js';
 import { getSkillBundle, getAllCanonicalSkillIds } from './skills-bundle.js';
 import { generateKiroFiles } from './kiro-generator.js';
+import { generateCursorFiles, generateAntigravityFiles, generateClaudeFiles } from './ide-rules.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 /**
@@ -289,17 +290,31 @@ export async function deployToWorkstations(targetDir = process.cwd(), deployment
 
     // 3. Install Cursor Rules if targeting Cursor
     if (w.id === 'cursor') {
-      const cursorRulesContent = `# PixelCrew Swarm Rules for Cursor
-
-You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
-Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
-- \`/pixelcrew assemble [prompt]\` — Full-stack multi-agent sprint
-- \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning & wireframes
-- \`/pixelcrew boss-fight <issue>\` — Bug blitz
-- \`/pixelcrew render\` — Anti-AI visual review
-`;
       if (!isGlobal) {
-        await safeWriteFile(path.join(targetDir, '.cursorrules'), cursorRulesContent, { dryRun, reporter, targetDir });
+        const cursorFiles = generateCursorFiles(targetDir);
+        for (const cf of cursorFiles) {
+          await safeWriteFile(cf.path, cf.content, { dryRun, reporter, targetDir });
+        }
+      }
+    }
+
+    // 4. Install Antigravity Instructions if targeting Antigravity
+    if (w.id === 'antigravity') {
+      if (!isGlobal) {
+        const antigravityFiles = generateAntigravityFiles(targetDir);
+        for (const af of antigravityFiles) {
+          await safeWriteFile(af.path, af.content, { dryRun, reporter, targetDir });
+        }
+      }
+    }
+
+    // 5. Install Claude Code Instructions if targeting Claude Code
+    if (w.id === 'claude-code') {
+      if (!isGlobal) {
+        const claudeFiles = generateClaudeFiles(targetDir);
+        for (const clf of claudeFiles) {
+          await safeWriteFile(clf.path, clf.content, { dryRun, reporter, targetDir });
+        }
       }
     }
 

@@ -926,7 +926,7 @@ export class OrchestratorEngine extends EventEmitter {
         });
       }
 
-      // Save audit report to .pixel-agents/reports/
+      // Save audit report to .pixel-crew/reports/
       const reportData = this.compileAuditReport(
         prompt,
         ['creativeDirector', 'frontend', 'backend', 'database', 'performance', 'security', 'qa'],
@@ -1150,7 +1150,7 @@ export class OrchestratorEngine extends EventEmitter {
   }
 
   /**
-   * Saves audit report to .pixel-agents/reports/ in both JSON and Markdown format
+   * Saves audit report to .pixel-crew/reports/ in both JSON and Markdown format
    */
   async saveAuditReport(reportData) {
     const reportsDir = path.join(this.activeDir, 'reports');

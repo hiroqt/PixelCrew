@@ -1,5 +1,5 @@
 /**
- * Default templates for pixel-agents initialization (.pixel-agents/ and .pixel-dashboard/)
+ * Default templates for Pixel Crew initialization (.pixel-crew/ and dashboard)
  */
 
 export const DEFAULT_CONFIG = {

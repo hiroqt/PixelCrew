@@ -8,10 +8,11 @@ import { analyzeCodebase, buildAdaptedConfig } from './analyzer.js';
 import { detectActiveIDE, GLOBAL_PROVIDER_PATHS, PROVIDER_PATHS } from './installer.js';
 import { getSkillBundle, getAllCanonicalSkillIds } from './skills-bundle.js';
 import { generateKiroFiles } from './kiro-generator.js';
+import { generateCursorFiles, generateAntigravityFiles, generateClaudeFiles, generateAllIDERules } from './ide-rules.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 /**
- * Initializes a new .pixel-agents / .pixel-crew workspace adapted to the target directory
+ * Initializes a new .pixel-crew workspace adapted to the target directory
  */
 export async function initializeProject(targetDir = process.cwd(), options = {}) {
   const isInteractive = !options.yes && !options.dryRun && process.stdin.isTTY;
@@ -46,18 +47,18 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     }
 
     if (!options.scope && !options.global) {
-      console.log(`\n\x1b[36mActive IDE Environment:\x1b[0m \x1b[1m${activeIDE.name}\x1b[0m (${activeIDE.id})`);
+      console.log(`\n\x1b[36mActive Environment:\x1b[0m \x1b[1m${activeIDE.name}\x1b[0m (${activeIDE.id})`);
       console.log('Select skill installation scope:');
-      console.log(`  1) Project-level (Current workspace: .${activeIDE.id === 'pixel-crew' ? 'pixel-crew' : activeIDE.id}/skills/ + .pixel-crew/) [Default]`);
+      console.log(`  1) Workspace Multi-IDE Setup (.pixel-crew/, .kiro/, .cursor/, .agents/, .claude/) [Default]`);
       console.log(`  2) Global (${activeIDE.name}: ${activeIDE.globalPath} — available in ANY folder)`);
-      console.log(`  3) Both (Project workspace + Global ${activeIDE.name} config)`);
-      console.log(`  4) Multi-IDE Project (Sync across .cursor, .claude, .kiro, .agents)`);
+      console.log(`  3) Both (Workspace Multi-IDE Setup + Global ${activeIDE.name} config)`);
+      console.log(`  4) Universal Sync (All Project Workspaces + All Global IDE configs)`);
 
       const scopeAns = await rl.question(`Choice [1-4] (1): `);
       const trimmed = scopeAns.trim();
       if (trimmed === '2' || trimmed.toLowerCase() === 'global') installScope = 'global';
       else if (trimmed === '3' || trimmed.toLowerCase() === 'both') installScope = 'both';
-      else if (trimmed === '4' || trimmed.toLowerCase() === 'multi') installScope = 'all';
+      else if (trimmed === '4' || trimmed.toLowerCase() === 'multi' || trimmed.toLowerCase() === 'all') installScope = 'all';
       else installScope = 'project';
     }
 
@@ -174,11 +175,15 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     }
   }
 
-  // 1. Install skills to IDE project directories (.agents for Antigravity, .kiro, .cursor, etc.)
+  // 1. Install skills to IDE project directories (.agents for Antigravity, .kiro, .cursor, .claude)
   if (installScope !== 'global') {
-    const targetIdes = new Set(['antigravity']);
-    if (activeIDE.id !== 'pixel-crew') {
-      targetIdes.add(activeIDE.id);
+    // Multi-IDE by default: scaffold across Antigravity, Kiro, Cursor, Claude Code
+    let targetIdes = ['antigravity', 'kiro', 'cursor', 'claude-code'];
+    if (options.provider && options.provider !== 'auto' && options.provider !== 'all') {
+      const p = options.provider.toLowerCase();
+      if (p === 'claude') targetIdes = ['claude-code'];
+      else if (p === 'agents') targetIdes = ['antigravity'];
+      else if (PROVIDER_PATHS[p]) targetIdes = [p];
     }
 
     const canonicalSkills = getAllCanonicalSkillIds();
@@ -202,36 +207,55 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
       }
     }
 
-    if (activeIDE.id === 'kiro' || targetIdes.has('kiro')) {
+    // Generate Kiro workflows, prompts, and rules
+    if (targetIdes.includes('kiro')) {
       const kiroFiles = generateKiroFiles(targetDir, false);
       for (const kf of kiroFiles) {
         await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir });
       }
     }
 
-    if (activeIDE.id === 'cursor' || targetIdes.has('cursor')) {
-      const cursorRulesContent = `# PixelCrew Swarm Rules for Cursor
+    // Generate Cursor rules & Cursor 2.0 rules
+    if (targetIdes.includes('cursor')) {
+      const cursorFiles = generateCursorFiles(targetDir);
+      for (const cf of cursorFiles) {
+        await safeWriteFile(cf.path, cf.content, { dryRun, reporter, targetDir });
+      }
+    }
 
-You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
-Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
-- \`/pixelcrew init\` (or \`init\`) — Initialize workspace
-- \`/pixelcrew recap\` — Session recap and git changelog
-- \`/pixelcrew assemble [prompt]\` — Full-stack multi-agent sprint
-- \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning & wireframes
-- \`/pixelcrew boss-fight <issue>\` — Bug blitz
-- \`/pixelcrew render\` — Anti-AI visual review
-`;
-      await safeWriteFile(path.join(targetDir, '.cursorrules'), cursorRulesContent, { dryRun, reporter, targetDir });
+    // Generate Antigravity agent instructions & workspace rules
+    if (targetIdes.includes('antigravity')) {
+      const antigravityFiles = generateAntigravityFiles(targetDir);
+      for (const af of antigravityFiles) {
+        await safeWriteFile(af.path, af.content, { dryRun, reporter, targetDir });
+      }
+    }
+
+    // Generate Claude Code instructions & plugin manifest
+    if (targetIdes.includes('claude-code')) {
+      const claudeFiles = generateClaudeFiles(targetDir);
+      for (const clf of claudeFiles) {
+        await safeWriteFile(clf.path, clf.content, { dryRun, reporter, targetDir });
+      }
     }
   }
 
-  // 2. Install skills to Global IDE directory if scope is global or both
-  if (installScope === 'global' || installScope === 'both') {
-    const globalPathFn = GLOBAL_PROVIDER_PATHS[activeIDE.id] || GLOBAL_PROVIDER_PATHS['pixel-crew'];
-    if (globalPathFn) {
+  // 2. Install skills to Global IDE directory if scope is global, both, or all
+  if (installScope === 'global' || installScope === 'both' || installScope === 'all') {
+    const globalProviders = installScope === 'all'
+      ? Object.keys(GLOBAL_PROVIDER_PATHS)
+      : (options.provider && options.provider !== 'auto'
+          ? (options.provider === 'all' ? Object.keys(GLOBAL_PROVIDER_PATHS) : [options.provider.toLowerCase() === 'claude' ? 'claude-code' : (options.provider.toLowerCase() === 'agents' ? 'antigravity' : options.provider.toLowerCase())])
+          : [activeIDE.id]);
+
+    for (const gp of globalProviders) {
+      const globalPathFn = GLOBAL_PROVIDER_PATHS[gp];
+      if (!globalPathFn) continue;
+
       const canonicalSkills = getAllCanonicalSkillIds();
       for (const sName of canonicalSkills) {
         const bundle = await getSkillBundle(sName);
+        if (!bundle) continue;
         const fullGlobalPath = globalPathFn(sName);
         await safeWriteFile(fullGlobalPath, bundle.content.trim() + '\n', { dryRun, reporter, targetDir: os.homedir() });
 
@@ -245,7 +269,7 @@ Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
       }
     }
 
-    if (activeIDE.id === 'kiro') {
+    if (globalProviders.includes('kiro')) {
       const kiroGlobalFiles = generateKiroFiles(os.homedir(), true);
       for (const kf of kiroGlobalFiles) {
         await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir: os.homedir() });
@@ -270,16 +294,17 @@ Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
     };
   }
 
-  console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/ config.json (tailored agent roles & permissions)');
-  console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/context.json (grounded codebase context)');
-  console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/state.json & pixel.json');
-  console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/events.jsonl');
+  console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/ (config.json, context.json, state.json, events.jsonl, pixel.json)');
   console.log(`  \x1b[32m✓\x1b[0m Created ${Object.keys(AGENT_MARKDOWNS).length} agent definitions in .pixel-crew/agents/`);
   console.log(`  \x1b[32m✓\x1b[0m Created ${Object.keys(SKILL_MARKDOWNS).length} skill definitions in .pixel-crew/skills/`);
-  if (activeIDE.id !== 'pixel-crew' && installScope !== 'global') {
-    console.log(`  \x1b[32m✓\x1b[0m Synced ${Object.keys(SKILL_MARKDOWNS).length} skills into active IDE (.\x1b[36m${activeIDE.id}\x1b[0m/skills/)`);
+  if (installScope !== 'global') {
+    console.log(`  \x1b[32m✓\x1b[0m Synced multi-IDE skills into .kiro/, .cursor/, .agents/, .claude/`);
+    console.log(`  \x1b[32m✓\x1b[0m Generated Kiro workflows & prompts (.kiro/workflows/, .kiro/prompts/, .kirorules)`);
+    console.log(`  \x1b[32m✓\x1b[0m Generated Cursor rules (.cursorrules, .cursor/rules/pixelcrew.mdc)`);
+    console.log(`  \x1b[32m✓\x1b[0m Generated Antigravity agent instructions (AGENTS.md, GEMINI.md, .agents/rules/)`);
+    console.log(`  \x1b[32m✓\x1b[0m Generated Claude Code instructions (CLAUDE.md, .claude-plugin/)`);
   }
-  if (installScope === 'global' || installScope === 'both') {
+  if (installScope === 'global' || installScope === 'both' || installScope === 'all') {
     console.log(`  \x1b[32m✓\x1b[0m Installed skills globally for \x1b[36m${activeIDE.name}\x1b[0m (\x1b[90m${activeIDE.globalPath}\x1b[0m)`);
   }
   if (enableDashboard) {
@@ -290,7 +315,7 @@ Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
   }
 
   console.log('\n\x1b[32m\x1b[1mPixel Crew initialized & adapted successfully!\x1b[0m\n');
-  console.log('Ready in IDE Chatbox:');
+  console.log('Ready in IDE Chatbox (Kiro, Cursor, Antigravity, Claude Code):');
   console.log('  • Type \x1b[36minit\x1b[0m or \x1b[36m/pixelcrew init\x1b[0m in chat to adapt current workspace');
   console.log('  • Type \x1b[36m/recap\x1b[0m in chat to get a token-optimized session changelog');
   console.log('  • Type \x1b[36m/pixelcrew assemble "..."\x1b[0m to run full-stack multi-agent sprint');

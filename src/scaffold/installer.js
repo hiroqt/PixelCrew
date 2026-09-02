@@ -17,6 +17,7 @@ import { SKILL_DEFINITIONS } from '../orchestrator/skills-registry.js';
 import { SKILL_MARKDOWNS } from './templates.js';
 import { getSkillBundle, sanitizeFrontmatter } from './skills-bundle.js';
 import { generateKiroFiles } from './kiro-generator.js';
+import { generateCursorFiles, generateAntigravityFiles, generateClaudeFiles } from './ide-rules.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 export const PROVIDER_PATHS = {
@@ -470,21 +471,33 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
     }
   }
 
-  // 2. Cursor Rules
+  // 2. Cursor Rules & MDC
   if (detected.includes('cursor') || activeIDE.id === 'cursor' || provider === 'cursor' || provider === 'all') {
-    const cursorRulesContent = `# PixelCrew Swarm Rules for Cursor
-
-You are integrated with PixelCrew, an autonomous multi-agent engineering swarm.
-Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
-- \`/pixelcrew init\` (or \`init\`) — Initialize workspace
-- \`/pixelcrew recap\` — Session recap and git changelog
-- \`/pixelcrew assemble [prompt]\` — Full-stack multi-agent sprint
-- \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning & wireframes
-- \`/pixelcrew boss-fight <issue>\` — Bug blitz
-- \`/pixelcrew render\` — Anti-AI visual review
-`;
     if (scope !== 'global') {
-      await safeWriteFile(path.join(targetDir, '.cursorrules'), cursorRulesContent, { dryRun, reporter, targetDir });
+      const cursorFiles = generateCursorFiles(targetDir);
+      for (const cf of cursorFiles) {
+        await safeWriteFile(cf.path, cf.content, { dryRun, reporter, targetDir });
+      }
+    }
+  }
+
+  // 3. Antigravity Agent Instructions (AGENTS.md, GEMINI.md, .agents/rules/)
+  if (detected.includes('antigravity') || activeIDE.id === 'antigravity' || provider === 'antigravity' || provider === 'all') {
+    if (scope !== 'global') {
+      const antigravityFiles = generateAntigravityFiles(targetDir);
+      for (const af of antigravityFiles) {
+        await safeWriteFile(af.path, af.content, { dryRun, reporter, targetDir });
+      }
+    }
+  }
+
+  // 4. Claude Code Instructions (CLAUDE.md, .claude-plugin/)
+  if (detected.includes('claude-code') || activeIDE.id === 'claude-code' || provider === 'claude-code' || provider === 'all') {
+    if (scope !== 'global') {
+      const claudeFiles = generateClaudeFiles(targetDir);
+      for (const clf of claudeFiles) {
+        await safeWriteFile(clf.path, clf.content, { dryRun, reporter, targetDir });
+      }
     }
   }
 

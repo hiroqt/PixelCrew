@@ -25,7 +25,7 @@ export class AddCommand extends PixelCommand {
       return {
         success: false,
         message: 'Please provide a skill name or ID to install.',
-        output: '\x1b[31mError: Please specify a skill to install.\x1b[0m\nUsage: npx pixel-crew add <skill-name> [--dry-run] [--provider <name>]\nExample: npx pixel-crew add design/ui-design --dry-run'
+        output: '\x1b[31mError: Please specify a skill to install.\x1b[0m\nUsage: npx pixelcrew add <skill-name> [--dry-run] [--provider <name>]\nExample: npx pixelcrew add design/ui-design --dry-run'
       };
     }
 
