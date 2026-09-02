@@ -1198,10 +1198,11 @@ async function initApp() {
 
   // Instant initial fetch before SSE stream connects
   try {
-    const [cfgRes, stRes, provRes] = await Promise.all([
+    const [cfgRes, stRes, provRes, tokRes] = await Promise.all([
       fetch('/api/config').then(r => r.ok ? r.json() : null),
       fetch('/api/state').then(r => r.ok ? r.json() : null),
-      fetch('/api/providers').then(r => r.ok ? r.json() : null)
+      fetch('/api/providers').then(r => r.ok ? r.json() : null),
+      fetch('/api/token-telemetry').then(r => r.ok ? r.json() : null)
     ]);
     if (cfgRes) {
       appState.config = cfgRes;
@@ -1216,6 +1217,9 @@ async function initApp() {
     if (provRes) {
       updateProviderUI(provRes);
     }
+    if (tokRes) {
+      renderTokenTelemetry(tokRes);
+    }
     await fetchReports();
   } catch (e) {
     // Handled by SSE
@@ -1229,6 +1233,8 @@ let currentSuggestions = [];
 
 // Setup DOM Event Listeners
 function setupEventListeners() {
+  initTokenTelemetryModal();
+
   // Provider Badge & Switcher Modal
   const providerBadge = document.getElementById('providerBadge');
   if (providerBadge) {
@@ -2199,6 +2205,11 @@ function connectSSE() {
       renderOneShotResults(event.metadata);
     }
 
+    // Real-time Token Telemetry Update
+    if (event.type === 'token_telemetry' || event.tokenStats || event.metadata?.tokenStats) {
+      renderTokenTelemetry(event.tokenStats || event.metadata?.tokenStats);
+    }
+
     // Audio cues & Report Refresh
     if (event.type === 'spawn') {
       synth.playSpawn();
@@ -2492,6 +2503,287 @@ function openAgentModal(agentKey) {
 
   modal.classList.add('open');
   synth.playClick();
+}
+
+// ============================================================================
+// REAL-TIME TOKEN TELEMETRY & VISUALIZER ENGINE
+// ============================================================================
+const tokenState = {
+  rawTokensEstimated: 0,
+  actualTokensUsed: 0,
+  tokensSaved: 0,
+  promptTokens: 0,
+  completionTokens: 0,
+  cachedTokens: 0,
+  efficiencyRatio: 72,
+  costUsd: 0,
+  perAgent: {
+    creativeDirector: 0,
+    uxPlanner: 0,
+    designSystem: 0,
+    frontend: 0,
+    backend: 0,
+    database: 0,
+    performance: 0,
+    security: 0,
+    qa: 0
+  },
+  timeline: []
+};
+
+function initTokenTelemetryModal() {
+  const btnOpen = document.getElementById('btnTokenAnalyticsModal');
+  const btnClose = document.getElementById('btnCloseTokenModal');
+  const modal = document.getElementById('tokenAnalyticsModal');
+
+  if (btnOpen && modal) {
+    btnOpen.addEventListener('click', () => {
+      modal.classList.add('open');
+      renderTokenTelemetry(tokenState);
+      synth.playClick();
+    });
+  }
+
+  if (btnClose && modal) {
+    btnClose.addEventListener('click', () => {
+      modal.classList.remove('open');
+      synth.playClick();
+    });
+  }
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('open');
+      }
+    });
+  }
+}
+
+async function fetchTokenTelemetry() {
+  try {
+    const res = await fetch('/api/token-telemetry');
+    if (res.ok) {
+      const data = await res.json();
+      renderTokenTelemetry(data);
+    }
+  } catch (err) {
+    console.warn('Failed to fetch initial token telemetry:', err);
+  }
+}
+
+function renderTokenTelemetry(stats) {
+  if (!stats) return;
+  Object.assign(tokenState, stats);
+
+  const used = tokenState.actualTokensUsed || 0;
+  const raw = tokenState.rawTokensEstimated || 0;
+  const saved = tokenState.tokensSaved || 0;
+  const ratio = tokenState.efficiencyRatio || 72;
+  const cost = tokenState.costUsd || ((used / 1000000) * 2.4);
+  const costSaved = ((saved / 1000000) * 2.4);
+
+  // 1. Header & HUD Badges
+  const headerVal = document.getElementById('headerTokenVal');
+  if (headerVal) {
+    headerVal.textContent = used >= 1000 ? `${(used / 1000).toFixed(1)}k tok` : `${used} tok`;
+  }
+  const headerPill = document.getElementById('headerSavedPill');
+  if (headerPill) {
+    headerPill.textContent = `${ratio}% SAVED`;
+  }
+  const hudTokenVal = document.getElementById('hudTokenVal');
+  if (hudTokenVal) {
+    hudTokenVal.textContent = `${used.toLocaleString()} tokens`;
+  }
+  const hudCostVal = document.getElementById('hudCostVal');
+  if (hudCostVal) {
+    hudCostVal.textContent = `($${cost.toFixed(4)})`;
+  }
+
+  // 2. OneShot Modal Token Card
+  const rawEl = document.getElementById('rawTokenVal');
+  const actualEl = document.getElementById('actualTokenVal');
+  const savedEl = document.getElementById('savedTokenVal');
+  if (rawEl && raw > 0) rawEl.textContent = raw.toLocaleString();
+  if (actualEl && used > 0) actualEl.textContent = used.toLocaleString();
+  if (savedEl && saved > 0) savedEl.textContent = `${saved.toLocaleString()} (${ratio}% Saved)`;
+
+  // 3. Analytics Modal KPI Cards
+  const modalActual = document.getElementById('modalActualTokens');
+  if (modalActual) modalActual.textContent = used.toLocaleString();
+
+  const modalSaved = document.getElementById('modalSavedTokens');
+  if (modalSaved) modalSaved.textContent = `${saved.toLocaleString()} (${ratio}%)`;
+
+  const modalRaw = document.getElementById('modalRawTokens');
+  if (modalRaw) modalRaw.textContent = `Raw Est: ${raw.toLocaleString()}`;
+
+  const modalCost = document.getElementById('modalEstCost');
+  if (modalCost) modalCost.textContent = `$${cost.toFixed(4)}`;
+
+  const modalCostSaved = document.getElementById('modalCostSaved');
+  if (modalCostSaved) modalCostSaved.textContent = `Saved: $${costSaved.toFixed(4)}`;
+
+  const modalRatio = document.getElementById('modalPromptOutputRatio');
+  if (modalRatio) {
+    const p = tokenState.promptTokens || 0;
+    const c = tokenState.completionTokens || 0;
+    modalRatio.textContent = `${p.toLocaleString()} / ${c.toLocaleString()}`;
+  }
+
+  const modalCached = document.getElementById('modalCachedTokens');
+  if (modalCached) {
+    modalCached.textContent = `Cached: ${(tokenState.cachedTokens || 0).toLocaleString()}`;
+  }
+
+  // 4. Per-Agent Token Distribution Bars
+  const agentBarsContainer = document.getElementById('agentTokenBars');
+  if (agentBarsContainer && tokenState.perAgent) {
+    const agents = [
+      { key: 'frontend', name: 'Frontend Eng', icon: '💻', class: 'fe' },
+      { key: 'backend', name: 'Backend Eng', icon: '⚙️', class: 'be' },
+      { key: 'qa', name: 'QA Critic', icon: '🔍', class: 'qa' },
+      { key: 'creativeDirector', name: 'Creative Dir', icon: '🎨', class: 'cd' },
+      { key: 'uxPlanner', name: 'UX Planner', icon: '📐', class: 'ux' },
+      { key: 'designSystem', name: 'Design System', icon: '🌿', class: 'ds' },
+      { key: 'database', name: 'DB Architect', icon: '🗄️', class: 'db' },
+      { key: 'performance', name: 'Perf SRE', icon: '⚡', class: 'perf' },
+      { key: 'security', name: 'Security Sentinel', icon: '🛡️', class: 'sec' }
+    ];
+
+    const maxAgentTokens = Math.max(...Object.values(tokenState.perAgent), 1);
+
+    agentBarsContainer.innerHTML = agents.map(ag => {
+      const agTokens = tokenState.perAgent[ag.key] || 0;
+      const pct = Math.round((agTokens / maxAgentTokens) * 100);
+      const share = used > 0 ? Math.round((agTokens / used) * 100) : 0;
+      return `
+        <div class="agent-token-bar-row">
+          <div class="agent-bar-meta">
+            <span>${ag.icon}</span>
+            <span>${ag.name}</span>
+          </div>
+          <div class="agent-bar-track">
+            <div class="agent-bar-fill ${ag.class}" style="width: ${pct}%;"></div>
+          </div>
+          <div class="agent-bar-stats">
+            <strong>${agTokens.toLocaleString()}</strong> <span style="color: var(--color-cyan);">(${share}%)</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 5. Render Real-Time Sparkline Canvas
+  drawTokenSparkline(tokenState.timeline || []);
+}
+
+function drawTokenSparkline(timeline) {
+  const canvas = document.getElementById('tokenSparklineCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Clear background
+  ctx.fillStyle = '#04070f';
+  ctx.fillRect(0, 0, w, h);
+
+  // Draw retro gridlines
+  ctx.strokeStyle = '#0e1626';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 40) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 25) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  if (!timeline || timeline.length === 0) {
+    // Render idle pulse wave
+    ctx.strokeStyle = '#00f0ff33';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '9px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('AWAITING ACTIVE SPRINT TOKEN EMISSIONS...', w / 2, h / 2 - 10);
+    return;
+  }
+
+  const padding = 20;
+  const maxVal = Math.max(...timeline.map(t => t.totalTokens || 0), 1000);
+  const minVal = 0;
+
+  const getX = (idx) => padding + (idx / Math.max(timeline.length - 1, 1)) * (w - padding * 2);
+  const getY = (val) => (h - padding) - ((val - minVal) / (maxVal - minVal)) * (h - padding * 2);
+
+  // Gradient fill under curve
+  const gradient = ctx.createLinearGradient(0, 0, 0, h);
+  gradient.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
+  gradient.addColorStop(1, 'rgba(0, 255, 136, 0.02)');
+
+  ctx.beginPath();
+  ctx.moveTo(getX(0), h - padding);
+  for (let i = 0; i < timeline.length; i++) {
+    ctx.lineTo(getX(i), getY(timeline[i].totalTokens || 0));
+  }
+  ctx.lineTo(getX(timeline.length - 1), h - padding);
+  ctx.closePath();
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // Glow line
+  ctx.shadowColor = '#00f0ff';
+  ctx.shadowBlur = 8;
+  ctx.strokeStyle = '#00f0ff';
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  for (let i = 0; i < timeline.length; i++) {
+    const x = getX(i);
+    const y = getY(timeline[i].totalTokens || 0);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Draw node points & step labels
+  for (let i = 0; i < timeline.length; i++) {
+    const pt = timeline[i];
+    const x = getX(i);
+    const y = getY(pt.totalTokens || 0);
+
+    ctx.fillStyle = '#00ff88';
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Node label
+    if (i === timeline.length - 1 || i % 2 === 0) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '8px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${(pt.totalTokens || 0).toLocaleString()}`, x, y - 8);
+    }
+  }
 }
 
 // Bootstrap

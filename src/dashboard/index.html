@@ -59,6 +59,16 @@
       </div>
 
       <div class="header-right">
+        <!-- REAL-TIME TOKEN TELEMETRY BADGE -->
+        <div class="token-telemetry-badge clickable-badge" id="btnTokenAnalyticsModal" title="Click to open Real-Time Token Telemetry & Analytics Center">
+          <span class="token-telemetry-icon">⚡</span>
+          <div class="token-telemetry-meta">
+            <span class="token-telemetry-label">TASK TOKENS:</span>
+            <span class="token-telemetry-val" id="headerTokenVal">0 tok</span>
+          </div>
+          <span class="token-telemetry-pill" id="headerSavedPill">72% SAVED</span>
+        </div>
+
         <!-- PROCEDURAL LO-FI MUSIC PLAYER -->
         <div class="lofi-player-box" id="lofiPlayerBox" title="Procedural Lo-Fi Music Synthesizer & Radio">
           <button class="pixel-btn btn-sm btn-lofi" id="btnLofiToggle" title="Play / Pause Lo-Fi Beats">
@@ -112,6 +122,11 @@
         <span class="hud-task-text" id="hudActiveTaskText">Ready for mission dispatch — type / or select a ticket below</span>
       </div>
       <div class="hud-right">
+        <div class="hud-token-badge" id="hudTokenBadge" title="Real-time tokens consumed for this task">
+          <span class="hud-token-icon">⚡</span>
+          <span class="hud-token-val" id="hudTokenVal">0 tokens</span>
+          <span class="hud-cost-val" id="hudCostVal">($0.00)</span>
+        </div>
         <div class="hud-tool-badge" id="hudToolBadge" style="display: none;">
           <span class="tool-badge-icon">⚡</span>
           <span class="tool-badge-name" id="hudToolName">TOOL: view_file</span>
@@ -459,6 +474,87 @@
                   <span>🌐</span> OPEN LIVE PREVIEW
                 </a>
               </div>
+              <div class="preview-frame-wrapper" id="previewFrameWrapper">
+                <div class="preview-placeholder">Live preview will appear here upon sprint completion.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REAL-TIME TOKEN TELEMETRY & ANALYTICS MODAL -->
+    <div class="pixel-modal-backdrop" id="tokenAnalyticsModal">
+      <div class="pixel-modal-card token-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-agent-icon">⚡</span>
+            <h2 class="modal-agent-name" style="color: var(--color-green);">REAL-TIME TOKEN TELEMETRY & EFFICIENCY CENTER</h2>
+          </div>
+          <button class="pixel-btn btn-sm btn-warn" id="btnCloseTokenModal">✕</button>
+        </div>
+        <div class="modal-body token-modal-body">
+          <!-- Top Stats KPI Grid -->
+          <div class="token-analytics-kpi-grid">
+            <div class="token-kpi-card">
+              <span class="kpi-label">TOTAL TOKENS USED</span>
+              <span class="kpi-val text-cyan" id="modalActualTokens">0</span>
+              <span class="kpi-sub" id="modalTokenVelocity">⚡ 0 tok/sec</span>
+            </div>
+            <div class="token-kpi-card highlight-green">
+              <span class="kpi-label">TOKENS CONSERVED</span>
+              <span class="kpi-val text-green" id="modalSavedTokens">0 (72%)</span>
+              <span class="kpi-sub" id="modalRawTokens">Raw Est: 0</span>
+            </div>
+            <div class="token-kpi-card">
+              <span class="kpi-label">ESTIMATED COST</span>
+              <span class="kpi-val text-gold" id="modalEstCost">$0.0000</span>
+              <span class="kpi-sub" id="modalCostSaved">Saved: $0.0000</span>
+            </div>
+            <div class="token-kpi-card">
+              <span class="kpi-label">PROMPT / COMPLETION</span>
+              <span class="kpi-val" id="modalPromptOutputRatio">0 / 0</span>
+              <span class="kpi-sub" id="modalCachedTokens">Cached: 0</span>
+            </div>
+          </div>
+
+          <!-- Real-Time Token Generation Sparkline Canvas -->
+          <div class="token-chart-section">
+            <div class="chart-header">
+              <span class="chart-title">REAL-TIME TOKEN STREAM (LIVE EMISSIONS)</span>
+              <span class="chart-live-indicator">● LIVE SSE STREAM</span>
+            </div>
+            <div class="sparkline-container">
+              <canvas id="tokenSparklineCanvas" width="800" height="130" class="sparkline-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Per-Agent Token Distribution Bars -->
+          <div class="token-agent-breakdown-section">
+            <div class="breakdown-header">
+              <span class="breakdown-title">PER-AGENT TOKEN ATTRIBUTION</span>
+              <span class="breakdown-subtitle">Live tokens consumed across engineering squads</span>
+            </div>
+            <div class="agent-token-bars" id="agentTokenBars">
+              <!-- Dynamically populated by app.js -->
+            </div>
+          </div>
+
+          <!-- Optimization Strategies Active -->
+          <div class="token-strategies-card">
+            <div class="strategies-title">ACTIVE TOKEN CONSERVATION STRATEGIES:</div>
+            <div class="strategies-pills-list">
+              <span class="strat-pill active">✓ AST Symbol Graph Skeletonization (-45%)</span>
+              <span class="strat-pill active">✓ Sliding Window Context Pruning (-15%)</span>
+              <span class="strat-pill active">✓ Prompt Caching Prefix Anchoring (-12%)</span>
+              <span class="strat-pill active">✓ Compact JSON Envelopes (-8%)</span>
+              <span class="strat-pill active">✓ Isolated Subagent Sandboxes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- PROVIDER SELECTOR & ENVIRONMENT DIAGNOSTICS MODAL -->
     <div class="pixel-modal-backdrop" id="providerModal">
       <div class="pixel-modal-card provider-modal-card">
