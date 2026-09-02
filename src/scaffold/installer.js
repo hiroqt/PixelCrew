@@ -10,6 +10,7 @@
  */
 
 import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -41,7 +42,7 @@ export const GLOBAL_PROVIDER_PATHS = {
 /**
  * Detects which IDE / Coding Agent environment the current terminal shell is executing inside
  */
-export function detectActiveIDE() {
+export function detectActiveIDE(targetDir = process.cwd()) {
   const env = process.env;
 
   // 1. Kiro AI
@@ -107,7 +108,7 @@ export function detectActiveIDE() {
     };
   }
 
-  // 5. Codex
+  // 5. OpenAI Codex
   if (env.CODEX_SESSION || env.CODEX_AGENT || env.CODEX) {
     return {
       id: 'codex',
@@ -116,6 +117,55 @@ export function detectActiveIDE() {
       detectedVia: 'env'
     };
   }
+
+  // 6. Check existing workspace markers in targetDir
+  try {
+    if (
+      fsSync.existsSync(path.join(targetDir, '.kiro')) ||
+      fsSync.existsSync(path.join(targetDir, '.kirorules')) ||
+      fsSync.existsSync(path.join(targetDir, 'kiro.json'))
+    ) {
+      return {
+        id: 'kiro',
+        name: 'Kiro AI',
+        globalPath: path.join(os.homedir(), '.kiro', 'skills'),
+        detectedVia: 'workspace'
+      };
+    }
+    if (
+      fsSync.existsSync(path.join(targetDir, '.cursor')) ||
+      fsSync.existsSync(path.join(targetDir, '.cursorrules'))
+    ) {
+      return {
+        id: 'cursor',
+        name: 'Cursor IDE',
+        globalPath: path.join(os.homedir(), '.cursor', 'skills'),
+        detectedVia: 'workspace'
+      };
+    }
+    if (
+      fsSync.existsSync(path.join(targetDir, '.agents')) ||
+      fsSync.existsSync(path.join(targetDir, 'AGENTS.md'))
+    ) {
+      return {
+        id: 'antigravity',
+        name: 'Google Antigravity',
+        globalPath: path.join(os.homedir(), '.gemini', 'config', 'skills'),
+        detectedVia: 'workspace'
+      };
+    }
+    if (
+      fsSync.existsSync(path.join(targetDir, '.claude')) ||
+      fsSync.existsSync(path.join(targetDir, 'CLAUDE.md'))
+    ) {
+      return {
+        id: 'claude-code',
+        name: 'Claude Code',
+        globalPath: path.join(os.homedir(), '.claude', 'skills'),
+        detectedVia: 'workspace'
+      };
+    }
+  } catch {}
 
   return {
     id: 'pixel-crew',
@@ -132,10 +182,10 @@ export async function detectInstalledProviders(targetDir = process.cwd()) {
   const detected = new Set(['pixel-crew']);
 
   const checks = [
-    { provider: 'claude-code', paths: [path.join(targetDir, '.claude')] },
+    { provider: 'claude-code', paths: [path.join(targetDir, '.claude'), path.join(targetDir, 'CLAUDE.md')] },
     { provider: 'cursor', paths: [path.join(targetDir, '.cursor'), path.join(targetDir, '.cursorrules')] },
     { provider: 'kiro', paths: [path.join(targetDir, '.kiro'), path.join(targetDir, '.kirorules'), path.join(targetDir, 'kiro.json'), path.join(targetDir, '.kiro.json')] },
-    { provider: 'antigravity', paths: [path.join(targetDir, '.agents'), path.join(targetDir, '.gemini')] },
+    { provider: 'antigravity', paths: [path.join(targetDir, '.agents'), path.join(targetDir, 'AGENTS.md'), path.join(targetDir, '.gemini')] },
     { provider: 'pixel-crew', paths: [path.join(targetDir, '.pixel-crew'), path.join(targetDir, '.pixel-agents')] }
   ];
 
@@ -247,13 +297,15 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
   const skillMeta = normalizeSkillId(rawSkillInput);
   const bundle = await getSkillBundle(rawSkillInput);
   const content = (bundle && bundle.content) ? bundle.content : generateSkillMarkdown(skillMeta);
-  const activeIDE = detectActiveIDE();
+  const activeIDE = detectActiveIDE(targetDir);
 
   // Determine target providers
   let targetProviders = [];
   if (provider && provider !== 'auto') {
-    if (provider === 'all') {
+    if (provider === 'all' || provider === 'multi') {
       targetProviders = Object.keys(PROVIDER_PATHS);
+    } else if (provider === 'none' || provider === 'cli' || provider === 'pixel-crew') {
+      targetProviders = ['pixel-crew'];
     } else {
       const p = provider.toLowerCase();
       if (PROVIDER_PATHS[p]) targetProviders.push(p);
@@ -268,10 +320,6 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
       targetProviders = await detectInstalledProviders(targetDir);
       if (activeIDE.id !== 'pixel-crew' && !targetProviders.includes(activeIDE.id)) {
         targetProviders.push(activeIDE.id);
-      }
-      // Always ensure Antigravity workspace skills (.agents/skills) are provisioned
-      if (!targetProviders.includes('antigravity')) {
-        targetProviders.push('antigravity');
       }
       if (options.allProviders || scope === 'all') {
         targetProviders = Object.keys(PROVIDER_PATHS);
@@ -453,10 +501,17 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
 
   // Generate IDE-specific workflow definitions and steering rules
   const detected = await detectInstalledProviders(targetDir);
-  const activeIDE = detectActiveIDE();
+  const activeIDE = detectActiveIDE(targetDir);
+
+  const shouldGenerate = (ideId) => {
+    if (provider && provider !== 'auto') {
+      return provider === 'all' || provider === 'multi' || provider.toLowerCase() === ideId || (provider.toLowerCase() === 'claude' && ideId === 'claude-code') || (provider.toLowerCase() === 'agents' && ideId === 'antigravity');
+    }
+    return activeIDE.id === ideId || (detected.includes(ideId) && ideId !== 'pixel-crew');
+  };
 
   // 1. Kiro Workflows & Rules
-  if (detected.includes('kiro') || activeIDE.id === 'kiro' || provider === 'kiro' || provider === 'all') {
+  if (shouldGenerate('kiro')) {
     if (scope !== 'global') {
       const kiroFiles = generateKiroFiles(targetDir, false);
       for (const kf of kiroFiles) {
@@ -472,7 +527,7 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
   }
 
   // 2. Cursor Rules & MDC
-  if (detected.includes('cursor') || activeIDE.id === 'cursor' || provider === 'cursor' || provider === 'all') {
+  if (shouldGenerate('cursor')) {
     if (scope !== 'global') {
       const cursorFiles = generateCursorFiles(targetDir);
       for (const cf of cursorFiles) {
@@ -482,7 +537,7 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
   }
 
   // 3. Antigravity Agent Instructions (AGENTS.md, GEMINI.md, .agents/rules/)
-  if (detected.includes('antigravity') || activeIDE.id === 'antigravity' || provider === 'antigravity' || provider === 'all') {
+  if (shouldGenerate('antigravity')) {
     if (scope !== 'global') {
       const antigravityFiles = generateAntigravityFiles(targetDir);
       for (const af of antigravityFiles) {
@@ -492,7 +547,7 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
   }
 
   // 4. Claude Code Instructions (CLAUDE.md, .claude-plugin/)
-  if (detected.includes('claude-code') || activeIDE.id === 'claude-code' || provider === 'claude-code' || provider === 'all') {
+  if (shouldGenerate('claude-code')) {
     if (scope !== 'global') {
       const claudeFiles = generateClaudeFiles(targetDir);
       for (const clf of claudeFiles) {
