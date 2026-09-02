@@ -47,6 +47,7 @@ import { OptimizeCommand } from './optimize.js';
 import { LiveCommand } from './live.js';
 import { PlanCommand } from './plan.js';
 import { RecapCommand } from './recap.js';
+import { BackendCommand } from './backend.js';
 
 import { BuildCommand } from './build.js';
 import { CrewCommand } from './crew.js';
@@ -110,8 +111,9 @@ export class CommandRegistry {
     this.register(new SyncCommand());
     this.register(new InstallCommand());
 
-    // 4. Inspection & Recap
+    // 4. Inspection, Recap & Backend Synthesis
     this.register(new RecapCommand());
+    this.register(new BackendCommand());
   }
 
 
