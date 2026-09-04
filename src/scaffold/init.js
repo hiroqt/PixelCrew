@@ -170,12 +170,12 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     agent: 'orchestrator',
     type: 'spawn',
     message: `Pixel Crew swarm initialized & adapted to ${profile.frameworks.join(', ') || 'codebase'}`,
-    metadata: { version: '0.2.4', profile }
+    metadata: { version: '0.2.5', profile }
   };
 
   const manifest = {
     name: projectName,
-    version: '0.2.4',
+    version: '0.2.5',
     frameworks: profile.frameworks,
     languages: profile.languages,
     installedAt: new Date().toISOString(),

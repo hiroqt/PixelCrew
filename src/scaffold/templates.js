@@ -449,7 +449,7 @@ Context conservation across Claude, Antigravity, Cursor, Kiro, Windsurf, and Cop
   "pixelcrew.md": `---
 name: pixelcrew
 description: Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office. Orchestrates 23 specialized commands across Creative Director, UX Planner, Design System Architect, Frontend Engineer, Backend Engineer, Performance SRE, Security Sentinel, and QA Automation personas.
-version: 0.2.4
+version: 0.2.5
 author: Arnel (@hiroqt)
 ---
 

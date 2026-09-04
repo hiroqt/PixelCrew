@@ -34,5 +34,5 @@ test('syncAllProviders populates all primary provider directories with valid SKI
   const pluginJson = await fs.readFile(path.join(ROOT_DIR, '.claude-plugin', 'plugin.json'), 'utf-8');
   const manifest = JSON.parse(pluginJson);
   assert.equal(manifest.name, 'pixelcrew');
-  assert.equal(manifest.version, '0.2.4');
+  assert.equal(manifest.version, '0.2.5');
 });

@@ -101,7 +101,7 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
       return sendJson(200, {
         rootDir: engine.rootDir,
         project: engine.getConfig()?.project || path.basename(engine.rootDir),
-        version: '0.2.4',
+        version: '0.2.5',
         ...activeProv
       });
     }

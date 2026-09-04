@@ -1,6 +1,6 @@
 {
   "name": "pixelcrew",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "lockfileVersion": 1,
   "generatedAt": "2026-09-04T13:52:00.000Z",
   "integrity": "sha256-floor42-pixelcrew-multi-agent-orchestrator-lock",
@@ -138,7 +138,7 @@
       "description": "Static codebase analysis, ORM/framework adaptation, and context pruning"
     },
     "pixelcrew": {
-      "version": "0.2.4",
+      "version": "0.2.5",
       "category": "orchestration",
       "path": "skill/SKILL.md",
       "description": "Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office"

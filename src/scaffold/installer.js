@@ -362,7 +362,7 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
     const manifestPath = path.join(targetDir, '.pixel-crew', 'pixel.json');
     let manifest = {
       name: path.basename(targetDir),
-      version: '0.2.4',
+      version: '0.2.5',
       skills: {},
       installedAt: new Date().toISOString()
     };

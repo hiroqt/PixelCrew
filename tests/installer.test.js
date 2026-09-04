@@ -81,7 +81,7 @@ test('initializeProject creates complete .pixel-crew/ and pixel.json manifest', 
     const manifestRaw = await fs.readFile(path.join(tmpDir, '.pixel-crew', 'pixel.json'), 'utf-8');
     const manifest = JSON.parse(manifestRaw);
     assert.equal(manifest.name, 'real-test-app');
-    assert.equal(manifest.version, '0.2.4');
+    assert.equal(manifest.version, '0.2.5');
     assert.ok(manifest.skills);
 
     // Verify core directories

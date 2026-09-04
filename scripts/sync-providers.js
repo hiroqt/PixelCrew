@@ -90,7 +90,7 @@ export async function syncAllProviders() {
   await fs.mkdir(claudePluginDir, { recursive: true });
   const pluginManifest = {
     name: "pixelcrew",
-    version: "0.2.4",
+    version: "0.2.5",
     description: "Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office",
     skills: ["skills/pixelcrew"]
   };

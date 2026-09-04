@@ -1,6 +1,6 @@
 {
   "name": "pixelcrew",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Local multi-agent orchestration framework and interactive pixel-art startup office visual dashboard with design-first website synthesis",
   "author": {
     "name": "Arnel (@hiroqt)"
