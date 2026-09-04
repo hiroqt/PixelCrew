@@ -72,15 +72,24 @@ test('E2E: Greenfield initialization on a new device generates slash commands fo
     const cursorrules = await fs.readFile(path.join(tmpDir, '.cursorrules'), 'utf-8');
     assert.ok(cursorrules.includes('PixelCrew Swarm Rules for Cursor'));
 
-    // 4. Verify Kiro Workflows & Prompts (.kiro/workflows/ & .kiro/prompts/)
+    // 4. Verify Kiro Workflows, Prompts & Skills (.kiro/workflows/, .kiro/prompts/, .kiro/skills/)
     for (const cmd of FLOOR42_COMMANDS) {
       const wf = path.join(tmpDir, '.kiro', 'workflows', `${cmd.name}.md`);
       const prompt = path.join(tmpDir, '.kiro', 'prompts', `${cmd.name}.md`);
+      const kiroSkill = path.join(tmpDir, '.kiro', 'skills', cmd.name, 'SKILL.md');
       assert.ok(await fs.stat(wf).then(s => s.isFile()).catch(() => false), `Expected Kiro workflow ${cmd.name}.md`);
       assert.ok(await fs.stat(prompt).then(s => s.isFile()).catch(() => false), `Expected Kiro prompt ${cmd.name}.md`);
+      assert.ok(await fs.stat(kiroSkill).then(s => s.isFile()).catch(() => false), `Expected Kiro skill ${cmd.name}/SKILL.md`);
     }
 
-    // 5. Verify Antigravity Instructions & Rules
+    // 5. Verify Antigravity Instructions, Rules & Individual Command Skills (.agents/skills/<cmd>/SKILL.md)
+    for (const cmd of FLOOR42_COMMANDS) {
+      const agySkill = path.join(tmpDir, '.agents', 'skills', cmd.name, 'SKILL.md');
+      assert.ok(await fs.stat(agySkill).then(s => s.isFile()).catch(() => false), `Expected Antigravity skill .agents/skills/${cmd.name}/SKILL.md`);
+      const content = await fs.readFile(agySkill, 'utf-8');
+      assert.ok(content.includes(`name: ${cmd.name}`));
+    }
+
     const agentsMd = await fs.readFile(path.join(tmpDir, 'AGENTS.md'), 'utf-8');
     assert.ok(agentsMd.includes('Available Slash Commands & Instructions'));
     assert.ok(agentsMd.includes('/assemble'));

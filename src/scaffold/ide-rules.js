@@ -96,6 +96,28 @@ When \`/pixelcrew <command>\` or direct slash commands are invoked in chat, orch
     files.push({ path: path.join(targetDir, '.agents', 'rules', 'pixelcrew.md'), content: agentsRuleContent });
   }
 
+  // Generate individual skill directories for each Floor 42 command so Antigravity AI chat
+  // automatically indexes and exposes them in the "/" slash command autocomplete menu
+  const skillsBase = isGlobal
+    ? path.join(targetDir, 'skills')
+    : path.join(targetDir, '.agents', 'skills');
+
+  for (const cmd of FLOOR42_COMMANDS) {
+    if (cmd.name === 'pixelcrew') continue;
+    const skillPath = path.join(skillsBase, cmd.name, 'SKILL.md');
+    const skillContent = `---
+name: ${cmd.name}
+description: >-
+  ${cmd.description}. Triggers Floor 42 command /${cmd.name}.
+---
+
+# /${cmd.name} — PixelCrew Command
+
+${cmd.prompt}
+`;
+    files.push({ path: skillPath, content: skillContent });
+  }
+
   return files;
 }
 

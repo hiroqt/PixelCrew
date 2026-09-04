@@ -106,22 +106,104 @@ export async function syncAllProviders() {
   const globalGeminiSkills = path.join(os.homedir(), '.gemini', 'config', 'skills');
   const workspaceSkillsDir = path.join(ROOT_DIR, '.agents', 'skills');
 
+  // 4. Generate all Floor 42 command skills in .agents/skills/ for Antigravity AI chat discovery
+  const { FLOOR42_COMMANDS } = await import('../src/scaffold/commands-catalog.js');
+  for (const cmd of FLOOR42_COMMANDS) {
+    if (cmd.name === 'pixelcrew') continue; // Canonical skill synced in step 1
+    const skillDir = path.join(workspaceSkillsDir, cmd.name);
+    await fs.mkdir(skillDir, { recursive: true });
+    const skillContent = `---
+name: ${cmd.name}
+description: >-
+  ${cmd.description}. Triggers Floor 42 command /${cmd.name}.
+---
+
+# /${cmd.name} — PixelCrew Command
+
+${cmd.prompt}
+`;
+    await fs.writeFile(path.join(skillDir, 'SKILL.md'), skillContent, 'utf-8');
+  }
+  console.log(`  \x1b[32m✓\x1b[0m Generated ${FLOOR42_COMMANDS.length - 1} command skills -> \x1b[36m.agents/skills/\x1b[0m`);
+
+  // 5. Generate Kiro workflows, prompts, and skills in .kiro/ for Kiro AI chat discovery
+  const kiroDir = path.join(ROOT_DIR, '.kiro');
+  await fs.mkdir(path.join(kiroDir, 'prompts'), { recursive: true });
+  await fs.mkdir(path.join(kiroDir, 'workflows'), { recursive: true });
+  await fs.mkdir(path.join(kiroDir, 'skills'), { recursive: true });
+  for (const cmd of FLOOR42_COMMANDS) {
+    await fs.writeFile(
+      path.join(kiroDir, 'prompts', `${cmd.name}.md`),
+      `---\nname: ${cmd.name}\ndescription: ${cmd.description}\n---\n\n${cmd.prompt}\n`,
+      'utf-8'
+    );
+    await fs.writeFile(
+      path.join(kiroDir, 'workflows', `${cmd.name}.md`),
+      `---\nname: ${cmd.name}\ndescription: ${cmd.description}\n---\n\n# /${cmd.name} — PixelCrew Command\n\n${cmd.prompt}\n`,
+      'utf-8'
+    );
+    if (cmd.name === 'pixelcrew') continue; // Canonical skill synced in step 1
+    const kiroSkillDir = path.join(kiroDir, 'skills', cmd.name);
+    await fs.mkdir(kiroSkillDir, { recursive: true });
+    await fs.writeFile(
+      path.join(kiroSkillDir, 'SKILL.md'),
+      `---\nname: ${cmd.name}\ndescription: >-\n  ${cmd.description}. Triggers Floor 42 command /${cmd.name}.\n---\n\n# /${cmd.name} — PixelCrew Command\n\n${cmd.prompt}\n`,
+      'utf-8'
+    );
+  }
+  console.log(`  \x1b[32m✓\x1b[0m Generated Kiro prompts, workflows & skills -> \x1b[36m.kiro/\x1b[0m`);
+
+  // 6. Generate Claude Code commands in .claude/commands/
+  const claudeCommandsDir = path.join(ROOT_DIR, '.claude', 'commands');
+  await fs.mkdir(claudeCommandsDir, { recursive: true });
+  for (const cmd of FLOOR42_COMMANDS) {
+    await fs.writeFile(
+      path.join(claudeCommandsDir, `${cmd.name}.md`),
+      `---\ndescription: ${cmd.description}\n---\n\n# /${cmd.name}\n\n${cmd.prompt}\n`,
+      'utf-8'
+    );
+  }
+  console.log(`  \x1b[32m✓\x1b[0m Generated Claude Code commands -> \x1b[36m.claude/commands/\x1b[0m`);
+
+  // 7. Generate Cursor commands in .cursor/commands/
+  const cursorCommandsDir = path.join(ROOT_DIR, '.cursor', 'commands');
+  await fs.mkdir(cursorCommandsDir, { recursive: true });
+  for (const cmd of FLOOR42_COMMANDS) {
+    await fs.writeFile(
+      path.join(cursorCommandsDir, `${cmd.name}.md`),
+      `---\ndescription: ${cmd.description}\n---\n\n# /${cmd.name}\n\n${cmd.prompt}\n`,
+      'utf-8'
+    );
+  }
+  console.log(`  \x1b[32m✓\x1b[0m Generated Cursor commands -> \x1b[36m.cursor/commands/\x1b[0m`);
+
+  // 8. Generate PixelCrew commands in .pixel-crew/commands/
+  const pcCommandsDir = path.join(ROOT_DIR, '.pixel-crew', 'commands');
+  await fs.mkdir(pcCommandsDir, { recursive: true });
+  for (const cmd of FLOOR42_COMMANDS) {
+    await fs.writeFile(
+      path.join(pcCommandsDir, `${cmd.name}.md`),
+      `---\ndescription: ${cmd.description}\n---\n\n# /${cmd.name}\n\n${cmd.prompt}\n`,
+      'utf-8'
+    );
+  }
+  console.log(`  \x1b[32m✓\x1b[0m Generated PixelCrew commands -> \x1b[36m.pixel-crew/commands/\x1b[0m`);
+
+  // 9. Sync Global Antigravity & User IDE Skills
   try {
     const globalExists = await fs.access(globalGeminiSkills).then(() => true).catch(() => false);
     if (globalExists) {
-      // Sync canonical pixelcrew skill
       await copyDir(SOURCE_SKILL_DIR, path.join(globalGeminiSkills, 'pixelcrew'));
       
-      // Sync all companion skills (anti-ai-patterns, design-director, frontend-engineering, etc.)
       const skills = await fs.readdir(workspaceSkillsDir, { withFileTypes: true });
       for (const s of skills) {
         if (s.isDirectory()) {
           const srcSkill = path.join(workspaceSkillsDir, s.name);
           const destSkill = path.join(globalGeminiSkills, s.name);
           await copyDir(srcSkill, destSkill);
-          console.log(`  \x1b[32m✓\x1b[0m Synced Global Antigravity Skill -> \x1b[36m~/.gemini/config/skills/${s.name}/\x1b[0m`);
         }
       }
+      console.log(`  \x1b[32m✓\x1b[0m Synced all Floor 42 command skills -> \x1b[36m~/.gemini/config/skills/\x1b[0m`);
     }
   } catch {}
 

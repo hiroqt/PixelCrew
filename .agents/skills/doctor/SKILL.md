@@ -1,0 +1,9 @@
+---
+name: doctor
+description: >-
+  Diagnoses local environment, toolchain verification, and coding agent provider runtimes. Triggers Floor 42 command /doctor.
+---
+
+# /doctor — PixelCrew Command
+
+Run comprehensive environment diagnostics: check Node.js, Git, local CLI runtimes, and detected AI IDE providers.

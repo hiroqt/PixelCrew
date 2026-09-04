@@ -65,5 +65,22 @@ ${KIRO_COMMANDS.map(c => `- **\`/${c.name}\`**: ${c.description}`).join('\n')}
     files.push({ path: path.join(baseDir, 'rules', 'pixelcrew.md'), content: rulesContent });
   }
 
+  // 4. Skills (.kiro/skills/<cmd>/SKILL.md) for direct slash command invocation in Kiro AI chat
+  for (const cmd of KIRO_COMMANDS) {
+    if (cmd.name === 'pixelcrew') continue;
+    const skillPath = path.join(baseDir, 'skills', cmd.name, 'SKILL.md');
+    const skillContent = `---
+name: ${cmd.name}
+description: >-
+  ${cmd.description}. Triggers Floor 42 command /${cmd.name}.
+---
+
+# /${cmd.name} — PixelCrew Command
+
+${cmd.prompt}
+`;
+    files.push({ path: skillPath, content: skillContent });
+  }
+
   return files;
 }
