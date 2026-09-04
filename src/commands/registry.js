@@ -61,11 +61,15 @@ import { DeployCommand } from './deploy.js';
 import { AddCommand } from './add.js';
 import { SyncCommand } from './sync.js';
 import { InstallCommand } from './install.js';
+import { CommandsCommand } from './commands.js';
 
 export class CommandRegistry {
   constructor() {
     this.commands = new Map();
     this.aliases = new Map();
+
+    // 0. Register commands guide & help
+    this.register(new CommandsCommand());
 
     // 1. Register master dispatcher
     const master = new MasterPixelCrewCommand(this);
@@ -238,18 +242,48 @@ export class CommandRegistry {
    * Dispatches execution from raw input string or structured command
    */
   async execute(input, context = {}) {
-    const parsed = typeof input === 'string' ? InputParser.parse(input) : input;
+    let parsed = typeof input === 'string' ? InputParser.parse(input) : input;
 
     if (parsed.type === 'empty') {
       return { success: false, message: 'Empty command or message' };
     }
 
+    // If input was a string without leading '/', check if the first token matches a registered command or alias
+    if (parsed.type === 'chat' && typeof input === 'string') {
+      const tokens = InputParser.tokenize(input.trim());
+      const firstToken = tokens[0]?.toLowerCase();
+      if (firstToken && (this.commands.has(firstToken) || this.aliases.has(firstToken) || firstToken === 'commands' || firstToken === 'help' || firstToken === 'menu' || firstToken === 'cmds')) {
+        parsed = {
+          type: 'command',
+          command: firstToken,
+          args: tokens.slice(1),
+          raw: input.trim(),
+          fullArgsString: input.trim().slice(tokens[0].length).trim()
+        };
+      }
+    }
+
     if (parsed.type === 'command') {
-      const cmd = this.getCommand(parsed.command);
+      const cleanCmd = (parsed.command || '').trim().toLowerCase();
+
+      // Handle bare '/' or help/commands shortcuts
+      if (!cleanCmd || cleanCmd === 'commands' || cleanCmd === 'help' || cleanCmd === 'menu' || cleanCmd === 'cmds') {
+        const cmdHelper = this.getCommand('commands');
+        if (cmdHelper) {
+          return await cmdHelper.execute(context, parsed.args);
+        }
+      }
+
+      const cmd = this.getCommand(cleanCmd);
       if (!cmd) {
+        const suggestions = this.getAutocompleteSuggestions(`/${cleanCmd}`);
+        const suggestText = suggestions.length > 0
+          ? ` Did you mean: ${suggestions.slice(0, 3).map(s => s.name).join(', ')}?`
+          : '';
         return {
           success: false,
-          message: `Unknown command: "/${parsed.command}". Type "/" to see available commands.`
+          message: `Unknown command: "/${parsed.command}".${suggestText} Type "/commands" to view the Floor 42 command suite.`,
+          output: `\x1b[31mUnknown command:\x1b[0m /${parsed.command}.${suggestText}\nType \x1b[36m/commands\x1b[0m to list all available commands.`
         };
       }
 

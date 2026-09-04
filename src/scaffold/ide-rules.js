@@ -3,89 +3,22 @@
  * 
  * Generates configuration files, rules, prompts, and workflows for:
  * - Kiro AI (.kiro/workflows/*.md, .kiro/prompts/*.md, .kiro/rules/, .kirorules)
- * - Cursor AI (.cursorrules, .cursor/rules/pixelcrew.mdc, .cursor/skills/)
+ * - Cursor AI (.cursor/commands/*.md, .cursorrules, .cursor/rules/pixelcrew.mdc)
  * - Google Antigravity (.agents/skills/, .agents/rules/, AGENTS.md, GEMINI.md)
- * - Claude Code (.claude/skills/, CLAUDE.md, .claude-plugin/plugin.json)
+ * - Claude Code (.claude/commands/*.md, .claude/skills/, CLAUDE.md, .claude-plugin/plugin.json)
  */
 
 import path from 'node:path';
-import { KIRO_COMMANDS } from './kiro-generator.js';
+import { FLOOR42_COMMANDS } from './commands-catalog.js';
+import { generateCursorFiles } from './cursor-generator.js';
+import { generateClaudeFiles } from './claude-generator.js';
 
-/**
- * Generates Cursor AI configuration and rules files (.cursorrules and .cursor/rules/pixelcrew.mdc)
- */
-export function generateCursorFiles(targetDir) {
-  const files = [];
-
-  const cursorRulesContent = `# 🏢 PixelCrew Swarm Rules for Cursor
-
-You are integrated with PixelCrew, an autonomous multi-agent engineering swarm (Floor 42, Pixel Corps HQ).
-Support \`/pixelcrew <command>\` and \`@pixelcrew\` workflows:
-
-## ⚡ Available Slash Commands:
-- \`/pixelcrew assemble [prompt]\` — Full-stack multi-agent sprint (brief → Next.js App Router + TypeScript)
-- \`/pixelcrew blueprint [prompt]\` — Dynamic DAG planning, wireframes & specs
-- \`/pixelcrew boss-fight <issue>\` — Targeted swarm bug blitz to isolate and fix errors
-- \`/pixelcrew render\` — 6-dimension Anti-AI design & UX review (>= 8.5/10)
-- \`/pixelcrew recap\` — Token-optimized git changelog & diff statistics
-- \`/pixelcrew sentinel\` — Security audit, OWASP checks, RFC 7807 envelopes
-- \`/pixelcrew audit\` — SRE technical quality audit (WCAG AA/AAA, Core Web Vitals)
-- \`/pixelcrew warp\` — Full-stack performance tuning & AST prompt pruning
-- \`/pixelcrew polish\` — Shipping readiness pass & strict type checks
-- \`/pixelcrew 8bit\` — Retro Web Audio chimes & CRT scanlines
-- \`/pixelcrew chromatic [palette]\` — HSL color tokens & dark mode elevation surfaces
-- \`/pixelcrew typeset [preset]\` — Mathematical fluid clamp() typography scales
-- \`/pixelcrew bento [section]\` — Asymmetric Bento grid layouts
-- \`/pixelcrew de-slop [section]\` — Strip generic AI cliché copy
-- \`/pixelcrew bolder\` / \`/pixelcrew quieter\` — Amplify visual energy or restore calm balance
-- \`/pixelcrew office\` — Live Floor 42 startup office visual dashboard (http://localhost:4747)
-- \`/pixelcrew doctor\` — Diagnose environment, toolchains & provider runtimes
-- \`/pixelcrew init\` — Initialize and adapt workspace
-
-## 🛡️ Anti-AI Slop Directive:
-- Never generate purple/cyan glowing mesh gradient blobs on flat black cards.
-- Never generate repetitive 3-column identical card grids. Use asymmetric Bento layouts.
-- Never use placeholder marketing buzzwords (*"Elevate your workflow"*, *"Seamlessly innovate"*).
-- Enforce mathematical fluid \`clamp()\` typography and WCAG AA/AAA contrast ratios.
-`;
-
-  const cursorMdcContent = `---
-description: PixelCrew Autonomous Multi-Agent Engineering Swarm & Anti-AI Design Suite
-globs: *
-alwaysApply: true
----
-
-# 🏢 PixelCrew — Autonomous Multi-Agent Engineering Swarm (Floor 42)
-
-When the user invokes \`/pixelcrew <command>\`, \`@pixelcrew\`, or direct slash commands (\`/assemble\`, \`/blueprint\`, \`/boss-fight\`, \`/render\`, \`/recap\`, \`/sentinel\`, \`/audit\`, \`/warp\`, \`/polish\`):
-
-## ⚡ Swarm Commands:
-- \`/pixelcrew assemble [prompt]\`: Run full-stack multi-agent sprint pipeline from brief to Next.js code.
-- \`/pixelcrew blueprint [prompt]\`: Plan UX section topologies & dynamic DAG graphs before writing code.
-- \`/pixelcrew boss-fight <issue>\`: Targeted bug blitz with root cause isolation.
-- \`/pixelcrew render\`: 6-dimension Anti-AI design & UX review (>= 8.5/10).
-- \`/pixelcrew recap\`: Compact git changelog and diff statistics.
-- \`/pixelcrew sentinel\`: OWASP security audit & RFC 7807 error envelopes.
-- \`/pixelcrew audit\`: WCAG 2.1 AA/AAA accessibility & Core Web Vitals checks.
-- \`/pixelcrew warp\`: Performance optimization & AST token caching.
-- \`/pixelcrew polish\`: Shipping readiness pass & TypeScript cleanup.
-- \`/pixelcrew office\`: Launch live Floor 42 dashboard at http://localhost:4747.
-
-## 🛡️ Anti-AI Slop Enforcement:
-- Enforce intentional asymmetry (Bento grids), fluid clamp() typography, and high-contrast surface tiers.
-- Ban generic AI tropes: purple gradient blobs, floating fake sparkles, uniform card repetition, and cliché buzzwords.
-`;
-
-  files.push({ path: path.join(targetDir, '.cursorrules'), content: cursorRulesContent });
-  files.push({ path: path.join(targetDir, '.cursor', 'rules', 'pixelcrew.mdc'), content: cursorMdcContent });
-
-  return files;
-}
+export { generateCursorFiles, generateClaudeFiles };
 
 /**
  * Generates Google Antigravity configuration and rules files (AGENTS.md, GEMINI.md, .agents/rules/pixelcrew.md)
  */
-export function generateAntigravityFiles(targetDir) {
+export function generateAntigravityFiles(targetDir, isGlobal = false) {
   const files = [];
 
   const agentsMdContent = `# 🏢 PixelCrew — Autonomous Multi-Agent Engineering Swarm
@@ -152,50 +85,16 @@ When \`/pixelcrew <command>\` or direct slash commands are invoked in chat, orch
 8. **QA Automation Engineer**: Playwright E2E user journeys
 `;
 
-  files.push({ path: path.join(targetDir, 'AGENTS.md'), content: agentsMdContent });
-  files.push({ path: path.join(targetDir, 'GEMINI.md'), content: geminiMdContent });
-  files.push({ path: path.join(targetDir, '.agents', 'rules', 'pixelcrew.md'), content: agentsRuleContent });
-
-  return files;
-}
-
-/**
- * Generates Claude Code configuration and rules files (CLAUDE.md, .claude-plugin/plugin.json)
- */
-export function generateClaudeFiles(targetDir) {
-  const files = [];
-
-  const claudeMdContent = `# 🏢 PixelCrew Multi-Agent Swarm Instructions for Claude Code
-
-You are integrated with PixelCrew (Floor 42, Pixel Corps HQ).
-Support \`/pixelcrew <command>\` and direct slash commands (\`/assemble\`, \`/blueprint\`, \`/boss-fight\`, \`/render\`, \`/recap\`, \`/sentinel\`, \`/audit\`, \`/warp\`, \`/polish\`).
-
-## Commands:
-- \`/pixelcrew assemble [prompt]\`: Run full-stack multi-agent sprint (brief → Next.js App Router + TypeScript)
-- \`/pixelcrew blueprint [prompt]\`: Dynamic DAG planning, wireframes & specs
-- \`/pixelcrew boss-fight <issue>\`: Targeted bug blitz to isolate and repair errors
-- \`/pixelcrew render\`: 6-dimension Anti-AI design review (>= 8.5/10)
-- \`/pixelcrew recap\`: Token-optimized git changelog and diff stats
-- \`/pixelcrew sentinel\`: Security audit, OWASP checks, RFC 7807 envelopes
-- \`/pixelcrew audit\`: Accessibility (WCAG AA/AAA) & Core Web Vitals checks
-- \`/pixelcrew warp\`: Streaming SSR, bundle optimization, AST prompt caching
-- \`/pixelcrew polish\`: Shipping readiness pass & strict type checks
-- \`/pixelcrew office\`: Live Floor 42 startup office visual dashboard at http://localhost:4747
-
-## Anti-AI Guidelines:
-- Reject purple/cyan neon blobs, floating fake sparkles, and uniform 3-card grids.
-- Apply intentional asymmetry (Bento grids), mathematical fluid clamp() typography, and high-contrast surface tiers.
-`;
-
-  const claudePluginContent = JSON.stringify({
-    name: 'pixelcrew',
-    version: '0.2.4',
-    description: 'Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office',
-    skills: ['skills/pixelcrew']
-  }, null, 2) + '\n';
-
-  files.push({ path: path.join(targetDir, 'CLAUDE.md'), content: claudeMdContent });
-  files.push({ path: path.join(targetDir, '.claude-plugin', 'plugin.json'), content: claudePluginContent });
+  if (isGlobal) {
+    // Global Antigravity configuration in ~/.gemini/config/
+    files.push({ path: path.join(targetDir, 'GEMINI.md'), content: geminiMdContent });
+    files.push({ path: path.join(targetDir, 'rules', 'pixelcrew.md'), content: agentsRuleContent });
+  } else {
+    // Workspace Antigravity configuration in .agents/
+    files.push({ path: path.join(targetDir, 'AGENTS.md'), content: agentsMdContent });
+    files.push({ path: path.join(targetDir, 'GEMINI.md'), content: geminiMdContent });
+    files.push({ path: path.join(targetDir, '.agents', 'rules', 'pixelcrew.md'), content: agentsRuleContent });
+  }
 
   return files;
 }
@@ -203,10 +102,10 @@ Support \`/pixelcrew <command>\` and direct slash commands (\`/assemble\`, \`/bl
 /**
  * Generates all multi-IDE rule and configuration files for a target directory
  */
-export function generateAllIDERules(targetDir) {
+export function generateAllIDERules(targetDir, isGlobal = false) {
   return [
-    ...generateCursorFiles(targetDir),
-    ...generateAntigravityFiles(targetDir),
-    ...generateClaudeFiles(targetDir)
+    ...generateCursorFiles(targetDir, isGlobal),
+    ...generateAntigravityFiles(targetDir, isGlobal),
+    ...generateClaudeFiles(targetDir, isGlobal)
   ];
 }

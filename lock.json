@@ -1,0 +1,227 @@
+{
+  "name": "pixelcrew",
+  "version": "0.2.4",
+  "lockfileVersion": 1,
+  "generatedAt": "2026-09-04T13:52:00.000Z",
+  "integrity": "sha256-floor42-pixelcrew-multi-agent-orchestrator-lock",
+  "runtime": {
+    "node": ">=18.0.0",
+    "architecture": "esm",
+    "main": "src/index.js",
+    "bin": {
+      "pixelcrew": "bin/pixel-agents.js",
+      "pixel-crew": "bin/pixel-agents.js",
+      "pixel-agents": "bin/pixel-agents.js"
+    },
+    "dependencies": {},
+    "devDependencies": {}
+  },
+  "swarm": {
+    "floor": 42,
+    "name": "Floor 42 Autonomous Multi-Agent Engineering Swarm",
+    "headquarters": "Floor 42, Pixel Corps HQ",
+    "dashboardPort": 4747,
+    "agents": {
+      "creativeDirector": {
+        "name": "Creative Director",
+        "title": "Lead Creative Direction & Aesthetic Strategy",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.7,
+        "maxTokens": 4096,
+        "skills": ["design-director", "anti-ai-patterns", "token-efficiency"]
+      },
+      "uxPlanner": {
+        "name": "UX Planner",
+        "title": "Information Architecture & DAG Topological Planner",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.3,
+        "maxTokens": 4096,
+        "skills": ["codebase-intelligence", "token-efficiency"]
+      },
+      "designSystem": {
+        "name": "Design System Architect",
+        "title": "Design System Engineering & Anti-AI Quality Guardian",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.2,
+        "maxTokens": 4096,
+        "skills": ["anti-ai-patterns", "frontend-engineering", "token-efficiency"]
+      },
+      "frontend": {
+        "name": "Frontend Engineer",
+        "title": "Senior Frontend Engineer (Next.js & TypeScript)",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.2,
+        "maxTokens": 8192,
+        "skills": ["frontend-engineering", "anti-ai-patterns", "token-efficiency"]
+      },
+      "backend": {
+        "name": "Backend Engineer",
+        "title": "Universal Backend Systems Architect",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.2,
+        "maxTokens": 8192,
+        "skills": ["backend-engineering", "database-engineering", "token-efficiency"]
+      },
+      "performance": {
+        "name": "Performance SRE",
+        "title": "Performance Engineering & Runtime Optimization SRE",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.1,
+        "maxTokens": 4096,
+        "skills": ["performance-engineering", "token-efficiency"]
+      },
+      "sentinel": {
+        "name": "Security Sentinel",
+        "title": "Security Engineering & STRIDE Threat Sentinel",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.1,
+        "maxTokens": 4096,
+        "skills": ["backend-engineering", "database-engineering"]
+      },
+      "qa": {
+        "name": "QA Automation Lead",
+        "title": "QA Automation & 6-Dimension Rubric Verifier",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.1,
+        "maxTokens": 4096,
+        "skills": ["anti-ai-patterns", "codebase-intelligence"]
+      }
+    }
+  },
+  "skills": {
+    "anti-ai-patterns": {
+      "version": "1.0.0",
+      "category": "design",
+      "path": ".agents/skills/anti-ai-patterns/SKILL.md",
+      "description": "Strict Anti-AI-Generated Design Critic and Quality Guardian"
+    },
+    "design-director": {
+      "version": "1.0.0",
+      "category": "design",
+      "path": ".agents/skills/design-director/SKILL.md",
+      "description": "Lead Creative Direction and Aesthetic Strategy"
+    },
+    "frontend-engineering": {
+      "version": "1.0.0",
+      "category": "engineering",
+      "path": ".agents/skills/frontend-engineering/SKILL.md",
+      "description": "Modern front-end engineering across Next.js, React 19, TypeScript, and CSS"
+    },
+    "backend-engineering": {
+      "version": "1.0.0",
+      "category": "engineering",
+      "path": ".agents/skills/backend-engineering/SKILL.md",
+      "description": "Clean Architecture, Hexagonal API standards, rate limiting, and observability"
+    },
+    "database-engineering": {
+      "version": "1.0.0",
+      "category": "data",
+      "path": ".agents/skills/database-engineering/SKILL.md",
+      "description": "Advanced indexing, RLS policy optimization, and multi-tenant scaling"
+    },
+    "performance-engineering": {
+      "version": "1.0.0",
+      "category": "performance",
+      "path": ".agents/skills/performance-engineering/SKILL.md",
+      "description": "Full-stack Core Web Vitals, runtime profiling, multi-tier caching, and load testing"
+    },
+    "token-efficiency": {
+      "version": "1.0.0",
+      "category": "optimization",
+      "path": ".agents/skills/token-efficiency/SKILL.md",
+      "description": "AST symbol-graph extraction and prompt caching slashing tokens by 50% to 75%"
+    },
+    "codebase-intelligence": {
+      "version": "1.0.0",
+      "category": "analysis",
+      "path": ".agents/skills/codebase-intelligence/SKILL.md",
+      "description": "Static codebase analysis, ORM/framework adaptation, and context pruning"
+    },
+    "pixelcrew": {
+      "version": "0.2.4",
+      "category": "orchestration",
+      "path": "skill/SKILL.md",
+      "description": "Autonomous Multi-Agent Engineering Swarm & Retro Pixel-Art Startup Office"
+    }
+  },
+  "providers": {
+    "claude-code": {
+      "harness": "Anthropic Claude Code",
+      "skillPath": ".claude/skills/pixelcrew/SKILL.md",
+      "commandsPath": ".claude/commands",
+      "rulesPath": "CLAUDE.md",
+      "pluginPath": ".claude-plugin/plugin.json"
+    },
+    "cursor": {
+      "harness": "Cursor AI IDE",
+      "skillPath": ".cursor/skills/pixelcrew/SKILL.md",
+      "commandsPath": ".cursor/commands",
+      "rulesPath": ".cursor/rules/pixelcrew.mdc",
+      "dotRulesPath": ".cursorrules"
+    },
+    "kiro": {
+      "harness": "Kiro AI",
+      "skillPath": ".kiro/skills/pixelcrew/SKILL.md",
+      "workflowsPath": ".kiro/workflows",
+      "promptsPath": ".kiro/prompts",
+      "rulesPath": ".kirorules"
+    },
+    "antigravity": {
+      "harness": "Google Antigravity & Agentic IDEs",
+      "skillPath": ".agents/skills/pixelcrew/SKILL.md",
+      "rulesPath": "AGENTS.md",
+      "geminiRulesPath": "GEMINI.md"
+    },
+    "gemini": {
+      "harness": "Google Gemini CLI & Code Assist",
+      "skillPath": ".agent/skills/pixelcrew/SKILL.md",
+      "rulesPath": "GEMINI.md"
+    },
+    "codex": {
+      "harness": "OpenAI Codex",
+      "skillPath": ".codex/skills/pixelcrew/SKILL.md"
+    },
+    "grok": {
+      "harness": "xAI Grok",
+      "skillPath": ".grok/skills/pixelcrew/SKILL.md"
+    },
+    "hermes": {
+      "harness": "Hermes Agentic CLI",
+      "skillPath": ".hermes/skills/pixelcrew/SKILL.md"
+    },
+    "opencode": {
+      "harness": "OpenCode IDE",
+      "skillPath": ".opencode/skills/pixelcrew/SKILL.md"
+    },
+    "pi": {
+      "harness": "Inflection Pi Agent",
+      "skillPath": ".pi/skills/pixelcrew/SKILL.md"
+    }
+  },
+  "commands": {
+    "assemble": { "category": "architecture", "description": "Full shape-then-build multi-agent sprint pipeline from brief to production code" },
+    "blueprint": { "category": "architecture", "description": "Dynamic DAG planning, wireframes & specifications before writing code" },
+    "boss-fight": { "category": "architecture", "description": "Targeted swarm bug blitz to isolate, repair, and verify breaking issues" },
+    "render": { "category": "review", "description": "6-dimension Anti-AI design & UX review (Originality, Hierarchy, Typography, Layout, Brand, Slop Penalty >= 8.5/10)" },
+    "recap": { "category": "review", "description": "Token-optimized recap of recent git changes, commits, diff stats, and file operations" },
+    "sentinel": { "category": "security", "description": "Enterprise security audit, OWASP Top 10 analysis, and RFC 7807 error checks" },
+    "audit": { "category": "governance", "description": "Accessibility audit (WCAG 2.1/2.2 AA/AAA) and Core Web Vitals checks" },
+    "warp": { "category": "performance", "description": "Full-stack performance pass: streaming SSR, bundle size reduction, and prompt caching" },
+    "polish": { "category": "review", "description": "Pre-ship visual polish, micro-interactions, smooth hover transitions, and dark mode" },
+    "bolder": { "category": "aesthetics", "description": "Amplifies contrast, typography weight, and visceral visual punch" },
+    "quieter": { "category": "aesthetics", "description": "Softens contrast, refines spacing, and adopts a restrained editorial tone" },
+    "chromatic": { "category": "aesthetics", "description": "Curates vibrant, harmonious HSL color palettes with zero muddy tones" },
+    "colorize": { "category": "aesthetics", "description": "Generates a cohesive, context-aware color palette matching brand energy" },
+    "bento": { "category": "aesthetics", "description": "Organizes features into dynamic, asymmetric Bento-box grid layouts" },
+    "eight-bit": { "category": "aesthetics", "description": "Injects retro 8-bit / 16-bit arcade aesthetics, pixel typography, and nostalgic flair" },
+    "delight": { "category": "aesthetics", "description": "Adds interactive whimsy, satisfying micro-animations, and dynamic feedback" },
+    "animate": { "category": "aesthetics", "description": "Adds tasteful CSS / SVG animations with reduced-motion respect" },
+    "typeset": { "category": "aesthetics", "description": "Applies fluid mathematical clamp() typography scale" },
+    "init": { "category": "scaffold", "description": "Initializes and adapts PixelCrew to active project" },
+    "install": { "category": "scaffold", "description": "Floor 42 Agent Workstation Installer & Cross-IDE Dispatcher" },
+    "sync": { "category": "scaffold", "description": "Synchronizes skills across all supported AI coding providers" },
+    "add": { "category": "scaffold", "description": "Installs additional agent skills into active project" },
+    "doctor": { "category": "scaffold", "description": "Diagnoses local environment, toolchain verification, and coding agent providers" },
+    "office": { "category": "telemetry", "description": "Launches Floor 42 startup office visual dashboard at http://localhost:4747" }
+  }
+}

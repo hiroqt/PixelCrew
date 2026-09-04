@@ -3,12 +3,14 @@ import path from 'node:path';
 import os from 'node:os';
 import readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
+import fsSync from 'node:fs';
 import { DEFAULT_CONFIG, INITIAL_STATE, AGENT_MARKDOWNS, SKILL_MARKDOWNS } from './templates.js';
 import { analyzeCodebase, buildAdaptedConfig } from './analyzer.js';
 import { detectActiveIDE, GLOBAL_PROVIDER_PATHS, PROVIDER_PATHS } from './installer.js';
 import { getSkillBundle, getAllCanonicalSkillIds } from './skills-bundle.js';
 import { generateKiroFiles } from './kiro-generator.js';
 import { generateCursorFiles, generateAntigravityFiles, generateClaudeFiles, generateAllIDERules } from './ide-rules.js';
+import { FLOOR42_COMMANDS } from './commands-catalog.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 /**
@@ -91,7 +93,37 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   }
 
   if (!chosenProvider) {
-    chosenProvider = activeIDE.id !== 'pixel-crew' ? activeIDE.id : 'none';
+    if (options.yes) {
+      chosenProvider = 'all';
+    } else if (activeIDE.id !== 'pixel-crew') {
+      chosenProvider = activeIDE.id;
+    } else {
+      // Check if project workspace already contains specific IDE markers
+      const workspaceMarkers = [
+        { id: 'kiro', paths: ['.kiro', '.kirorules', 'kiro.json'] },
+        { id: 'cursor', paths: ['.cursor', '.cursorrules'] },
+        { id: 'antigravity', paths: ['.agents', 'AGENTS.md', '.gemini'] },
+        { id: 'claude-code', paths: ['.claude', 'CLAUDE.md'] }
+      ];
+      const matchedWorkspace = workspaceMarkers.find(m => m.paths.some(p => fsSync.existsSync(path.join(targetDir, p))));
+
+      if (matchedWorkspace) {
+        chosenProvider = matchedWorkspace.id;
+      } else {
+        // Check if user has global IDEs in home directory
+        const home = options.homeDir || process.env.PIXELCREW_HOME || os.homedir();
+        const homeMarkers = [
+          { id: 'claude-code', path: path.join(home, '.claude') },
+          { id: 'cursor', path: path.join(home, '.cursor') },
+          { id: 'kiro', path: path.join(home, '.kiro') },
+          { id: 'antigravity', path: path.join(home, '.gemini', 'config') }
+        ];
+        const hasHomeIde = homeMarkers.some(m => fsSync.existsSync(m.path));
+        // Default to 'all' so that when opened in ANY AI IDE on this device,
+        // slash commands and workflows appear immediately!
+        chosenProvider = hasHomeIde ? 'all' : (options.yes ? 'all' : 'none');
+      }
+    }
   }
 
   console.log('\n\x1b[33mInitializing Pixel Crew in:\x1b[0m', targetDir);
@@ -164,6 +196,7 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   for (const baseDir of targets) {
     const agentsDir = path.join(baseDir, 'agents');
     const skillsDir = path.join(baseDir, 'skills');
+    const commandsDir = path.join(baseDir, 'commands');
     const reportsDir = path.join(baseDir, 'reports');
     const tasksDir = path.join(baseDir, 'tasks');
     const dashboardDir = path.join(baseDir, 'dashboard');
@@ -171,6 +204,7 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     await safeMkdir(baseDir, { dryRun, reporter });
     await safeMkdir(agentsDir, { dryRun, reporter });
     await safeMkdir(skillsDir, { dryRun, reporter });
+    await safeMkdir(commandsDir, { dryRun, reporter });
     await safeMkdir(reportsDir, { dryRun, reporter });
     await safeMkdir(tasksDir, { dryRun, reporter });
     if (enableDashboard) {
@@ -189,6 +223,19 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
 
     for (const [filename, content] of Object.entries(SKILL_MARKDOWNS)) {
       await safeWriteFile(path.join(skillsDir, filename), content.trim() + '\n', { dryRun, reporter, targetDir });
+    }
+
+    // Write all Floor 42 command markdown files
+    for (const cmd of FLOOR42_COMMANDS) {
+      const cmdContent = `---
+description: ${cmd.description}
+---
+
+# /${cmd.name}
+
+${cmd.prompt}
+`;
+      await safeWriteFile(path.join(commandsDir, `${cmd.name}.md`), cmdContent, { dryRun, reporter, targetDir });
     }
 
     if (enableDashboard) {
@@ -272,6 +319,7 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
 
   // 2. Install skills to Global IDE directory if scope is global, both, or all
   if (installScope === 'global' || installScope === 'both' || installScope === 'all') {
+    const userHome = options.homeDir || process.env.PIXELCREW_HOME || os.homedir();
     const globalProviders = installScope === 'all'
       ? Object.keys(GLOBAL_PROVIDER_PATHS)
       : (options.provider && options.provider !== 'auto'
@@ -286,23 +334,44 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
       for (const sName of canonicalSkills) {
         const bundle = await getSkillBundle(sName);
         if (!bundle) continue;
-        const fullGlobalPath = globalPathFn(sName);
-        await safeWriteFile(fullGlobalPath, bundle.content.trim() + '\n', { dryRun, reporter, targetDir: os.homedir() });
+        const fullGlobalPath = globalPathFn(sName, userHome);
+        await safeWriteFile(fullGlobalPath, bundle.content.trim() + '\n', { dryRun, reporter, targetDir: userHome });
 
         if (bundle.references && Object.keys(bundle.references).length > 0) {
           const skillDir = path.dirname(fullGlobalPath);
           for (const [refName, refContent] of Object.entries(bundle.references)) {
             const refFullPath = path.join(skillDir, 'references', refName);
-            await safeWriteFile(refFullPath, refContent, { dryRun, reporter, targetDir: os.homedir() });
+            await safeWriteFile(refFullPath, refContent, { dryRun, reporter, targetDir: userHome });
           }
         }
       }
     }
 
     if (globalProviders.includes('kiro')) {
-      const kiroGlobalFiles = generateKiroFiles(os.homedir(), true);
+      const kiroGlobalFiles = generateKiroFiles(path.join(userHome, '.kiro'), true);
       for (const kf of kiroGlobalFiles) {
-        await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir: os.homedir() });
+        await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir: userHome });
+      }
+    }
+
+    if (globalProviders.includes('claude-code')) {
+      const claudeGlobalFiles = generateClaudeFiles(path.join(userHome, '.claude'), true);
+      for (const clf of claudeGlobalFiles) {
+        await safeWriteFile(clf.path, clf.content, { dryRun, reporter, targetDir: userHome });
+      }
+    }
+
+    if (globalProviders.includes('cursor')) {
+      const cursorGlobalFiles = generateCursorFiles(path.join(userHome, '.cursor'), true);
+      for (const cf of cursorGlobalFiles) {
+        await safeWriteFile(cf.path, cf.content, { dryRun, reporter, targetDir: userHome });
+      }
+    }
+
+    if (globalProviders.includes('antigravity')) {
+      const antigravityGlobalFiles = generateAntigravityFiles(path.join(userHome, '.gemini', 'config'), true);
+      for (const af of antigravityGlobalFiles) {
+        await safeWriteFile(af.path, af.content, { dryRun, reporter, targetDir: userHome });
       }
     }
   }

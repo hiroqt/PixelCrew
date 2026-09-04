@@ -1,0 +1,28 @@
+{
+  "name": "pixelcrew",
+  "version": "0.2.4",
+  "lockfileVersion": 1,
+  "generatedAt": "2026-09-04T13:52:00.000Z",
+  "integrity": "sha256-floor42-pixelcrew-multi-agent-orchestrator-lock",
+  "runtime": {
+    "node": ">=18.0.0",
+    "architecture": "esm",
+    "main": "src/index.js"
+  },
+  "swarm": {
+    "floor": 42,
+    "name": "Floor 42 Autonomous Multi-Agent Engineering Swarm",
+    "headquarters": "Floor 42, Pixel Corps HQ",
+    "dashboardPort": 4747,
+    "activeAgents": [
+      "creativeDirector",
+      "uxPlanner",
+      "designSystem",
+      "frontend",
+      "backend",
+      "performance",
+      "sentinel",
+      "qa"
+    ]
+  }
+}

@@ -31,12 +31,12 @@ export const PROVIDER_PATHS = {
 };
 
 export const GLOBAL_PROVIDER_PATHS = {
-  'claude-code': (skillName) => path.join(os.homedir(), '.claude', 'skills', skillName, 'SKILL.md'),
-  'cursor': (skillName) => path.join(os.homedir(), '.cursor', 'skills', skillName, 'SKILL.md'),
-  'kiro': (skillName) => path.join(os.homedir(), '.kiro', 'skills', skillName, 'SKILL.md'),
-  'antigravity': (skillName) => path.join(os.homedir(), '.gemini', 'config', 'skills', skillName, 'SKILL.md'),
-  'codex': (skillName) => path.join(os.homedir(), '.codex', 'skills', skillName, 'SKILL.md'),
-  'pixel-crew': (skillName) => path.join(os.homedir(), '.pixel-crew', 'skills', `${skillName}.md`)
+  'claude-code': (skillName, home = (process.env.PIXELCREW_HOME || os.homedir())) => path.join(home, '.claude', 'skills', skillName, 'SKILL.md'),
+  'cursor': (skillName, home = (process.env.PIXELCREW_HOME || os.homedir())) => path.join(home, '.cursor', 'skills', skillName, 'SKILL.md'),
+  'kiro': (skillName, home = (process.env.PIXELCREW_HOME || os.homedir())) => path.join(home, '.kiro', 'skills', skillName, 'SKILL.md'),
+  'antigravity': (skillName, home = (process.env.PIXELCREW_HOME || os.homedir())) => path.join(home, '.gemini', 'config', 'skills', skillName, 'SKILL.md'),
+  'codex': (skillName, home = (process.env.PIXELCREW_HOME || os.homedir())) => path.join(home, '.codex', 'skills', skillName, 'SKILL.md'),
+  'pixel-crew': (skillName, home = (process.env.PIXELCREW_HOME || os.homedir())) => path.join(home, '.pixel-crew', 'skills', `${skillName}.md`)
 };
 
 /**

@@ -557,6 +557,16 @@ async function main() {
       break;
     }
 
+    case 'commands':
+    case 'slash-commands':
+    case 'palette': {
+      const { CommandsCommand } = await import('../src/commands/commands.js');
+      const cmd = new CommandsCommand();
+      const res = await cmd.execute({ targetDir: rootDir, options }, args.slice(1));
+      if (res.output) console.log(res.output);
+      break;
+    }
+
     case 'help':
     case '--help':
     case '-h':

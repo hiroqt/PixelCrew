@@ -13,15 +13,17 @@ import { PROVIDER_PATHS, GLOBAL_PROVIDER_PATHS, detectActiveIDE } from './instal
 import { getSkillBundle, getAllCanonicalSkillIds } from './skills-bundle.js';
 import { generateKiroFiles } from './kiro-generator.js';
 import { generateCursorFiles, generateAntigravityFiles, generateClaudeFiles } from './ide-rules.js';
+import { FLOOR42_COMMANDS } from './commands-catalog.js';
 import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 
 /**
+/**
  * Discovers all active workspace and global user AI coding workstations
  */
-export async function scanAllWorkstations(targetDir = process.cwd()) {
+export function getWorkstationCandidates(targetDir = process.cwd()) {
   const home = os.homedir();
 
-  const candidates = [
+  return [
     // Local Workspace Workstations
     {
       id: 'kiro',
@@ -106,7 +108,10 @@ export async function scanAllWorkstations(targetDir = process.cwd()) {
       configFiles: []
     }
   ];
+}
 
+export async function scanAllWorkstations(targetDir = process.cwd()) {
+  const candidates = getWorkstationCandidates(targetDir);
   const detected = [];
   const activeIDE = detectActiveIDE();
 
@@ -222,9 +227,14 @@ export async function promptWorkstationSetup(targetDir = process.cwd(), options 
     if (options.scope === 'global' || options.global) {
       selectedPlan = 'global';
       targetWorkstations = detected.filter(d => d.scope === 'global');
+      if (targetWorkstations.length === 0) {
+        const allCandidates = getWorkstationCandidates(targetDir);
+        targetWorkstations = allCandidates.filter(c => c.scope === 'global');
+      }
     } else if (options.scope === 'all') {
       selectedPlan = 'all';
-      targetWorkstations = detected;
+      const allCandidates = getWorkstationCandidates(targetDir);
+      targetWorkstations = allCandidates;
     } else {
       selectedPlan = 'detected';
       targetWorkstations = detected.filter(d => d.scope === 'workspace' || d.isActive);
@@ -243,14 +253,18 @@ export async function promptWorkstationSetup(targetDir = process.cwd(), options 
  * Deploys PixelCrew skills, workflows, and rules to the selected workstations
  */
 export async function deployToWorkstations(targetDir = process.cwd(), deploymentPlan, options = {}) {
-  const { dryRun = false, reporter = new DryRunReporter(targetDir) } = options;
+  const {
+    dryRun = false,
+    reporter = new DryRunReporter(targetDir),
+    homeDir = (process.env.PIXELCREW_HOME || os.homedir())
+  } = options;
   const { workstations, activeIDE } = deploymentPlan;
 
   const deployedSummary = [];
 
   for (const w of workstations) {
     const isGlobal = w.scope === 'global';
-    const baseDir = isGlobal ? os.homedir() : targetDir;
+    const baseDir = isGlobal ? homeDir : targetDir;
 
     // 1. Install all canonical production skills & references
     const canonicalSkills = getAllCanonicalSkillIds();
@@ -260,7 +274,7 @@ export async function deployToWorkstations(targetDir = process.cwd(), deployment
 
       if (isGlobal) {
         const globalPathFn = GLOBAL_PROVIDER_PATHS[w.id] || GLOBAL_PROVIDER_PATHS['pixel-crew'];
-        if (globalPathFn) skillFile = globalPathFn(sName);
+        if (globalPathFn) skillFile = globalPathFn(sName, homeDir);
       } else {
         const pathFn = PROVIDER_PATHS[w.id] || PROVIDER_PATHS['pixel-crew'];
         if (pathFn) skillFile = pathFn(targetDir, sName);
@@ -282,39 +296,53 @@ export async function deployToWorkstations(targetDir = process.cwd(), deployment
 
     // 2. Install Kiro Workflows, Prompts & Rules if targeting Kiro
     if (w.id === 'kiro') {
-      const kiroFiles = generateKiroFiles(isGlobal ? os.homedir() : targetDir, isGlobal);
+      const kiroTarget = isGlobal ? path.join(homeDir, '.kiro') : targetDir;
+      const kiroFiles = generateKiroFiles(kiroTarget, isGlobal);
       for (const kf of kiroFiles) {
         await safeWriteFile(kf.path, kf.content, { dryRun, reporter, targetDir: baseDir });
       }
     }
 
-    // 3. Install Cursor Rules if targeting Cursor
+    // 3. Install Cursor Commands, Rules & Settings if targeting Cursor
     if (w.id === 'cursor') {
-      if (!isGlobal) {
-        const cursorFiles = generateCursorFiles(targetDir);
-        for (const cf of cursorFiles) {
-          await safeWriteFile(cf.path, cf.content, { dryRun, reporter, targetDir });
-        }
+      const cursorTarget = isGlobal ? path.join(homeDir, '.cursor') : targetDir;
+      const cursorFiles = generateCursorFiles(cursorTarget, isGlobal);
+      for (const cf of cursorFiles) {
+        await safeWriteFile(cf.path, cf.content, { dryRun, reporter, targetDir: baseDir });
       }
     }
 
-    // 4. Install Antigravity Instructions if targeting Antigravity
+    // 4. Install Antigravity Instructions & Rules if targeting Antigravity
     if (w.id === 'antigravity') {
-      if (!isGlobal) {
-        const antigravityFiles = generateAntigravityFiles(targetDir);
-        for (const af of antigravityFiles) {
-          await safeWriteFile(af.path, af.content, { dryRun, reporter, targetDir });
-        }
+      const antigravityTarget = isGlobal ? path.join(homeDir, '.gemini', 'config') : targetDir;
+      const antigravityFiles = generateAntigravityFiles(antigravityTarget, isGlobal);
+      for (const af of antigravityFiles) {
+        await safeWriteFile(af.path, af.content, { dryRun, reporter, targetDir: baseDir });
       }
     }
 
-    // 5. Install Claude Code Instructions if targeting Claude Code
+    // 5. Install Claude Code Slash Commands & Instructions if targeting Claude Code
     if (w.id === 'claude-code') {
-      if (!isGlobal) {
-        const claudeFiles = generateClaudeFiles(targetDir);
-        for (const clf of claudeFiles) {
-          await safeWriteFile(clf.path, clf.content, { dryRun, reporter, targetDir });
-        }
+      const claudeTarget = isGlobal ? path.join(homeDir, '.claude') : targetDir;
+      const claudeFiles = generateClaudeFiles(claudeTarget, isGlobal);
+      for (const clf of claudeFiles) {
+        await safeWriteFile(clf.path, clf.content, { dryRun, reporter, targetDir: baseDir });
+      }
+    }
+
+    // 6. Install Floor 42 command definitions if targeting pixel-crew
+    if (w.id === 'pixel-crew') {
+      const commandsDir = path.join(baseDir, isGlobal ? '.pixel-crew/commands' : '.pixel-crew/commands');
+      for (const cmd of FLOOR42_COMMANDS) {
+        const cmdContent = `---
+description: ${cmd.description}
+---
+
+# /${cmd.name}
+
+${cmd.prompt}
+`;
+        await safeWriteFile(path.join(commandsDir, `${cmd.name}.md`), cmdContent, { dryRun, reporter, targetDir: baseDir });
       }
     }
 
