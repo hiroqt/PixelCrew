@@ -14,7 +14,6 @@ export function createServer(engineOrRootDir, maybeEngine, options = {}) {
   }
 
   const dashboardDir = path.join(rootDir, '.pixel-crew', 'dashboard');
-  const legacyDashboardDir = path.join(rootDir, '.pixel-dashboard');
   const fallbackDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));
 
   const sseClients = new Set();
