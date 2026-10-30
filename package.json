@@ -1,6 +1,6 @@
 {
   "name": "pixelcrew",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Local multi-agent orchestration framework with an interactive pixel-art tech startup office visual dashboard",
   "type": "module",
   "main": "src/index.js",
@@ -40,7 +40,7 @@
   "author": "Arnel (@hiroqt)",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=26.13.0"
   },
   "repository": {
     "type": "git",
