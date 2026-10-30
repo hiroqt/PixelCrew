@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/hiroqt/PixelCrew"><img src="https://img.shields.io/badge/version-0.2.5-7c3aed?style=flat-square" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-22c55e?style=flat-square" alt="License" /></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18.0.0-0ea5e9?style=flat-square" alt="Node.js" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D26.13.0-0ea5e9?style=flat-square" alt="Node.js" /></a>
   <a href="#zero-runtime-dependencies"><img src="https://img.shields.io/badge/dependencies-0-f59e0b?style=flat-square" alt="Zero Dependencies" /></a>
 </p>
 
@@ -59,7 +59,7 @@ PixelCrew resolves this observability and coordination challenge by structuring 
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 26.13.0
 - npm >= 9.0.0
 - Zero external runtime packages required
 
