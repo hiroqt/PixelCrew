@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import readline from 'node:readline/promises';
-import { fileURLToPath } from 'node:url';
 import fsSync from 'node:fs';
 import { DEFAULT_CONFIG, INITIAL_STATE, AGENT_MARKDOWNS, SKILL_MARKDOWNS } from './templates.js';
 import { analyzeCodebase, buildAdaptedConfig } from './analyzer.js';
@@ -19,7 +18,6 @@ import { safeWriteFile, safeMkdir, DryRunReporter } from '../utils/fs-safe.js';
 export async function initializeProject(targetDir = process.cwd(), options = {}) {
   const isInteractive = !options.yes && !options.dryRun && process.stdin.isTTY;
   let projectName = options.name || path.basename(targetDir);
-  let enableDashboard = true;
   const activeIDE = detectActiveIDE(targetDir);
   let installScope = options.scope || (options.global ? 'global' : 'project');
   let chosenProvider = options.provider || null;
@@ -44,10 +42,6 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
       projectName = nameAns.trim();
     }
 
-    const dashAns = await rl.question(`? Enable visual pixel dashboard? (Y/n): `);
-    if (dashAns.trim().toLowerCase() === 'n') {
-      enableDashboard = false;
-    }
 
     if (!chosenProvider) {
       const isDetected = activeIDE.id !== 'pixel-crew';
@@ -156,7 +150,6 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
   // 2. Build Context-Adapted Config
   const adaptedConfig = buildAdaptedConfig(profile, options);
   adaptedConfig.project = projectName;
-  adaptedConfig.dashboard.enabled = enableDashboard;
   if (!adaptedConfig.orchestrator) adaptedConfig.orchestrator = {};
   adaptedConfig.orchestrator.runtimeStrategy = options.provider || 'auto';
 
@@ -191,7 +184,6 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     }, {})
   };
 
-  const srcDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));
 
   for (const baseDir of targets) {
     const agentsDir = path.join(baseDir, 'agents');
@@ -199,7 +191,6 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     const commandsDir = path.join(baseDir, 'commands');
     const reportsDir = path.join(baseDir, 'reports');
     const tasksDir = path.join(baseDir, 'tasks');
-    const dashboardDir = path.join(baseDir, 'dashboard');
 
     await safeMkdir(baseDir, { dryRun, reporter });
     await safeMkdir(agentsDir, { dryRun, reporter });
@@ -207,9 +198,6 @@ export async function initializeProject(targetDir = process.cwd(), options = {})
     await safeMkdir(commandsDir, { dryRun, reporter });
     await safeMkdir(reportsDir, { dryRun, reporter });
     await safeMkdir(tasksDir, { dryRun, reporter });
-    if (enableDashboard) {
-      await safeMkdir(dashboardDir, { dryRun, reporter });
-    }
 
     await safeWriteFile(path.join(baseDir, 'config.json'), JSON.stringify(adaptedConfig, null, 2), { dryRun, reporter, targetDir });
     await safeWriteFile(path.join(baseDir, 'context.json'), JSON.stringify(profile, null, 2), { dryRun, reporter, targetDir });
@@ -238,17 +226,6 @@ ${cmd.prompt}
       await safeWriteFile(path.join(commandsDir, `${cmd.name}.md`), cmdContent, { dryRun, reporter, targetDir });
     }
 
-    if (enableDashboard) {
-      try {
-        const html = await fs.readFile(path.join(srcDashboardDir, 'index.html'), 'utf-8');
-        const css = await fs.readFile(path.join(srcDashboardDir, 'styles.css'), 'utf-8');
-        const js = await fs.readFile(path.join(srcDashboardDir, 'app.js'), 'utf-8');
-
-        await safeWriteFile(path.join(dashboardDir, 'index.html'), html, { dryRun, reporter, targetDir });
-        await safeWriteFile(path.join(dashboardDir, 'styles.css'), css, { dryRun, reporter, targetDir });
-        await safeWriteFile(path.join(dashboardDir, 'app.js'), js, { dryRun, reporter, targetDir });
-      } catch {}
-    }
   }
 
   // 1. Install skills to IDE project directories (.kiro, .cursor, .agents, .claude)
@@ -386,7 +363,6 @@ ${cmd.prompt}
       reporter,
       profile,
       pixelCrewDir,
-      dashboardDir: path.join(pixelCrewDir, 'dashboard'),
       activeIDE,
       installScope,
       gitignore: gitignoreResult
@@ -413,9 +389,6 @@ ${cmd.prompt}
   if (installScope === 'global' || installScope === 'both' || installScope === 'all') {
     console.log(`  \x1b[32m✓\x1b[0m Installed skills globally for \x1b[36m${activeIDE.name}\x1b[0m (\x1b[90m${activeIDE.globalPath}\x1b[0m)`);
   }
-  if (enableDashboard) {
-    console.log('  \x1b[32m✓\x1b[0m Created .pixel-crew/dashboard/ (index.html, styles.css, app.js)');
-  }
   if (gitignoreResult.created || gitignoreResult.updated) {
     console.log('  \x1b[32m✓\x1b[0m Clean workspace configured in .gitignore (ignoring .vite/, .next/, build/ & cache directories)');
   }
@@ -430,13 +403,13 @@ ${cmd.prompt}
   console.log('  • Type \x1b[36m/recap\x1b[0m in chat to get a token-optimized session changelog');
   console.log('  • Type \x1b[36m/pixelcrew assemble "..."\x1b[0m to run full-stack multi-agent sprint');
   console.log('\nCLI Commands:');
-  console.log('  \x1b[36mnpx pixelcrew start\x1b[0m           Launch orchestration server & visual dashboard');
+  console.log('  \x1b[36mnpx pixelcrew start\x1b[0m           Launch orchestration server');
   console.log('  \x1b[36mnpx pixelcrew task "..."\x1b[0m    Dispatch goal or full-stack task to agents');
   console.log('  \x1b[36mnpx pixelcrew recap\x1b[0m          Generate git activity and session recap');
   console.log('  \x1b[36mnpx pixelcrew doctor\x1b[0m          Check available coding agent providers');
   console.log('  \x1b[36mnpx pixelcrew demo\x1b[0m            Run interactive multi-agent visual demo\n');
 
-  return { pixelCrewDir, dashboardDir: path.join(pixelCrewDir, 'dashboard'), profile, gitignore: gitignoreResult };
+  return { pixelCrewDir, profile, gitignore: gitignoreResult };
 }
 
 /**

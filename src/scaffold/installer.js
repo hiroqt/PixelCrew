@@ -328,7 +328,7 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
   }
 
   // Ensure pixel-crew is included for project-level manifests
-  if (scope !== 'global' && !targetProviders.includes('pixel-crew')) {
+  if (scope !== 'global' && (!provider || provider === 'auto') && !targetProviders.includes('pixel-crew')) {
     targetProviders.push('pixel-crew');
   }
 
@@ -358,6 +358,8 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
       }
     }
 
+    // Keep a manifest only when the PixelCrew provider itself is selected.
+    if (targetProviders.includes('pixel-crew')) {
     // Update .pixel-crew/pixel.json manifest
     const manifestPath = path.join(targetDir, '.pixel-crew', 'pixel.json');
     let manifest = {
@@ -385,6 +387,7 @@ export async function installSkill(targetDir = process.cwd(), rawSkillInput, opt
       reporter,
       targetDir
     });
+    }
   }
 
   // 2. Write Global skills if scope is 'global' or 'both'
@@ -554,28 +557,6 @@ export async function syncSkills(targetDir = process.cwd(), options = {}) {
         await safeWriteFile(clf.path, clf.content, { dryRun, reporter, targetDir });
       }
     }
-  }
-
-  // 3. Synchronize Dashboard Assets if workspace dashboard directory exists
-  const srcDashboardDir = fileURLToPath(new URL('../dashboard', import.meta.url));
-  const dashboardTargets = [
-    path.join(targetDir, '.pixel-crew', 'dashboard')
-  ];
-
-  for (const dashDir of dashboardTargets) {
-    try {
-      const parentDir = path.dirname(dashDir);
-      const parentExists = await fs.access(parentDir).then(() => true).catch(() => false);
-      if (parentExists) {
-        await safeMkdir(dashDir, { dryRun, reporter });
-        const html = await fs.readFile(path.join(srcDashboardDir, 'index.html'), 'utf-8');
-        const css = await fs.readFile(path.join(srcDashboardDir, 'styles.css'), 'utf-8');
-        const js = await fs.readFile(path.join(srcDashboardDir, 'app.js'), 'utf-8');
-        await safeWriteFile(path.join(dashDir, 'index.html'), html, { dryRun, reporter, targetDir });
-        await safeWriteFile(path.join(dashDir, 'styles.css'), css, { dryRun, reporter, targetDir });
-        await safeWriteFile(path.join(dashDir, 'app.js'), js, { dryRun, reporter, targetDir });
-      }
-    } catch {}
   }
 
   return {
